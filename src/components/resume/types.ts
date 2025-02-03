@@ -1,4 +1,3 @@
-// Types for Resume Generator
 export interface Education {
   school: string;
   degree: string;
@@ -12,6 +11,7 @@ export interface BulletPoint {
 export interface Experience {
   company: string;
   position: string;
+  location: string;
   startDate: string;
   endDate: string;
   bulletPoints: BulletPoint[];

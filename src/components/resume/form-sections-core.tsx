@@ -134,6 +134,17 @@ export const ExperienceSection = ({
             }}
             className="border-input border p-2 rounded"
           />
+          <input
+            type="text"
+            placeholder="Location"
+            value={exp.location}
+            onChange={(e) => {
+              const newExperience = [...experiences];
+              newExperience[index].location = e.target.value;
+              onChange(newExperience);
+            }}
+            className="border-input border p-2 rounded"
+          />
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
