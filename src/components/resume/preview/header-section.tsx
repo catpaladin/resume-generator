@@ -17,7 +17,7 @@ export function HeaderSection({ data }: HeaderSectionProps) {
   return (
     <section className="space-y-2 text-center">
       <h1 className="text-2xl font-bold text-foreground">
-        {fullName || 'Your Name'}
+        {fullName}
       </h1>
 
       {contactInfo.length > 0 && (
