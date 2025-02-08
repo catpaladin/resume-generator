@@ -1,14 +1,21 @@
-export { EducationSection } from './education-section';
-export { ExperienceSection } from './experience-section';
-export { HeaderSection } from './header-section';
-export { ProjectsSection } from './projects-section';
-export { SkillsSection } from './skills-section';
+import { Card } from "@/components/ui/card";
+import { Download } from "lucide-react";
+import { useTheme } from "next-themes";
+import type { ResumeData } from "@/types/resume";
 
-// Export the container component that composes all sections
-import { Card } from '@/components/ui/card';
-import { Download } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import type { ResumeData } from '@/types/resume';
+// Import the sections that are being used in the JSX
+import { HeaderSection } from "./header-section";
+import { SkillsSection } from "./skills-section";
+import { ExperienceSection } from "./experience-section";
+import { EducationSection } from "./education-section";
+import { ProjectsSection } from "./projects-section";
+
+// Re-export the sections for use by other components
+export { HeaderSection } from "./header-section";
+export { ExperienceSection } from "./experience-section";
+export { EducationSection } from "./education-section";
+export { ProjectsSection } from "./projects-section";
+export { SkillsSection } from "./skills-section";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -18,9 +25,9 @@ export function ResumePreview({ data }: ResumePreviewProps) {
   const { theme, setTheme } = useTheme();
 
   const handlePrint = async () => {
-    const currentTheme = theme;
-    setTheme('light');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    const currentTheme = theme || "dark";
+    setTheme("light");
+    await new Promise((resolve) => setTimeout(resolve, 100));
     window.print();
     setTimeout(() => setTheme(currentTheme), 100);
   };

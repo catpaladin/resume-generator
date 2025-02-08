@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Download } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { jsPDF } from 'jspdf';
-import type { ResumeData } from '@/types/resume';
+import React, { useRef, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Download } from "lucide-react";
+import { jsPDF } from "jspdf";
+import type { ResumeData } from "@/types/resume";
 
 interface ClientResumePreviewProps {
   data: ResumeData;
@@ -13,15 +12,14 @@ interface ClientResumePreviewProps {
 
 // Tailwind-inspired color palette with improved contrast
 const COLOR_PALETTE = {
-  primary: '#1e40af', // blue-800
-  secondary: '#374151', // gray-700
-  muted: '#4b5563', // gray-600
-  subtle: '#9ca3af', // gray-400
-  border: '#e5e7eb', // gray-200
+  primary: "#1e40af", // blue-800
+  secondary: "#374151", // gray-700
+  muted: "#4b5563", // gray-600
+  subtle: "#9ca3af", // gray-400
+  border: "#e5e7eb", // gray-200
 };
 
 export function ClientResumePreview({ data }: ClientResumePreviewProps) {
-  const { theme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -32,13 +30,12 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       setIsExporting(true);
 
       const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
 
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 15;
       let currentY = margin;
 
@@ -48,31 +45,27 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
         doc.setFontSize(12);
         doc.setTextColor(COLOR_PALETTE.primary);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         doc.text(title.toUpperCase(), margin, currentY);
 
-        currentY += 8;
-      };
-
-      const addHeading = (text: string, isBold: boolean = false) => {
-        doc.setFontSize(14);
-        doc.setTextColor(COLOR_PALETTE.secondary);
-        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
-        doc.text(text, margin, currentY);
         currentY += 8;
       };
 
       const addSubheading = (text: string, details?: string) => {
         doc.setFontSize(11);
         doc.setTextColor(COLOR_PALETTE.secondary);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         doc.text(text, margin, currentY);
 
         if (details) {
           doc.setFontSize(10);
           doc.setTextColor(COLOR_PALETTE.subtle);
-          doc.setFont('helvetica', 'normal');
-          doc.text(details, pageWidth - margin - doc.getTextWidth(details), currentY);
+          doc.setFont("helvetica", "normal");
+          doc.text(
+            details,
+            pageWidth - margin - doc.getTextWidth(details),
+            currentY,
+          );
         }
         currentY += 6;
       };
@@ -80,11 +73,11 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       const addBodyText = (text: string, indent: number = 0) => {
         doc.setFontSize(10);
         doc.setTextColor(COLOR_PALETTE.muted);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
 
         const splitText = doc.splitTextToSize(
           text,
-          pageWidth - margin * 2 - indent
+          pageWidth - margin * 2 - indent,
         );
 
         doc.text(splitText, margin + indent, currentY);
@@ -94,12 +87,9 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       const addBulletPoint = (text: string) => {
         doc.setFontSize(10);
         doc.setTextColor(COLOR_PALETTE.muted);
-        doc.text('•', margin + 2, currentY);
+        doc.text("•", margin + 2, currentY);
 
-        const splitText = doc.splitTextToSize(
-          text,
-          pageWidth - margin * 2 - 6
-        );
+        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2 - 6);
 
         doc.text(splitText, margin + 6, currentY);
         currentY += splitText.length * 5;
@@ -109,48 +99,50 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       const { personal } = data;
       doc.setFontSize(16);
       doc.setTextColor(COLOR_PALETTE.primary);
-      doc.setFont('helvetica', 'bold');
-              doc.text(personal.fullName.toUpperCase(), margin, currentY, {
-        align: 'left'
+      doc.setFont("helvetica", "bold");
+      doc.text(personal.fullName.toUpperCase(), margin, currentY, {
+        align: "left",
       });
       currentY += 10;
 
       // Contact Info
       doc.setFontSize(10);
       doc.setTextColor(COLOR_PALETTE.subtle);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       const contactInfo = [
         personal.location,
         personal.email,
         personal.phone,
-        personal.linkedin
-      ].filter(Boolean).join(' | ');
-      doc.text(contactInfo, margin, currentY, { align: 'left' });
+        personal.linkedin,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+      doc.text(contactInfo, margin, currentY, { align: "left" });
       currentY += 10;
 
       // Professional Summary
       if (personal.summary) {
-        addSection('PROFESSIONAL SUMMARY');
+        addSection("PROFESSIONAL SUMMARY");
         addBodyText(personal.summary);
         currentY += 6;
       }
 
       // Skills
       if (data.skills.length > 0) {
-        addSection('SKILLS');
-        const skillText = data.skills.map(skill => skill.name).join(' • ');
+        addSection("SKILLS");
+        const skillText = data.skills.map((skill) => skill.name).join(" • ");
         addBodyText(skillText);
         currentY += 6;
       }
 
       // Professional Experience
       if (data.experience.length > 0) {
-        addSection('PROFESSIONAL EXPERIENCE');
+        addSection("PROFESSIONAL EXPERIENCE");
 
-        data.experience.forEach(exp => {
+        data.experience.forEach((exp) => {
           addSubheading(
             exp.company,
-            `${exp.startDate} - ${exp.endDate || 'Present'}`
+            `${exp.startDate} - ${exp.endDate || "Present"}`,
           );
 
           doc.setFontSize(10);
@@ -164,7 +156,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
             currentY += 5;
           }
 
-          exp.bulletPoints.forEach(point => {
+          exp.bulletPoints.forEach((point) => {
             if (point.text) {
               addBulletPoint(point.text);
             }
@@ -176,13 +168,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
       // Education
       if (data.education.length > 0) {
-        addSection('EDUCATION');
+        addSection("EDUCATION");
 
-        data.education.forEach(edu => {
-          addSubheading(
-            edu.school,
-            edu.graduationYear
-          );
+        data.education.forEach((edu) => {
+          addSubheading(edu.school, edu.graduationYear);
 
           doc.setFontSize(10);
           doc.setTextColor(COLOR_PALETTE.muted);
@@ -193,9 +182,9 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
       // Projects
       if (data.projects.length > 0) {
-        addSection('PROJECTS');
+        addSection("PROJECTS");
 
-        data.projects.forEach(proj => {
+        data.projects.forEach((proj) => {
           addSubheading(proj.name, proj.link);
 
           if (proj.description) {
@@ -207,11 +196,12 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       }
 
       // Save PDF
-      doc.save(`resume-${personal.fullName.replace(/\s+/g, '-').toLowerCase()}.pdf`);
-
+      doc.save(
+        `resume-${personal.fullName.replace(/\s+/g, "-").toLowerCase()}.pdf`,
+      );
     } catch (error) {
-      console.error('PDF export failed:', error);
-      alert('Failed to export PDF. Please try again.');
+      console.error("PDF export failed:", error);
+      alert("Failed to export PDF. Please try again.");
     } finally {
       setIsExporting(false);
     }
@@ -227,7 +217,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
           className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Download size={18} />
-          {isExporting ? 'Exporting...' : 'Export PDF'}
+          {isExporting ? "Exporting..." : "Export PDF"}
         </button>
       </div>
 
@@ -245,8 +235,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
               data.personal.location,
               data.personal.email,
               data.personal.phone,
-              data.personal.linkedin
-            ].filter(Boolean).join(' | ')}
+              data.personal.linkedin,
+            ]
+              .filter(Boolean)
+              .join(" | ")}
           </p>
         </div>
 
@@ -263,7 +255,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Skills */}
-        {data.skills.some(skill => skill.name) && (
+        {data.skills.some((skill) => skill.name) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase">
               Skills
@@ -282,7 +274,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Professional Experience */}
-        {data.experience.some(exp => exp.company || exp.position) && (
+        {data.experience.some((exp) => exp.company || exp.position) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase">
               Professional Experience
@@ -306,20 +298,23 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                     </div>
                   </div>
                   <span className="text-subtle text-sm shrink-0">
-                    {[exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' - ')}
+                    {[exp.startDate, exp.endDate || "Present"]
+                      .filter(Boolean)
+                      .join(" - ")}
                   </span>
                 </div>
                 <ul className="list-disc ml-4 mt-1.5 space-y-1">
-                  {exp.bulletPoints.map((bullet, bulletIndex) => (
-                    bullet.text && (
-                      <li
-                        key={bulletIndex}
-                        className="text-muted-foreground text-sm"
-                      >
-                        {bullet.text}
-                      </li>
-                    )
-                  ))}
+                  {exp.bulletPoints.map(
+                    (bullet, bulletIndex) =>
+                      bullet.text && (
+                        <li
+                          key={bulletIndex}
+                          className="text-muted-foreground text-sm"
+                        >
+                          {bullet.text}
+                        </li>
+                      ),
+                  )}
                 </ul>
               </div>
             ))}
@@ -327,7 +322,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Education */}
-        {data.education.some(edu => edu.school || edu.degree) && (
+        {data.education.some((edu) => edu.school || edu.degree) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase">
               Education
@@ -342,16 +337,16 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                     {edu.graduationYear}
                   </span>
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  {edu.degree}
-                </p>
+                <p className="text-muted-foreground text-sm">{edu.degree}</p>
               </div>
             ))}
           </section>
         )}
 
         {/* Projects */}
-        {data.projects.some(project => project.name || project.description) && (
+        {data.projects.some(
+          (project) => project.name || project.description,
+        ) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase">
               Projects
@@ -368,7 +363,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline text-sm truncate ml-4"
-                      style={{ maxWidth: '50%' }}
+                      style={{ maxWidth: "50%" }}
                     >
                       {project.link}
                     </a>

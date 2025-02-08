@@ -4,20 +4,11 @@ export {
   initialResumeData,
   MAX_ITEMS,
   VALIDATION,
-  ERROR_MESSAGES
-} from './constants';
+  ERROR_MESSAGES,
+} from "./constants";
 
-export {
-  themeConfig,
-  printConfig,
-  defaultThemeConfig
-} from './theme-config';
+export { themeConfig, printConfig, defaultThemeConfig } from "./theme-config";
 
-export type {
-  TabType
-} from './constants';
+export type { TabType } from "./constants";
 
-export type {
-  Theme,
-  ThemeColor
-} from './theme-config';
+export type { Theme, ThemeColor } from "./theme-config";

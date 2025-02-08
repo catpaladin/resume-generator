@@ -64,7 +64,7 @@ export async function importResumeData(file: File): Promise<ResumeData> {
         } else {
           reject(new Error("Invalid resume data format"));
         }
-      } catch (error) {
+      } catch {
         reject(new Error("Failed to parse resume data"));
       }
     };
@@ -116,15 +116,15 @@ export function getInitials(name: string): string {
 }
 
 /**
- * Debounce function
+ * Debounce function with proper typing
  */
-export function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
+export function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
+  func: F,
+  wait: number,
+): (...args: Parameters<F>) => void {
   let timeout: NodeJS.Timeout;
 
-  return function executedFunction(...args: Parameters<T>) {
+  return function executedFunction(...args: Parameters<F>) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);

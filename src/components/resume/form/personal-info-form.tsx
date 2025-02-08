@@ -1,5 +1,5 @@
-import type { PersonalInfo } from '@/types/resume';
-import { Card } from '@/components/ui/card';
+import type { PersonalInfo } from "@/types/resume";
+import { Card } from "@/components/ui/card";
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
@@ -22,7 +22,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           type="text"
           placeholder="Full Name"
           value={fullName}
-          onChange={(e) => onChange('fullName', e.target.value)}
+          onChange={(e) => onChange("fullName", e.target.value)}
           className="w-full px-3 py-2 border rounded-md border-input bg-background"
         />
         <div className="grid grid-cols-2 gap-3">
@@ -30,14 +30,14 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             type="text"
             placeholder="Location"
             value={location}
-            onChange={(e) => onChange('location', e.target.value)}
+            onChange={(e) => onChange("location", e.target.value)}
             className="w-full px-3 py-2 border rounded-md border-input bg-background"
           />
           <input
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => onChange('email', e.target.value)}
+            onChange={(e) => onChange("email", e.target.value)}
             className="w-full px-3 py-2 border rounded-md border-input bg-background"
           />
         </div>
@@ -46,21 +46,21 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             type="tel"
             placeholder="Phone"
             value={phone}
-            onChange={(e) => onChange('phone', e.target.value)}
+            onChange={(e) => onChange("phone", e.target.value)}
             className="w-full px-3 py-2 border rounded-md border-input bg-background"
           />
           <input
             type="url"
             placeholder="LinkedIn URL"
             value={linkedin}
-            onChange={(e) => onChange('linkedin', e.target.value)}
+            onChange={(e) => onChange("linkedin", e.target.value)}
             className="w-full px-3 py-2 border rounded-md border-input bg-background"
           />
         </div>
         <textarea
           placeholder="Professional Summary"
           value={summary}
-          onChange={(e) => onChange('summary', e.target.value)}
+          onChange={(e) => onChange("summary", e.target.value)}
           className="w-full px-3 py-2 border rounded-md border-input bg-background min-h-[100px] resize-y"
         />
       </div>

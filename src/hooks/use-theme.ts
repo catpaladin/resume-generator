@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { useTheme as useNextTheme } from 'next-themes';
-import { defaultThemeConfig } from '@/config/theme-config';
-import type { Theme } from '@/config/theme-config';
+import { useEffect, useState } from "react";
+import { useTheme as useNextTheme } from "next-themes";
+import { defaultThemeConfig } from "@/config/theme-config";
+import type { Theme } from "@/config/theme-config";
 
 interface UseThemeReturn {
-  theme: Theme | 'system';
-  setTheme: (theme: Theme | 'system') => void;
+  theme: Theme | "system";
+  setTheme: (theme: Theme | "system") => void;
   systemTheme: Theme;
   isDark: boolean;
   isLoading: boolean;
@@ -19,17 +19,14 @@ export function useTheme(): UseThemeReturn {
     setIsLoading(false);
   }, []);
 
-  const isDark =
-    theme === 'system'
-      ? systemTheme === 'dark'
-      : theme === 'dark';
+  const isDark = theme === "system" ? systemTheme === "dark" : theme === "dark";
 
   return {
-    theme: (theme || defaultThemeConfig.defaultTheme) as Theme | 'system',
+    theme: (theme || defaultThemeConfig.defaultTheme) as Theme | "system",
     setTheme,
-    systemTheme: (systemTheme || 'light') as Theme,
+    systemTheme: (systemTheme || "light") as Theme,
     isDark,
-    isLoading
+    isLoading,
   };
 }
 

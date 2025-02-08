@@ -1,6 +1,6 @@
-import { Project } from '@/types/resume';
-import { Card } from '@/components/ui/card';
-import { Plus, X } from 'lucide-react';
+import { Project } from "@/types/resume";
+import { Card } from "@/components/ui/card";
+import { Plus, X } from "lucide-react";
 
 interface ProjectsFormProps {
   projects: Project[];
@@ -13,21 +13,23 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
       ...projects,
       {
         id: crypto.randomUUID(),
-        name: '',
-        link: '',
-        description: ''
-      }
+        name: "",
+        link: "",
+        description: "",
+      },
     ]);
   };
 
   const removeProject = (id: string) => {
-    onChange(projects.filter(project => project.id !== id));
+    onChange(projects.filter((project) => project.id !== id));
   };
 
   const updateProject = (id: string, field: keyof Project, value: string) => {
-    onChange(projects.map(project =>
-      project.id === id ? { ...project, [field]: value } : project
-    ));
+    onChange(
+      projects.map((project) =>
+        project.id === id ? { ...project, [field]: value } : project,
+      ),
+    );
   };
 
   return (
@@ -42,20 +44,26 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                   type="text"
                   placeholder="Project Name"
                   value={project.name}
-                  onChange={(e) => updateProject(project.id, 'name', e.target.value)}
+                  onChange={(e) =>
+                    updateProject(project.id, "name", e.target.value)
+                  }
                   className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
                 <input
                   type="url"
                   placeholder="Project Link (optional)"
                   value={project.link}
-                  onChange={(e) => updateProject(project.id, 'link', e.target.value)}
+                  onChange={(e) =>
+                    updateProject(project.id, "link", e.target.value)
+                  }
                   className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
                 <textarea
                   placeholder="Project Description"
                   value={project.description}
-                  onChange={(e) => updateProject(project.id, 'description', e.target.value)}
+                  onChange={(e) =>
+                    updateProject(project.id, "description", e.target.value)
+                  }
                   className="w-full px-3 py-2 border rounded-md border-input bg-background min-h-[80px] resize-y"
                 />
               </div>

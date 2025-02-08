@@ -1,6 +1,6 @@
-import { Experience, BulletPoint } from '@/types/resume';
-import { Card } from '@/components/ui/card';
-import { Plus, X, GripVertical } from 'lucide-react';
+import { Experience } from "@/types/resume";
+import { Card } from "@/components/ui/card";
+import { Plus, X, GripVertical } from "lucide-react";
 
 interface ExperienceFormProps {
   experiences: Experience[];
@@ -13,59 +13,80 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
       ...experiences,
       {
         id: crypto.randomUUID(),
-        company: '',
-        position: '',
-        location: '',
-        startDate: '',
-        endDate: '',
-        bulletPoints: [{ id: crypto.randomUUID(), text: '' }]
-      }
+        company: "",
+        position: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        bulletPoints: [{ id: crypto.randomUUID(), text: "" }],
+      },
     ]);
   };
 
   const removeExperience = (id: string) => {
-    onChange(experiences.filter(exp => exp.id !== id));
+    onChange(experiences.filter((exp) => exp.id !== id));
   };
 
-  const updateExperience = (id: string, field: keyof Experience, value: string) => {
-    onChange(experiences.map(exp =>
-      exp.id === id ? { ...exp, [field]: value } : exp
-    ));
+  const updateExperience = (
+    id: string,
+    field: keyof Experience,
+    value: string,
+  ) => {
+    onChange(
+      experiences.map((exp) =>
+        exp.id === id ? { ...exp, [field]: value } : exp,
+      ),
+    );
   };
 
   const addBulletPoint = (experienceId: string) => {
-    onChange(experiences.map(exp =>
-      exp.id === experienceId
-        ? {
-            ...exp,
-            bulletPoints: [...exp.bulletPoints, { id: crypto.randomUUID(), text: '' }]
-          }
-        : exp
-    ));
+    onChange(
+      experiences.map((exp) =>
+        exp.id === experienceId
+          ? {
+              ...exp,
+              bulletPoints: [
+                ...exp.bulletPoints,
+                { id: crypto.randomUUID(), text: "" },
+              ],
+            }
+          : exp,
+      ),
+    );
   };
 
-  const updateBulletPoint = (experienceId: string, bulletId: string, text: string) => {
-    onChange(experiences.map(exp =>
-      exp.id === experienceId
-        ? {
-            ...exp,
-            bulletPoints: exp.bulletPoints.map(bullet =>
-              bullet.id === bulletId ? { ...bullet, text } : bullet
-            )
-          }
-        : exp
-    ));
+  const updateBulletPoint = (
+    experienceId: string,
+    bulletId: string,
+    text: string,
+  ) => {
+    onChange(
+      experiences.map((exp) =>
+        exp.id === experienceId
+          ? {
+              ...exp,
+              bulletPoints: exp.bulletPoints.map((bullet) =>
+                bullet.id === bulletId ? { ...bullet, text } : bullet,
+              ),
+            }
+          : exp,
+      ),
+    );
   };
 
   const removeBulletPoint = (experienceId: string, bulletId: string) => {
-    onChange(experiences.map(exp =>
-      exp.id === experienceId
-        ? {
-            ...exp,
-            bulletPoints: exp.bulletPoints.filter(bullet => bullet.id !== bulletId)
-          }
-        : exp
-    ));
+    onChange(
+      experiences.map((exp) =>
+        exp.id === experienceId
+          ? {
+              ...exp,
+              bulletPoints: exp.bulletPoints.filter(
+                (bullet) => bullet.id !== bulletId,
+              ),
+            }
+          : exp,
+      ),
+    );
   };
 
   return (
@@ -80,7 +101,9 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                   type="text"
                   placeholder="Company"
                   value={exp.company}
-                  onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                  onChange={(e) =>
+                    updateExperience(exp.id, "company", e.target.value)
+                  }
                   className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
                 <div className="grid grid-cols-2 gap-3">
@@ -88,14 +111,18 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                     type="text"
                     placeholder="Position"
                     value={exp.position}
-                    onChange={(e) => updateExperience(exp.id, 'position', e.target.value)}
+                    onChange={(e) =>
+                      updateExperience(exp.id, "position", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                   <input
                     type="text"
                     placeholder="Location"
                     value={exp.location}
-                    onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
+                    onChange={(e) =>
+                      updateExperience(exp.id, "location", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>
@@ -104,14 +131,18 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                     type="text"
                     placeholder="Start Date"
                     value={exp.startDate}
-                    onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                    onChange={(e) =>
+                      updateExperience(exp.id, "startDate", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                   <input
                     type="text"
                     placeholder="End Date"
                     value={exp.endDate}
-                    onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                    onChange={(e) =>
+                      updateExperience(exp.id, "endDate", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>
@@ -134,7 +165,9 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                     type="text"
                     placeholder="Describe your achievement or responsibility"
                     value={bullet.text}
-                    onChange={(e) => updateBulletPoint(exp.id, bullet.id, e.target.value)}
+                    onChange={(e) =>
+                      updateBulletPoint(exp.id, bullet.id, e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
                   />
                   <button

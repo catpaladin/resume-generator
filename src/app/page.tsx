@@ -7,23 +7,27 @@ import { Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ResumeData } from "@/types/resume";
 
-const STORAGE_KEY = 'resume-data';
+const STORAGE_KEY = "resume-data";
 
-function isValidResumeData(data: any): data is ResumeData {
+function isValidResumeData(data: unknown): data is ResumeData {
   return (
-    data &&
-    typeof data === 'object' &&
-    'personal' in data &&
-    'skills' in data &&
-    'experience' in data &&
-    'education' in data &&
-    'projects' in data
+    data !== null &&
+    typeof data === "object" &&
+    "personal" in data &&
+    "skills" in data &&
+    "experience" in data &&
+    "education" in data &&
+    "projects" in data &&
+    Array.isArray((data as ResumeData).skills) &&
+    Array.isArray((data as ResumeData).experience) &&
+    Array.isArray((data as ResumeData).education) &&
+    Array.isArray((data as ResumeData).projects)
   );
 }
 
 export default function HomePage() {
   const [resumeData, setResumeData] = useState<ResumeData>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
@@ -32,7 +36,7 @@ export default function HomePage() {
             return parsed;
           }
         } catch (error) {
-          console.error('Failed to parse saved resume data:', error);
+          console.error("Failed to parse saved resume data:", error);
         }
       }
     }
@@ -48,7 +52,11 @@ export default function HomePage() {
   };
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to reset all data? This cannot be undone.",
+      )
+    ) {
       localStorage.removeItem(STORAGE_KEY);
       setResumeData(initialResumeData);
     }
@@ -60,17 +68,17 @@ export default function HomePage() {
       const imported = JSON.parse(text);
 
       if (!isValidResumeData(imported)) {
-        throw new Error('Invalid resume data format');
+        throw new Error("Invalid resume data format");
       }
 
       // Update state and localStorage
       setResumeData(imported);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
 
-      alert('Resume data imported successfully!');
+      alert("Resume data imported successfully!");
     } catch (error) {
-      console.error('Failed to import resume data:', error);
-      alert('Failed to import resume data. Please check the file format.');
+      console.error("Failed to import resume data:", error);
+      alert("Failed to import resume data. Please check the file format.");
     }
   };
 
@@ -80,7 +88,8 @@ export default function HomePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Resume Builder</h1>
           <p className="text-muted-foreground">
-            Create a professional resume in minutes. Fill in your details and see the live preview.
+            Create a professional resume in minutes. Fill in your details and
+            see the live preview.
           </p>
         </div>
 

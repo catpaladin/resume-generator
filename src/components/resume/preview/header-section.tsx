@@ -1,4 +1,4 @@
-import type { PersonalInfo } from '@/types/resume';
+import type { PersonalInfo } from "@/types/resume";
 
 interface HeaderSectionProps {
   data: PersonalInfo;
@@ -16,13 +16,11 @@ export function HeaderSection({ data }: HeaderSectionProps) {
 
   return (
     <section className="space-y-2 text-center">
-      <h1 className="text-2xl font-bold text-foreground">
-        {fullName}
-      </h1>
+      <h1 className="text-2xl font-bold text-foreground">{fullName}</h1>
 
       {contactInfo.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          {contactInfo.join(' • ')}
+          {contactInfo.join(" • ")}
         </p>
       )}
 

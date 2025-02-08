@@ -1,5 +1,5 @@
-import { MAX_ITEMS, VALIDATION, ERROR_MESSAGES } from '@/config/constants';
-import type { ResumeData } from '@/types/resume';
+import { MAX_ITEMS, VALIDATION, ERROR_MESSAGES } from "@/config/constants";
+import type { ResumeData } from "@/types/resume";
 
 interface ValidationError {
   field: string;
@@ -43,44 +43,50 @@ export function validateSectionLengths(data: ResumeData): ValidationError[] {
   // Validate personal info
   if (data.personal.fullName.length > VALIDATION.NAME_MAX_LENGTH) {
     errors.push({
-      field: 'fullName',
-      message: ERROR_MESSAGES.MAX_LENGTH('Name', VALIDATION.NAME_MAX_LENGTH)
+      field: "fullName",
+      message: ERROR_MESSAGES.MAX_LENGTH("Name", VALIDATION.NAME_MAX_LENGTH),
     });
   }
 
   if (data.personal.summary.length > VALIDATION.SUMMARY_MAX_LENGTH) {
     errors.push({
-      field: 'summary',
-      message: ERROR_MESSAGES.MAX_LENGTH('Summary', VALIDATION.SUMMARY_MAX_LENGTH)
+      field: "summary",
+      message: ERROR_MESSAGES.MAX_LENGTH(
+        "Summary",
+        VALIDATION.SUMMARY_MAX_LENGTH,
+      ),
     });
   }
 
   // Validate section limits
   if (data.skills.length > MAX_ITEMS.SKILLS) {
     errors.push({
-      field: 'skills',
-      message: ERROR_MESSAGES.MAX_ITEMS('skills', MAX_ITEMS.SKILLS)
+      field: "skills",
+      message: ERROR_MESSAGES.MAX_ITEMS("skills", MAX_ITEMS.SKILLS),
     });
   }
 
   if (data.experience.length > MAX_ITEMS.EXPERIENCE) {
     errors.push({
-      field: 'experience',
-      message: ERROR_MESSAGES.MAX_ITEMS('experiences', MAX_ITEMS.EXPERIENCE)
+      field: "experience",
+      message: ERROR_MESSAGES.MAX_ITEMS("experiences", MAX_ITEMS.EXPERIENCE),
     });
   }
 
   if (data.education.length > MAX_ITEMS.EDUCATION) {
     errors.push({
-      field: 'education',
-      message: ERROR_MESSAGES.MAX_ITEMS('education entries', MAX_ITEMS.EDUCATION)
+      field: "education",
+      message: ERROR_MESSAGES.MAX_ITEMS(
+        "education entries",
+        MAX_ITEMS.EDUCATION,
+      ),
     });
   }
 
   if (data.projects.length > MAX_ITEMS.PROJECTS) {
     errors.push({
-      field: 'projects',
-      message: ERROR_MESSAGES.MAX_ITEMS('projects', MAX_ITEMS.PROJECTS)
+      field: "projects",
+      message: ERROR_MESSAGES.MAX_ITEMS("projects", MAX_ITEMS.PROJECTS),
     });
   }
 
@@ -96,16 +102,16 @@ export function validateRequiredFields(data: ResumeData): ValidationError[] {
   // Validate personal info
   if (!data.personal.fullName.trim()) {
     errors.push({
-      field: 'fullName',
-      message: ERROR_MESSAGES.REQUIRED
+      field: "fullName",
+      message: ERROR_MESSAGES.REQUIRED,
     });
   }
 
   if (data.personal.email) {
     if (!isValidEmail(data.personal.email)) {
       errors.push({
-        field: 'email',
-        message: ERROR_MESSAGES.INVALID_EMAIL
+        field: "email",
+        message: ERROR_MESSAGES.INVALID_EMAIL,
       });
     }
   }
@@ -113,8 +119,8 @@ export function validateRequiredFields(data: ResumeData): ValidationError[] {
   if (data.personal.phone) {
     if (!isValidPhone(data.personal.phone)) {
       errors.push({
-        field: 'phone',
-        message: ERROR_MESSAGES.INVALID_PHONE
+        field: "phone",
+        message: ERROR_MESSAGES.INVALID_PHONE,
       });
     }
   }
@@ -122,8 +128,8 @@ export function validateRequiredFields(data: ResumeData): ValidationError[] {
   if (data.personal.linkedin) {
     if (!isValidUrl(data.personal.linkedin)) {
       errors.push({
-        field: 'linkedin',
-        message: ERROR_MESSAGES.INVALID_URL
+        field: "linkedin",
+        message: ERROR_MESSAGES.INVALID_URL,
       });
     }
   }
@@ -141,7 +147,10 @@ export function validateBulletPoints(data: ResumeData): ValidationError[] {
     if (exp.bulletPoints.length > MAX_ITEMS.BULLET_POINTS) {
       errors.push({
         field: `experience[${index}].bulletPoints`,
-        message: ERROR_MESSAGES.MAX_ITEMS('bullet points', MAX_ITEMS.BULLET_POINTS)
+        message: ERROR_MESSAGES.MAX_ITEMS(
+          "bullet points",
+          MAX_ITEMS.BULLET_POINTS,
+        ),
       });
     }
 
@@ -149,7 +158,10 @@ export function validateBulletPoints(data: ResumeData): ValidationError[] {
       if (bullet.text.length > VALIDATION.BULLET_POINT_MAX_LENGTH) {
         errors.push({
           field: `experience[${index}].bulletPoints[${bulletIndex}]`,
-          message: ERROR_MESSAGES.MAX_LENGTH('Bullet point', VALIDATION.BULLET_POINT_MAX_LENGTH)
+          message: ERROR_MESSAGES.MAX_LENGTH(
+            "Bullet point",
+            VALIDATION.BULLET_POINT_MAX_LENGTH,
+          ),
         });
       }
     });
@@ -161,21 +173,28 @@ export function validateBulletPoints(data: ResumeData): ValidationError[] {
 /**
  * Validate project descriptions
  */
-export function validateProjectDescriptions(data: ResumeData): ValidationError[] {
+export function validateProjectDescriptions(
+  data: ResumeData,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   data.projects.forEach((project, index) => {
-    if (project.description.length > VALIDATION.PROJECT_DESCRIPTION_MAX_LENGTH) {
+    if (
+      project.description.length > VALIDATION.PROJECT_DESCRIPTION_MAX_LENGTH
+    ) {
       errors.push({
         field: `projects[${index}].description`,
-        message: ERROR_MESSAGES.MAX_LENGTH('Project description', VALIDATION.PROJECT_DESCRIPTION_MAX_LENGTH)
+        message: ERROR_MESSAGES.MAX_LENGTH(
+          "Project description",
+          VALIDATION.PROJECT_DESCRIPTION_MAX_LENGTH,
+        ),
       });
     }
 
     if (project.link && !isValidUrl(project.link)) {
       errors.push({
         field: `projects[${index}].link`,
-        message: ERROR_MESSAGES.INVALID_URL
+        message: ERROR_MESSAGES.INVALID_URL,
       });
     }
   });
@@ -191,7 +210,7 @@ export function validateResumeData(data: ResumeData): ValidationError[] {
     ...validateRequiredFields(data),
     ...validateSectionLengths(data),
     ...validateBulletPoints(data),
-    ...validateProjectDescriptions(data)
+    ...validateProjectDescriptions(data),
   ];
 }
 
@@ -207,7 +226,7 @@ export function hasValidationErrors(data: ResumeData): boolean {
  */
 export function getFieldError(
   errors: ValidationError[],
-  field: string
+  field: string,
 ): string | undefined {
-  return errors.find(error => error.field === field)?.message;
+  return errors.find((error) => error.field === field)?.message;
 }

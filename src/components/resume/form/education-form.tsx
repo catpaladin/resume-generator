@@ -1,6 +1,6 @@
-import { Education } from '@/types/resume';
-import { Card } from '@/components/ui/card';
-import { Plus, X } from 'lucide-react';
+import { Education } from "@/types/resume";
+import { Card } from "@/components/ui/card";
+import { Plus, X } from "lucide-react";
 
 interface EducationFormProps {
   education: Education[];
@@ -13,21 +13,27 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
       ...education,
       {
         id: crypto.randomUUID(),
-        school: '',
-        degree: '',
-        graduationYear: ''
-      }
+        school: "",
+        degree: "",
+        graduationYear: "",
+      },
     ]);
   };
 
   const removeEducation = (id: string) => {
-    onChange(education.filter(edu => edu.id !== id));
+    onChange(education.filter((edu) => edu.id !== id));
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: string) => {
-    onChange(education.map(edu =>
-      edu.id === id ? { ...edu, [field]: value } : edu
-    ));
+  const updateEducation = (
+    id: string,
+    field: keyof Education,
+    value: string,
+  ) => {
+    onChange(
+      education.map((edu) =>
+        edu.id === id ? { ...edu, [field]: value } : edu,
+      ),
+    );
   };
 
   return (
@@ -42,7 +48,9 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
                   type="text"
                   placeholder="School"
                   value={edu.school}
-                  onChange={(e) => updateEducation(edu.id, 'school', e.target.value)}
+                  onChange={(e) =>
+                    updateEducation(edu.id, "school", e.target.value)
+                  }
                   className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
                 <div className="grid grid-cols-2 gap-3">
@@ -50,14 +58,18 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
                     type="text"
                     placeholder="Degree"
                     value={edu.degree}
-                    onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
+                    onChange={(e) =>
+                      updateEducation(edu.id, "degree", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                   <input
                     type="text"
                     placeholder="Graduation Year"
                     value={edu.graduationYear}
-                    onChange={(e) => updateEducation(edu.id, 'graduationYear', e.target.value)}
+                    onChange={(e) =>
+                      updateEducation(edu.id, "graduationYear", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>

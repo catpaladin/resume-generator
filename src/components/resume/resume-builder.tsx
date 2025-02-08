@@ -1,23 +1,26 @@
 "use client";
 
-import { useRef, useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Download, Upload, Trash2 } from 'lucide-react';
-import { exportResumeData } from '@/lib/utils';
-import { TabConfig } from '@/config/constants';
+import { useRef, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Download, Upload, Trash2 } from "lucide-react";
+import { exportResumeData } from "@/lib/utils";
+import { TabConfig } from "@/config/constants";
 import {
   EducationForm,
   ExperienceForm,
   PersonalInfoForm,
   ProjectsForm,
-  SkillsForm
-} from './form';
-import type { ResumeData } from '@/types/resume';
-import type { TabType } from '@/types/common';
+  SkillsForm,
+} from "./form";
+import type { ResumeData } from "@/types/resume";
+import type { TabType } from "@/types/common";
 
 interface ClientResumeBuilderProps {
   data: ResumeData;
-  updateSection: <K extends keyof ResumeData>(section: K, value: ResumeData[K]) => void;
+  updateSection: <K extends keyof ResumeData>(
+    section: K,
+    value: ResumeData[K],
+  ) => void;
   resetData: () => void;
   onImport: (file: File) => Promise<void>;
 }
@@ -26,57 +29,60 @@ export function ClientResumeBuilder({
   data,
   updateSection,
   resetData,
-  onImport
+  onImport,
 }: ClientResumeBuilderProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [activeTab, setActiveTab] = useState<TabType>("personal");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       await onImport(file);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'personal':
+      case "personal":
         return (
           <PersonalInfoForm
             data={data.personal}
             onChange={(field, value) =>
-              updateSection('personal', { ...data.personal, [field]: value })}
+              updateSection("personal", { ...data.personal, [field]: value })
+            }
           />
         );
-      case 'skills':
+      case "skills":
         return (
           <SkillsForm
             skills={data.skills}
-            onChange={(skills) => updateSection('skills', skills)}
+            onChange={(skills) => updateSection("skills", skills)}
           />
         );
-      case 'experience':
+      case "experience":
         return (
           <ExperienceForm
             experiences={data.experience}
-            onChange={(experiences) => updateSection('experience', experiences)}
+            onChange={(experiences) => updateSection("experience", experiences)}
           />
         );
-      case 'education':
+      case "education":
         return (
           <EducationForm
             education={data.education}
-            onChange={(education) => updateSection('education', education)}
+            onChange={(education) => updateSection("education", education)}
           />
         );
-      case 'projects':
+      case "projects":
         return (
           <ProjectsForm
             projects={data.projects}
-            onChange={(projects) => updateSection('projects', projects)}
+            onChange={(projects) => updateSection("projects", projects)}
           />
         );
     }
@@ -131,9 +137,10 @@ export function ClientResumeBuilder({
             onClick={() => setActiveTab(id as TabType)}
             className={`
               flex items-center gap-2 px-4 py-2 rounded-lg transition-colors shrink-0
-              ${activeTab === id
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              ${
+                activeTab === id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }
             `}
           >
@@ -143,9 +150,7 @@ export function ClientResumeBuilder({
         ))}
       </div>
 
-      <Card className="p-4 flex-1 overflow-y-auto">
-        {renderTabContent()}
-      </Card>
+      <Card className="p-4 flex-1 overflow-y-auto">{renderTabContent()}</Card>
     </>
   );
 }

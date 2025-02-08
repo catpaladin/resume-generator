@@ -1,3 +1,7 @@
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Button, ButtonProps } from "./button";
+
 interface IconButtonProps extends ButtonProps {
   icon: React.ReactNode;
   "aria-label": string;
@@ -16,9 +20,9 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {icon}
       </Button>
     );
-  }
+  },
 );
 
 IconButton.displayName = "IconButton";
 
-export { Button, IconButton, buttonVariants };
+export { IconButton };

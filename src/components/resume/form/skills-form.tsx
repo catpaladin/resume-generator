@@ -1,6 +1,6 @@
-import { Skill } from '@/types/resume';
-import { Card } from '@/components/ui/card';
-import { Plus, X } from 'lucide-react';
+import { Skill } from "@/types/resume";
+import { Card } from "@/components/ui/card";
+import { Plus, X } from "lucide-react";
 
 interface SkillsFormProps {
   skills: Skill[];
@@ -9,17 +9,17 @@ interface SkillsFormProps {
 
 export function SkillsForm({ skills, onChange }: SkillsFormProps) {
   const addSkill = () => {
-    onChange([...skills, { id: crypto.randomUUID(), name: '' }]);
+    onChange([...skills, { id: crypto.randomUUID(), name: "" }]);
   };
 
   const removeSkill = (id: string) => {
-    onChange(skills.filter(skill => skill.id !== id));
+    onChange(skills.filter((skill) => skill.id !== id));
   };
 
   const updateSkill = (id: string, name: string) => {
-    onChange(skills.map(skill =>
-      skill.id === id ? { ...skill, name } : skill
-    ));
+    onChange(
+      skills.map((skill) => (skill.id === id ? { ...skill, name } : skill)),
+    );
   };
 
   return (

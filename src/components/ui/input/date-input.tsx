@@ -16,10 +16,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label
-            htmlFor={id}
-            className="text-sm font-medium text-foreground"
-          >
+          <label htmlFor={id} className="text-sm font-medium text-foreground">
             {label}
           </label>
         )}
@@ -34,7 +31,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
               showIcon && "pl-10",
               error && "border-destructive focus-visible:ring-destructive",
-              className
+              className,
             )}
             ref={ref}
             aria-invalid={!!error}
@@ -52,7 +49,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 DateInput.displayName = "DateInput";
