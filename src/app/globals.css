@@ -60,17 +60,32 @@
 
 /* Print styles for PDF export */
 @media print {
+  @page {
+    margin: 0.5in;
+    size: auto;  /* Allow auto-sizing for multiple pages */
+  }
+
   body * {
     visibility: hidden;
   }
+
   #resume-preview,
   #resume-preview * {
     visibility: visible;
   }
+
   #resume-preview {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    height: auto;
+    overflow: visible !important;
+  }
+
+  /* Remove any fixed height constraints that might limit content */
+  .overflow-y-auto {
+    overflow: visible !important;
+    height: auto !important;
   }
 }

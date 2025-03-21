@@ -12,7 +12,7 @@ interface ClientResumePreviewProps {
 
 // Tailwind-inspired color palette with improved contrast
 const COLOR_PALETTE = {
-  primary: "#1e40af", // blue-800
+  primary: "#000000", // black
   secondary: "#374151", // gray-700
   muted: "#4b5563", // gray-600
   subtle: "#9ca3af", // gray-400
@@ -29,6 +29,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
     try {
       setIsExporting(true);
 
+      // Create new document with A4 dimensions
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -36,11 +37,22 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       });
 
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 15;
       let currentY = margin;
 
-      // Enhanced PDF generation functions with improved typography
+      // Page management
+      const checkForNewPage = (additionalHeight: number = 0) => {
+        if (currentY + additionalHeight > pageHeight - margin) {
+          doc.addPage();
+          currentY = margin;
+          return true;
+        }
+        return false;
+      };
+
       const addSection = (title: string) => {
+        checkForNewPage(10);
         currentY += 6;
 
         doc.setFontSize(12);
@@ -48,10 +60,18 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         doc.setFont("helvetica", "bold");
         doc.text(title.toUpperCase(), margin, currentY);
 
-        currentY += 8;
+        // Add subtle divider line
+        currentY += 2;
+        doc.setDrawColor(COLOR_PALETTE.border);
+        doc.setLineWidth(0.5);
+        doc.line(margin, currentY, pageWidth - margin, currentY);
+
+        currentY += 6;
       };
 
       const addSubheading = (text: string, details?: string) => {
+        checkForNewPage(8);
+
         doc.setFontSize(11);
         doc.setTextColor(COLOR_PALETTE.secondary);
         doc.setFont("helvetica", "bold");
@@ -71,6 +91,8 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       };
 
       const addBodyText = (text: string, indent: number = 0) => {
+        if (!text) return;
+
         doc.setFontSize(10);
         doc.setTextColor(COLOR_PALETTE.muted);
         doc.setFont("helvetica", "normal");
@@ -80,18 +102,28 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
           pageWidth - margin * 2 - indent,
         );
 
+        // Check if we need a new page
+        checkForNewPage(splitText.length * 5);
+
         doc.text(splitText, margin + indent, currentY);
         currentY += splitText.length * 5;
       };
 
       const addBulletPoint = (text: string) => {
+        if (!text) return;
+
+        const bulletIndent = 6;
+        const maxWidth = pageWidth - margin * 2 - bulletIndent;
+        const splitText = doc.splitTextToSize(text, maxWidth);
+
+        // Check if we need a new page
+        checkForNewPage(splitText.length * 5);
+
         doc.setFontSize(10);
         doc.setTextColor(COLOR_PALETTE.muted);
         doc.text("•", margin + 2, currentY);
+        doc.text(splitText, margin + bulletIndent, currentY);
 
-        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2 - 6);
-
-        doc.text(splitText, margin + 6, currentY);
         currentY += splitText.length * 5;
       };
 
@@ -100,8 +132,8 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       doc.setFontSize(16);
       doc.setTextColor(COLOR_PALETTE.primary);
       doc.setFont("helvetica", "bold");
-      doc.text(personal.fullName.toUpperCase(), margin, currentY, {
-        align: "left",
+      doc.text(personal.fullName.toUpperCase(), pageWidth / 2, currentY, {
+        align: "center",
       });
       currentY += 10;
 
@@ -117,7 +149,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       ]
         .filter(Boolean)
         .join(" | ");
-      doc.text(contactInfo, margin, currentY, { align: "left" });
+      doc.text(contactInfo, pageWidth / 2, currentY, { align: "center" });
       currentY += 10;
 
       // Professional Summary
@@ -128,26 +160,31 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       }
 
       // Skills
-      if (data.skills.length > 0) {
+      if (data.skills?.length > 0 && data.skills.some((skill) => skill.name)) {
         addSection("SKILLS");
-        const skillText = data.skills.map((skill) => skill.name).join(" • ");
+        const skillText = data.skills
+          .filter((skill) => skill.name)
+          .map((skill) => skill.name)
+          .join(" • ");
         addBodyText(skillText);
         currentY += 6;
       }
 
       // Professional Experience
-      if (data.experience.length > 0) {
+      if (data.experience?.length > 0) {
         addSection("PROFESSIONAL EXPERIENCE");
 
         data.experience.forEach((exp) => {
+          if (!exp.company) return;
+
           addSubheading(
             exp.company,
-            `${exp.startDate} - ${exp.endDate || "Present"}`,
+            `${exp.startDate || ""} - ${exp.endDate || "Present"}`,
           );
 
           doc.setFontSize(10);
           doc.setTextColor(COLOR_PALETTE.muted);
-          doc.text(exp.position, margin, currentY);
+          doc.text(exp.position || "", margin, currentY);
           currentY += 5;
 
           if (exp.location) {
@@ -167,25 +204,31 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       }
 
       // Education
-      if (data.education.length > 0) {
+      if (data.education?.length > 0) {
         addSection("EDUCATION");
 
         data.education.forEach((edu) => {
-          addSubheading(edu.school, edu.graduationYear);
+          if (!edu.school) return;
 
-          doc.setFontSize(10);
-          doc.setTextColor(COLOR_PALETTE.muted);
-          doc.text(edu.degree, margin, currentY);
-          currentY += 6;
+          addSubheading(edu.school, edu.graduationYear || "");
+
+          if (edu.degree) {
+            doc.setFontSize(10);
+            doc.setTextColor(COLOR_PALETTE.muted);
+            doc.text(edu.degree, margin, currentY);
+            currentY += 6;
+          }
         });
       }
 
       // Projects
-      if (data.projects.length > 0) {
+      if (data.projects?.length > 0) {
         addSection("PROJECTS");
 
         data.projects.forEach((proj) => {
-          addSubheading(proj.name, proj.link);
+          if (!proj.name) return;
+
+          addSubheading(proj.name, proj.link || "");
 
           if (proj.description) {
             addBodyText(proj.description);
@@ -195,10 +238,15 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         });
       }
 
-      // Save PDF
-      doc.save(
-        `resume-${personal.fullName.replace(/\s+/g, "-").toLowerCase()}.pdf`,
-      );
+      // Save PDF with sanitized filename
+      const sanitizedName = personal.fullName
+        ? personal.fullName
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .toLowerCase()
+        : "resume";
+
+      doc.save(`${sanitizedName}.pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
       alert("Failed to export PDF. Please try again.");
@@ -245,7 +293,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         {/* Professional Summary */}
         {data.personal.summary && (
           <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase">
+            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Professional Summary
             </h2>
             <p className="text-muted-foreground text-sm">
@@ -255,127 +303,141 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Skills */}
-        {data.skills.some((skill) => skill.name) && (
+        {data.skills?.some((skill) => skill.name) && (
           <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase">
+            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Skills
             </h2>
             <div className="flex flex-wrap gap-2">
-              {data.skills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-sm"
-                >
-                  {skill.name}
-                </span>
-              ))}
+              {data.skills.map(
+                (skill, index) =>
+                  skill.name && (
+                    <span
+                      key={index}
+                      className="bg-secondary/20 text-secondary px-2 py-0.5 rounded text-sm"
+                    >
+                      {skill.name}
+                    </span>
+                  ),
+              )}
             </div>
           </section>
         )}
 
         {/* Professional Experience */}
-        {data.experience.some((exp) => exp.company || exp.position) && (
+        {data.experience?.some((exp) => exp.company || exp.position) && (
           <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase">
+            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Professional Experience
             </h2>
-            {data.experience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <h3 className="font-semibold text-foreground text-base">
-                      {exp.company}
-                    </h3>
-                    <div className="flex gap-2 items-baseline">
-                      <p className="font-medium text-muted-foreground text-sm">
-                        {exp.position}
-                      </p>
-                      {exp.location && (
-                        <span className="text-subtle text-sm">
-                          | {exp.location}
-                        </span>
-                      )}
+            {data.experience.map(
+              (exp, index) =>
+                exp.company && (
+                  <div key={index} className="mb-4">
+                    <div className="flex justify-between items-baseline">
+                      <div>
+                        <h3 className="font-semibold text-foreground text-base">
+                          {exp.company}
+                        </h3>
+                        <div className="flex gap-2 items-baseline">
+                          <p className="font-medium text-muted-foreground text-sm">
+                            {exp.position}
+                          </p>
+                          {exp.location && (
+                            <span className="text-subtle text-sm">
+                              | {exp.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-subtle text-sm shrink-0">
+                        {[exp.startDate, exp.endDate || "Present"]
+                          .filter(Boolean)
+                          .join(" - ")}
+                      </span>
                     </div>
+                    <ul className="list-disc ml-4 mt-1.5 space-y-1">
+                      {exp.bulletPoints?.map(
+                        (bullet, bulletIndex) =>
+                          bullet.text && (
+                            <li
+                              key={bulletIndex}
+                              className="text-muted-foreground text-sm"
+                            >
+                              {bullet.text}
+                            </li>
+                          ),
+                      )}
+                    </ul>
                   </div>
-                  <span className="text-subtle text-sm shrink-0">
-                    {[exp.startDate, exp.endDate || "Present"]
-                      .filter(Boolean)
-                      .join(" - ")}
-                  </span>
-                </div>
-                <ul className="list-disc ml-4 mt-1.5 space-y-1">
-                  {exp.bulletPoints.map(
-                    (bullet, bulletIndex) =>
-                      bullet.text && (
-                        <li
-                          key={bulletIndex}
-                          className="text-muted-foreground text-sm"
-                        >
-                          {bullet.text}
-                        </li>
-                      ),
-                  )}
-                </ul>
-              </div>
-            ))}
+                ),
+            )}
           </section>
         )}
 
         {/* Education */}
-        {data.education.some((edu) => edu.school || edu.degree) && (
+        {data.education?.some((edu) => edu.school || edu.degree) && (
           <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase">
+            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Education
             </h2>
-            {data.education.map((edu, index) => (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-semibold text-foreground text-base">
-                    {edu.school}
-                  </h3>
-                  <span className="text-subtle text-sm">
-                    {edu.graduationYear}
-                  </span>
-                </div>
-                <p className="text-muted-foreground text-sm">{edu.degree}</p>
-              </div>
-            ))}
+            {data.education.map(
+              (edu, index) =>
+                edu.school && (
+                  <div key={index} className="mb-2">
+                    <div className="flex justify-between items-baseline">
+                      <h3 className="font-semibold text-foreground text-base">
+                        {edu.school}
+                      </h3>
+                      <span className="text-subtle text-sm">
+                        {edu.graduationYear}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      {edu.degree}
+                    </p>
+                  </div>
+                ),
+            )}
           </section>
         )}
 
         {/* Projects */}
-        {data.projects.some(
+        {data.projects?.some(
           (project) => project.name || project.description,
         ) && (
           <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase">
+            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Projects
             </h2>
-            {data.projects.map((project, index) => (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-semibold text-foreground text-base">
-                    {project.name}
-                  </h3>
-                  {project.link && (
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm truncate ml-4"
-                      style={{ maxWidth: "50%" }}
-                    >
-                      {project.link}
-                    </a>
-                  )}
-                </div>
-                {project.description && (
-                  <p className="text-muted-foreground text-sm mt-1">
-                    {project.description}
-                  </p>
-                )}
-              </div>
-            ))}
+            {data.projects.map(
+              (project, index) =>
+                project.name && (
+                  <div key={index} className="mb-2">
+                    <div className="flex justify-between items-baseline">
+                      <h3 className="font-semibold text-foreground text-base">
+                        {project.name}
+                      </h3>
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline text-sm truncate ml-4"
+                          style={{ maxWidth: "50%" }}
+                        >
+                          {project.link}
+                        </a>
+                      )}
+                    </div>
+                    {project.description && (
+                      <p className="text-muted-foreground text-sm mt-1">
+                        {project.description}
+                      </p>
+                    )}
+                  </div>
+                ),
+            )}
           </section>
         )}
       </div>
