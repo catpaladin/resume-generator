@@ -1,7 +1,7 @@
 ##############################
 # Stage 1: Dependencies
 ##############################
-FROM node:20-bullseye-slim AS deps
+FROM node:22-bullseye-slim AS deps
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
@@ -16,7 +16,7 @@ RUN npm install --frozen-lockfile
 ##############################
 # Stage 2: Builder
 ##############################
-FROM node:20-bullseye-slim AS builder
+FROM node:22-bullseye-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -30,7 +30,7 @@ RUN npm run build
 ##############################
 # Stage 3: Runner
 ##############################
-FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1

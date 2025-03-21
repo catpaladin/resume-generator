@@ -228,7 +228,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       >
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary uppercase mb-2">
-            {data.personal.fullName}
+            {data.personal?.fullName || ""}
           </h1>
           <p className="text-muted-foreground text-sm">
             {[
