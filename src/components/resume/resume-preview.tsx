@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import type { ResumeData } from "@/types/resume";
+import { SkillsSection } from "./preview/skills-section";
 
 interface ClientResumePreviewProps {
   data: ResumeData;
@@ -154,13 +155,45 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
       // Skills
       if (data.skills?.length > 0 && data.skills.some((skill) => skill.name)) {
-        addSection("SKILLS");
-        const skillText = data.skills
-          .filter((skill) => skill.name)
-          .map((skill) => skill.name)
-          .join(" • ");
-        addBodyText(skillText);
-        currentY += 6;
+        addSection("SKILLS"); // Main "SKILLS" section title
+
+        const groupSkillsForPdf = (skillsToGroup: typeof data.skills) => {
+          const grouped: { [category: string]: string[] } = {};
+          skillsToGroup.forEach(skill => {
+            if (skill.name) {
+              const category = skill.category || "General Skills";
+              if (!grouped[category]) {
+                grouped[category] = [];
+              }
+              grouped[category].push(skill.name);
+            }
+          });
+          return grouped;
+        };
+
+        const groupedSkills = groupSkillsForPdf(data.skills);
+        let firstCategory = true;
+
+        Object.entries(groupedSkills).forEach(([category, skillNames]) => {
+          if (skillNames.length > 0) {
+            if (!firstCategory) {
+              currentY += 3; // Add a small gap between categories
+            }
+            firstCategory = false;
+
+            checkForNewPage(6); // Estimate for category title height
+            doc.setFontSize(11);
+            doc.setTextColor(COLOR_PALETTE.secondary);
+            doc.setFont("helvetica", "bold");
+            doc.text(category, margin, currentY);
+            currentY += 5; // Space after category title before skills list
+
+            const skillsText = skillNames.join(", ");
+            addBodyText(skillsText, 4); // Indent skill list (4mm)
+            // addBodyText handles its own currentY updates and page checks
+          }
+        });
+        currentY += 4; // Space before the next major section
       }
 
       // Professional Experience
@@ -295,24 +328,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
         {/* Skills */}
         {data.skills?.some((skill) => skill.name) && (
-          <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
-              Skills
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {data.skills.map(
-                (skill, index) =>
-                  skill.name && (
-                    <span
-                      key={index}
-                      className="bg-secondary/20 text-secondary px-2 py-0.5 rounded text-sm"
-                    >
-                      {skill.name}
-                    </span>
-                  ),
-              )}
-            </div>
-          </section>
+          <SkillsSection skills={data.skills} />
         )}
 
         {/* Professional Experience */}

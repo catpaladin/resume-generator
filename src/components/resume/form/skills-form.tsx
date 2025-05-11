@@ -9,39 +9,50 @@ interface SkillsFormProps {
 
 export function SkillsForm({ skills, onChange }: SkillsFormProps) {
   const addSkill = () => {
-    onChange([...skills, { id: crypto.randomUUID(), name: "" }]);
+    onChange([...skills, { id: crypto.randomUUID(), name: "", category: "" }]);
   };
 
   const removeSkill = (id: string) => {
     onChange(skills.filter((skill) => skill.id !== id));
   };
 
-  const updateSkill = (id: string, name: string) => {
+  const updateSkill = (id: string, updatedField: Partial<Omit<Skill, 'id'>>) => {
     onChange(
-      skills.map((skill) => (skill.id === id ? { ...skill, name } : skill)),
+      skills.map((skill) =>
+        skill.id === id ? { ...skill, ...updatedField } : skill,
+      ),
     );
   };
 
   return (
     <Card className="p-4 space-y-4">
       <h3 className="text-lg font-semibold">Skills</h3>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {skills.map((skill) => (
-          <div key={skill.id} className="flex gap-2">
+          <div key={skill.id} className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
             <input
               type="text"
-              placeholder="Skill (e.g., JavaScript, Project Management)"
+              placeholder="Skill (e.g., JavaScript)"
               value={skill.name}
-              onChange={(e) => updateSkill(skill.id, e.target.value)}
-              className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
+              onChange={(e) => updateSkill(skill.id, { name: e.target.value })}
+              className="w-full px-3 py-2 border rounded-md border-input bg-background"
             />
-            <button
-              onClick={() => removeSkill(skill.id)}
-              className="p-2 text-muted-foreground hover:text-destructive"
-              aria-label="Remove skill"
-            >
-              <X size={20} />
-            </button>
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Category (e.g., Programming Languages)"
+                value={skill.category || ''}
+                onChange={(e) => updateSkill(skill.id, { category: e.target.value })}
+                className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
+              />
+              <button
+                onClick={() => removeSkill(skill.id)}
+                className="p-2 text-muted-foreground hover:text-destructive"
+                aria-label="Remove skill"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
