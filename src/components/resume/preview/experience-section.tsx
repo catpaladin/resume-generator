@@ -47,7 +47,7 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
                         bullet.text && (
                           <li
                             key={bullet.id}
-                            className="text-muted-foreground text-sm"
+                            className="text-muted-foreground text-sm whitespace-normal overflow-visible"
                           >
                             {bullet.text}
                           </li>

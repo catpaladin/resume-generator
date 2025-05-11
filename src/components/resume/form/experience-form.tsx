@@ -1,6 +1,7 @@
 import { Experience } from "@/types/resume";
 import { Card } from "@/components/ui/card";
 import { Plus, X, GripVertical } from "lucide-react";
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface ExperienceFormProps {
   experiences: Experience[];
@@ -161,13 +162,13 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
               {exp.bulletPoints.map((bullet) => (
                 <div key={bullet.id} className="flex gap-2 items-center">
                   <GripVertical size={16} className="text-muted-foreground" />
-                  <input
-                    type="text"
+                  <TextareaAutosize
                     placeholder="Describe your achievement or responsibility"
                     value={bullet.text}
                     onChange={(e) =>
                       updateBulletPoint(exp.id, bullet.id, e.target.value)
                     }
+                    minRows={1}
                     className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
                   />
                   <button

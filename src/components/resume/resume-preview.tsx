@@ -81,11 +81,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
           doc.setFontSize(10);
           doc.setTextColor(COLOR_PALETTE.subtle);
           doc.setFont("helvetica", "normal");
-          doc.text(
-            details,
-            pageWidth - margin - doc.getTextWidth(details),
-            currentY,
-          );
+          doc.text(details, pageWidth - margin - doc.getTextWidth(details), currentY);
         }
         currentY += 6;
       };
@@ -97,10 +93,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         doc.setTextColor(COLOR_PALETTE.muted);
         doc.setFont("helvetica", "normal");
 
-        const splitText = doc.splitTextToSize(
-          text,
-          pageWidth - margin * 2 - indent,
-        );
+        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2 - indent);
 
         // Check if we need a new page
         checkForNewPage(splitText.length * 5);
@@ -296,9 +289,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Professional Summary
             </h2>
-            <p className="text-muted-foreground text-sm">
-              {data.personal.summary}
-            </p>
+            <p className="text-muted-foreground text-sm">{data.personal.summary}</p>
           </section>
         )}
 
@@ -389,13 +380,9 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                       <h3 className="font-semibold text-foreground text-base">
                         {edu.school}
                       </h3>
-                      <span className="text-subtle text-sm">
-                        {edu.graduationYear}
-                      </span>
+                      <span className="text-subtle text-sm">{edu.graduationYear}</span>
                     </div>
-                    <p className="text-muted-foreground text-sm">
-                      {edu.degree}
-                    </p>
+                    <p className="text-muted-foreground text-sm">{edu.degree}</p>
                   </div>
                 ),
             )}
@@ -403,9 +390,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Projects */}
-        {data.projects?.some(
-          (project) => project.name || project.description,
-        ) && (
+        {data.projects?.some((project) => project.name || project.description) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Projects
