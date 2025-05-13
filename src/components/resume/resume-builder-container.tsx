@@ -4,15 +4,11 @@ import type { ResumeData } from "@/types/resume";
 interface ResumeBuilderContainerProps {
   data: ResumeData;
   onUpdate: (data: ResumeData) => void;
-  onReset: () => void;
-  onImport: (file: File) => Promise<void>;
 }
 
 export function ResumeBuilderContainer({
   data,
-  onUpdate,
-  onReset,
-  onImport
+  onUpdate
 }: ResumeBuilderContainerProps) {
   const handleUpdateSection = <K extends keyof ResumeData>(
     section: K,
@@ -29,8 +25,6 @@ export function ResumeBuilderContainer({
       <ClientResumeBuilder
         data={data}
         updateSection={handleUpdateSection}
-        resetData={onReset}
-        onImport={onImport}
       />
     </div>
   );

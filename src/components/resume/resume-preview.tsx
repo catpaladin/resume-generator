@@ -345,44 +345,51 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
             {data.experience.map(
               (exp, index) =>
                 exp.company && (
-                  <div key={index} className="mb-4">
-                    <div className="flex justify-between items-baseline">
-                      <div>
-                        <h3 className="font-semibold text-foreground text-base">
-                          {exp.company}
-                        </h3>
-                        <div className="flex gap-2 items-baseline">
-                          <p className="font-medium text-muted-foreground text-sm">
-                            {exp.position}
-                          </p>
-                          {exp.location && (
-                            <span className="text-subtle text-sm">
-                              | {exp.location}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-subtle text-sm shrink-0">
-                        {[exp.startDate, exp.endDate || "Present"]
-                          .filter(Boolean)
-                          .join(" - ")}
-                      </span>
-                    </div>
-                    <ul className="list-disc ml-4 mt-1.5 space-y-1">
-                      {exp.bulletPoints?.map(
-                        (bullet, bulletIndex) =>
-                          bullet.text && (
-                            <li
-                              key={bulletIndex}
-                              className="text-muted-foreground text-sm"
-                            >
-                              {bullet.text}
-                            </li>
-                          ),
-                      )}
-                    </ul>
-                  </div>
-                ),
+                  // Use <details> for each experience
+                  <details key={index} className="mb-2 border-b border-border/50 last:border-b-0 pb-2 group">
+                    {/* Use <summary> for the clickable header */}
+                    <summary className="flex justify-between items-start p-2 cursor-pointer list-none group-open:mb-1 hover:bg-muted/50 rounded-md">
+                       <div className="text-left flex-grow mr-2">
+                         <h3 className="font-semibold text-foreground text-base">
+                           {exp.company}
+                         </h3>
+                         <div className="flex flex-col sm:flex-row sm:gap-1 items-start sm:items-baseline">
+                           <p className="font-medium text-muted-foreground text-sm">
+                             {exp.position}
+                           </p>
+                           {exp.location && (
+                             <span className="text-subtle text-xs sm:text-sm sm:before:content-['|'] sm:before:mx-1">
+                               {exp.location}
+                             </span>
+                           )}
+                         </div>
+                       </div>
+                       <span className="text-subtle text-sm shrink-0 ml-auto text-right">
+                         {[exp.startDate, exp.endDate || "Present"]
+                           .filter(Boolean)
+                           .join(" - ")}
+                       </span>
+                       {/* Optional: Add a chevron icon that rotates */}
+                       <span className="ml-2 group-open:rotate-90 transition-transform duration-200">▶</span>
+                     </summary>
+                     {/* The content inside <details> but outside <summary> is collapsible */}
+                     <div className="pt-1 pb-3 px-2">
+                       <ul className="list-disc ml-4 mt-1 space-y-1">
+                         {exp.bulletPoints?.map(
+                           (bullet, bulletIndex) =>
+                             bullet.text && (
+                               <li
+                                 key={bulletIndex}
+                                 className="text-muted-foreground text-sm"
+                               >
+                                 {bullet.text}
+                               </li>
+                             ),
+                         )}
+                       </ul>
+                     </div>
+                   </details>
+                 ),
             )}
           </section>
         )}

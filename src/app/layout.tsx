@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ui/theme/theme-provider";
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle";
+import { HeaderActions } from "@/components/layout/HeaderActions";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -16,8 +17,6 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Builder",
-  description: "A modern, professional resume builder application",
   authors: [{ name: "Your Name" }],
   keywords: ["resume", "cv", "builder", "job application", "career"],
 };
@@ -42,8 +41,12 @@ export default function RootLayout({
         >
           <div className="relative flex min-h-screen flex-col">
             <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="container flex h-14 items-center">
-                <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+              <div className="container flex h-14 items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight whitespace-nowrap">Resume Builder</h1>
+                </div>
+                <div className="flex flex-1 justify-end items-center gap-2">
+                  <HeaderActions />
                   <ThemeToggle />
                 </div>
               </div>
@@ -54,7 +57,7 @@ export default function RootLayout({
             <footer className="border-t py-6 md:py-0">
               <div className="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
                 <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                  Built with{" "}
+                  A modern, professional resume builder application. Built with{" "}
                   <a
                     href="https://nextjs.org"
                     target="_blank"
