@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Download } from "lucide-react";
 import { jsPDF } from "jspdf";
@@ -23,6 +23,11 @@ const COLOR_PALETTE = {
 export function ClientResumePreview({ data }: ClientResumePreviewProps) {
   const [isExporting, setIsExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleExportPDF = async () => {
     if (!previewRef.current) return;
@@ -302,22 +307,22 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       >
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary uppercase mb-2">
-            {data.personal?.fullName || ""}
+            {isMounted ? (data.personal?.fullName || "") : ""}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {[
+            {isMounted ? ([ // Conditionally render contact info
               data.personal.location,
               data.personal.email,
               data.personal.phone,
               data.personal.linkedin,
             ]
               .filter(Boolean)
-              .join(" | ")}
+              .join(" | ")) : ""}
           </p>
         </div>
 
         {/* Professional Summary */}
-        {data.personal.summary && (
+        {isMounted && data.personal.summary && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Professional Summary
@@ -332,7 +337,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Professional Experience */}
-        {data.experience?.some((exp) => exp.company || exp.position) && (
+        {isMounted && data.experience?.some((exp) => exp.company || exp.position) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Professional Experience
@@ -383,7 +388,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Education */}
-        {data.education?.some((edu) => edu.school || edu.degree) && (
+        {isMounted && data.education?.some((edu) => edu.school || edu.degree) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Education
@@ -406,7 +411,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         )}
 
         {/* Projects */}
-        {data.projects?.some((project) => project.name || project.description) && (
+        {isMounted && data.projects?.some((project) => project.name || project.description) && (
           <section>
             <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
               Projects
