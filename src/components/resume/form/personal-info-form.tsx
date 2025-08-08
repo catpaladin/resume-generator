@@ -1,5 +1,12 @@
 import type { PersonalInfo } from "@/types/resume";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TextInput, TextArea } from "@/components/ui/input";
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
@@ -15,55 +22,61 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
   const { fullName, location, email, phone, linkedin, summary } = data;
 
   return (
-    <Card className="p-4 space-y-4">
-      <h3 className="text-lg font-semibold">Personal Information</h3>
-      <div className="grid gap-3">
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => onChange("fullName", e.target.value)}
-          className="w-full px-3 py-2 border rounded-md border-input bg-background"
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            placeholder="Location"
-            value={location}
-            onChange={(e) => onChange("location", e.target.value)}
-            className="w-full px-3 py-2 border rounded-md border-input bg-background"
+    <Card>
+      <CardHeader>
+        <CardTitle>Personal Information</CardTitle>
+        <CardDescription>
+          Your name and contact details. Keep it concise and professional.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-3">
+          <TextInput
+            label="Full Name"
+            placeholder="e.g., Taylor Morgan"
+            value={fullName}
+            onChange={(e) => onChange("fullName", e.target.value)}
           />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => onChange("email", e.target.value)}
-            className="w-full px-3 py-2 border rounded-md border-input bg-background"
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <TextInput
+              label="Location"
+              placeholder="City, Country"
+              value={location}
+              onChange={(e) => onChange("location", e.target.value)}
+            />
+            <TextInput
+              type="email"
+              label="Email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => onChange("email", e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <TextInput
+              type="tel"
+              label="Phone"
+              placeholder="e.g., +1 555 123 4567"
+              value={phone}
+              onChange={(e) => onChange("phone", e.target.value)}
+            />
+            <TextInput
+              type="url"
+              label="LinkedIn URL"
+              placeholder="https://linkedin.com/in/username"
+              value={linkedin}
+              onChange={(e) => onChange("linkedin", e.target.value)}
+            />
+          </div>
+          <TextArea
+            label="Professional Summary"
+            placeholder="2–3 lines highlighting your impact and strengths"
+            value={summary}
+            onChange={(e) => onChange("summary", e.target.value)}
+            className="min-h-[100px] resize-y"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="tel"
-            placeholder="Phone"
-            value={phone}
-            onChange={(e) => onChange("phone", e.target.value)}
-            className="w-full px-3 py-2 border rounded-md border-input bg-background"
-          />
-          <input
-            type="url"
-            placeholder="LinkedIn URL"
-            value={linkedin}
-            onChange={(e) => onChange("linkedin", e.target.value)}
-            className="w-full px-3 py-2 border rounded-md border-input bg-background"
-          />
-        </div>
-        <textarea
-          placeholder="Professional Summary"
-          value={summary}
-          onChange={(e) => onChange("summary", e.target.value)}
-          className="w-full px-3 py-2 border rounded-md border-input bg-background min-h-[100px] resize-y"
-        />
-      </div>
+      </CardContent>
     </Card>
   );
 }

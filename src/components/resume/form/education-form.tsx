@@ -1,5 +1,14 @@
 import { Education } from "@/types/resume";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TextInput } from "@/components/ui/input";
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { Plus, X } from "lucide-react";
 
 interface EducationFormProps {
@@ -37,61 +46,61 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
   };
 
   return (
-    <Card className="p-4 space-y-4">
-      <h3 className="text-lg font-semibold">Education</h3>
-      <div className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Education</CardTitle>
+        <CardDescription>
+          List your most relevant education. Include degree and graduation
+          year.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {education.map((edu) => (
-          <div key={edu.id} className="p-4 border rounded-lg">
+          <div key={edu.id} className="rounded-lg border p-4">
             <div className="flex gap-4">
               <div className="flex-1 space-y-3">
-                <input
-                  type="text"
-                  placeholder="School"
+                <TextInput
+                  label="School"
+                  placeholder="e.g., University of Somewhere"
                   value={edu.school}
                   onChange={(e) =>
                     updateEducation(edu.id, "school", e.target.value)
                   }
-                  className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Degree"
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <TextInput
+                    label="Degree"
+                    placeholder="e.g., B.Sc. Computer Science"
                     value={edu.degree}
                     onChange={(e) =>
                       updateEducation(edu.id, "degree", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
-                  <input
-                    type="text"
-                    placeholder="Graduation Year"
+                  <TextInput
+                    label="Graduation Year"
+                    placeholder="e.g., 2024"
                     value={edu.graduationYear}
                     onChange={(e) =>
                       updateEducation(edu.id, "graduationYear", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>
               </div>
-              <button
-                onClick={() => removeEducation(edu.id)}
-                className="p-2 text-muted-foreground hover:text-destructive"
+              <IconButton
+                variant="ghost"
                 aria-label="Remove education"
-              >
-                <X size={20} />
-              </button>
+                icon={<X size={18} />}
+                onClick={() => removeEducation(edu.id)}
+              />
             </div>
           </div>
         ))}
-      </div>
-      <button
-        onClick={addEducation}
-        className="flex items-center gap-2 text-sm text-primary hover:text-primary/80"
-      >
-        <Plus size={16} />
-        Add Education
-      </button>
+        <div>
+          <Button type="button" variant="link" className="px-0" onClick={addEducation}>
+            <Plus size={16} className="mr-2" /> Add Education
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

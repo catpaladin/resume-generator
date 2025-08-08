@@ -1,5 +1,14 @@
 import { Project } from "@/types/resume";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TextInput, TextArea } from "@/components/ui/input";
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { Plus, X } from "lucide-react";
 
 interface ProjectsFormProps {
@@ -33,58 +42,61 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
   };
 
   return (
-    <Card className="p-4 space-y-4">
-      <h3 className="text-lg font-semibold">Projects</h3>
-      <div className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Projects</CardTitle>
+        <CardDescription>
+          Showcase key projects. Include a short description and an optional
+          link.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {projects.map((project) => (
-          <div key={project.id} className="p-4 border rounded-lg">
+          <div key={project.id} className="rounded-lg border p-4">
             <div className="flex gap-4">
               <div className="flex-1 space-y-3">
-                <input
-                  type="text"
-                  placeholder="Project Name"
+                <TextInput
+                  label="Project Name"
+                  placeholder="e.g., Resume Builder"
                   value={project.name}
                   onChange={(e) =>
                     updateProject(project.id, "name", e.target.value)
                   }
-                  className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
-                <input
+                <TextInput
                   type="url"
-                  placeholder="Project Link (optional)"
+                  label="Project Link (optional)"
+                  placeholder="https://example.com"
                   value={project.link}
                   onChange={(e) =>
                     updateProject(project.id, "link", e.target.value)
                   }
-                  className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
-                <textarea
-                  placeholder="Project Description"
+                <TextArea
+                  label="Project Description"
+                  placeholder="What it does, your role, and impact"
                   value={project.description}
                   onChange={(e) =>
                     updateProject(project.id, "description", e.target.value)
                   }
-                  className="w-full px-3 py-2 border rounded-md border-input bg-background min-h-[80px] resize-y"
+                  className="min-h-[80px] resize-y"
                 />
               </div>
-              <button
-                onClick={() => removeProject(project.id)}
-                className="p-2 text-muted-foreground hover:text-destructive"
+              <IconButton
+                variant="ghost"
                 aria-label="Remove project"
-              >
-                <X size={20} />
-              </button>
+                icon={<X size={18} />}
+                onClick={() => removeProject(project.id)}
+              />
             </div>
           </div>
         ))}
-      </div>
-      <button
-        onClick={addProject}
-        className="flex items-center gap-2 text-sm text-primary hover:text-primary/80"
-      >
-        <Plus size={16} />
-        Add Project
-      </button>
+        <div>
+          <Button type="button" variant="link" className="px-0" onClick={addProject}>
+            <Plus size={16} className="mr-2" /> Add Project
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

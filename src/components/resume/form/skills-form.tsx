@@ -1,5 +1,14 @@
 import { Skill } from "@/types/resume";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TextInput } from "@/components/ui/input";
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { Plus, X } from "lucide-react";
 
 interface SkillsFormProps {
@@ -25,44 +34,58 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
   };
 
   return (
-    <Card className="p-4 space-y-4">
-      <h3 className="text-lg font-semibold">Skills</h3>
-      <div className="space-y-3">
-        {skills.map((skill) => (
-          <div key={skill.id} className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
-            <input
-              type="text"
-              placeholder="Skill (e.g., JavaScript)"
-              value={skill.name}
-              onChange={(e) => updateSkill(skill.id, { name: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md border-input bg-background"
-            />
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                placeholder="Category (e.g., Programming Languages)"
-                value={skill.category || ''}
-                onChange={(e) => updateSkill(skill.id, { category: e.target.value })}
-                className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
+    <Card>
+      <CardHeader>
+        <CardTitle>Skills</CardTitle>
+        <CardDescription>
+          Organize skills by category. Unlabeled skills will appear under
+          "General Skills" in the preview and export.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-4">
+          {skills.map((skill) => (
+            <div
+              key={skill.id}
+              className="grid grid-cols-1 items-start gap-3 md:grid-cols-2"
+            >
+              <TextInput
+                label="Skill"
+                placeholder="e.g., JavaScript"
+                value={skill.name}
+                onChange={(e) => updateSkill(skill.id, { name: e.target.value })}
               />
-              <button
-                onClick={() => removeSkill(skill.id)}
-                className="p-2 text-muted-foreground hover:text-destructive"
-                aria-label="Remove skill"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-end gap-2">
+                <TextInput
+                  label="Category"
+                  placeholder="e.g., Programming Languages"
+                  value={skill.category || ""}
+                  onChange={(e) =>
+                    updateSkill(skill.id, { category: e.target.value })
+                  }
+                  className="flex-1"
+                />
+                <IconButton
+                  variant="ghost"
+                  aria-label="Remove skill"
+                  icon={<X size={18} />}
+                  onClick={() => removeSkill(skill.id)}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      <button
-        onClick={addSkill}
-        className="flex items-center gap-2 text-sm text-primary hover:text-primary/80"
-      >
-        <Plus size={16} />
-        Add Skill
-      </button>
+          ))}
+        </div>
+        <div>
+          <Button
+            type="button"
+            variant="link"
+            className="px-0"
+            onClick={addSkill}
+          >
+            <Plus size={16} className="mr-2" /> Add Skill
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

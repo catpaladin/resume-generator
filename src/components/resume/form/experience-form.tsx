@@ -1,7 +1,16 @@
 import { Experience } from "@/types/resume";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TextInput } from "@/components/ui/input";
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { Plus, X, GripVertical } from "lucide-react";
-import TextareaAutosize from 'react-textarea-autosize';
+import TextareaAutosize from "react-textarea-autosize";
 
 interface ExperienceFormProps {
   experiences: Experience[];
@@ -91,76 +100,76 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
   };
 
   return (
-    <Card className="p-4 space-y-4">
-      <h3 className="text-lg font-semibold">Experience</h3>
-      <div className="space-y-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Experience</CardTitle>
+        <CardDescription>
+          Focus on impact. Start bullet points with strong verbs and quantify
+          results where possible.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
         {experiences.map((exp) => (
-          <div key={exp.id} className="p-4 border rounded-lg space-y-4">
-            <div className="flex justify-between items-start">
+          <div key={exp.id} className="space-y-4 rounded-lg border p-4">
+            <div className="flex items-start justify-between">
               <div className="flex-1 space-y-4">
-                <input
-                  type="text"
-                  placeholder="Company"
+                <TextInput
+                  label="Company"
+                  placeholder="e.g., Acme Inc."
                   value={exp.company}
                   onChange={(e) =>
                     updateExperience(exp.id, "company", e.target.value)
                   }
-                  className="w-full px-3 py-2 border rounded-md border-input bg-background"
                 />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Position"
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <TextInput
+                    label="Position"
+                    placeholder="e.g., Senior Software Engineer"
                     value={exp.position}
                     onChange={(e) =>
                       updateExperience(exp.id, "position", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
-                  <input
-                    type="text"
-                    placeholder="Location"
+                  <TextInput
+                    label="Location"
+                    placeholder="City, Country"
                     value={exp.location}
                     onChange={(e) =>
                       updateExperience(exp.id, "location", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Start Date"
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <TextInput
+                    label="Start Date"
+                    placeholder="e.g., Jan 2023"
                     value={exp.startDate}
                     onChange={(e) =>
                       updateExperience(exp.id, "startDate", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
-                  <input
-                    type="text"
-                    placeholder="End Date"
+                  <TextInput
+                    label="End Date"
+                    placeholder="e.g., Present"
                     value={exp.endDate}
                     onChange={(e) =>
                       updateExperience(exp.id, "endDate", e.target.value)
                     }
-                    className="w-full px-3 py-2 border rounded-md border-input bg-background"
                   />
                 </div>
               </div>
-              <button
-                onClick={() => removeExperience(exp.id)}
-                className="p-2 text-muted-foreground hover:text-destructive"
+              <IconButton
+                variant="ghost"
                 aria-label="Remove experience"
-              >
-                <X size={20} />
-              </button>
+                icon={<X size={18} />}
+                onClick={() => removeExperience(exp.id)}
+              />
             </div>
 
             <div className="space-y-2">
               <h4 className="font-medium">Bullet Points</h4>
               {exp.bulletPoints.map((bullet) => (
-                <div key={bullet.id} className="flex gap-2 items-center">
+                <div key={bullet.id} className="flex items-center gap-2">
                   <GripVertical size={16} className="text-muted-foreground" />
                   <TextareaAutosize
                     placeholder="Describe your achievement or responsibility"
@@ -169,35 +178,33 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                       updateBulletPoint(exp.id, bullet.id, e.target.value)
                     }
                     minRows={1}
-                    className="flex-1 px-3 py-2 border rounded-md border-input bg-background"
+                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />
-                  <button
-                    onClick={() => removeBulletPoint(exp.id, bullet.id)}
-                    className="p-2 text-muted-foreground hover:text-destructive"
+                  <IconButton
+                    variant="ghost"
                     aria-label="Remove bullet point"
-                  >
-                    <X size={20} />
-                  </button>
+                    icon={<X size={18} />}
+                    onClick={() => removeBulletPoint(exp.id, bullet.id)}
+                  />
                 </div>
               ))}
-              <button
+              <Button
+                type="button"
+                variant="link"
+                className="px-0"
                 onClick={() => addBulletPoint(exp.id)}
-                className="flex items-center gap-2 text-sm text-primary hover:text-primary/80"
               >
-                <Plus size={16} />
-                Add Bullet Point
-              </button>
+                <Plus size={16} className="mr-2" /> Add Bullet Point
+              </Button>
             </div>
           </div>
         ))}
-      </div>
-      <button
-        onClick={addExperience}
-        className="flex items-center gap-2 text-sm text-primary hover:text-primary/80"
-      >
-        <Plus size={16} />
-        Add Experience
-      </button>
+        <div>
+          <Button type="button" variant="link" className="px-0" onClick={addExperience}>
+            <Plus size={16} className="mr-2" /> Add Experience
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }
