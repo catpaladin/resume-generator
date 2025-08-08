@@ -87,7 +87,11 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
           doc.setFontSize(10);
           doc.setTextColor(COLOR_PALETTE.subtle);
           doc.setFont("helvetica", "normal");
-          doc.text(details, pageWidth - margin - doc.getTextWidth(details), currentY);
+          doc.text(
+            details,
+            pageWidth - margin - doc.getTextWidth(details),
+            currentY,
+          );
         }
         currentY += 6;
       };
@@ -99,7 +103,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         doc.setTextColor(COLOR_PALETTE.muted);
         doc.setFont("helvetica", "normal");
 
-        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2 - indent);
+        const splitText = doc.splitTextToSize(
+          text,
+          pageWidth - margin * 2 - indent,
+        );
 
         // Check if we need a new page
         checkForNewPage(splitText.length * 5);
@@ -164,7 +171,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
         const groupSkillsForPdf = (skillsToGroup: typeof data.skills) => {
           const grouped: { [category: string]: string[] } = {};
-          skillsToGroup.forEach(skill => {
+          skillsToGroup.forEach((skill) => {
             if (skill.name) {
               const category = skill.category || "General Skills";
               if (!grouped[category]) {
@@ -287,13 +294,13 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
   };
 
   return (
-    <Card className="p-6 bg-card">
-      <div className="flex justify-between items-center mb-6 print:hidden">
+    <Card className="bg-card p-6">
+      <div className="mb-6 flex items-center justify-between print:hidden">
         <h2 className="text-xl font-bold text-foreground">Resume Preview</h2>
         <button
           onClick={handleExportPDF}
           disabled={isExporting}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           <Download size={18} />
           {isExporting ? "Exporting..." : "Export PDF"}
@@ -302,158 +309,190 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
       <div
         ref={previewRef}
-        className="space-y-6 print:space-y-4 print:p-0"
         id="resume-preview"
+        className="mx-auto w-[816px] max-w-full space-y-6 rounded-lg border border-border bg-white p-8 text-black shadow-sm sm:p-10 print:w-full print:space-y-4 print:rounded-none print:border-0 print:p-0 print:shadow-none"
       >
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary uppercase mb-2">
-            {isMounted ? (data.personal?.fullName || "") : ""}
+        <div className="text-center" id="section-header">
+          <h1 className="mb-2 text-2xl font-bold uppercase text-primary">
+            {isMounted ? data.personal?.fullName || "" : ""}
           </h1>
-          <p className="text-muted-foreground text-sm">
-            {isMounted ? ([ // Conditionally render contact info
-              data.personal.location,
-              data.personal.email,
-              data.personal.phone,
-              data.personal.linkedin,
-            ]
-              .filter(Boolean)
-              .join(" | ")) : ""}
+          <p className="text-sm text-muted-foreground">
+            {isMounted
+              ? [
+                  // Conditionally render contact info
+                  data.personal.location,
+                  data.personal.email,
+                  data.personal.phone,
+                  data.personal.linkedin,
+                ]
+                  .filter(Boolean)
+                  .join(" | ")
+              : ""}
           </p>
         </div>
 
         {/* Professional Summary */}
         {isMounted && data.personal.summary && (
-          <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
+          <section id="section-summary">
+            <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
               Professional Summary
             </h2>
-            <p className="text-muted-foreground text-sm">{data.personal.summary}</p>
+            <p className="text-sm text-muted-foreground">
+              {data.personal.summary}
+            </p>
           </section>
         )}
 
         {/* Skills */}
         {data.skills?.some((skill) => skill.name) && (
-          <SkillsSection skills={data.skills} />
+          <section id="section-skills">
+            <SkillsSection skills={data.skills} />
+          </section>
         )}
 
         {/* Professional Experience */}
-        {isMounted && data.experience?.some((exp) => exp.company || exp.position) && (
-          <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
-              Professional Experience
-            </h2>
-            {data.experience.map(
-              (exp, index) =>
-                exp.company && (
-                  // Use <details> for each experience
-                  <details key={index} className="mb-2 border-b border-border/50 last:border-b-0 pb-2 group">
-                    {/* Use <summary> for the clickable header */}
-                    <summary className="flex justify-between items-start p-2 cursor-pointer list-none group-open:mb-1 hover:bg-muted/50 rounded-md">
-                       <div className="text-left flex-grow mr-2">
-                         <h3 className="font-semibold text-foreground text-base">
-                           {exp.company}
-                         </h3>
-                         <div className="flex flex-col sm:flex-row sm:gap-1 items-start sm:items-baseline">
-                           <p className="font-medium text-muted-foreground text-sm">
-                             {exp.position}
-                           </p>
-                           {exp.location && (
-                             <span className="text-subtle text-xs sm:text-sm sm:before:content-['|'] sm:before:mx-1">
-                               {exp.location}
-                             </span>
-                           )}
-                         </div>
-                       </div>
-                       <span className="text-subtle text-sm shrink-0 ml-auto text-right">
-                         {[exp.startDate, exp.endDate || "Present"]
-                           .filter(Boolean)
-                           .join(" - ")}
-                       </span>
-                       {/* Optional: Add a chevron icon that rotates */}
-                       <span className="ml-2 group-open:rotate-90 transition-transform duration-200">▶</span>
-                     </summary>
-                     {/* The content inside <details> but outside <summary> is collapsible */}
-                     <div className="pt-1 pb-3 px-2">
-                       <ul className="list-disc ml-4 mt-1 space-y-1">
-                         {exp.bulletPoints?.map(
-                           (bullet, bulletIndex) =>
-                             bullet.text && (
-                               <li
-                                 key={bulletIndex}
-                                 className="text-muted-foreground text-sm"
-                               >
-                                 {bullet.text}
-                               </li>
-                             ),
-                         )}
-                       </ul>
-                     </div>
-                   </details>
-                 ),
-            )}
-          </section>
-        )}
+        {isMounted &&
+          data.experience?.some((exp) => exp.company || exp.position) && (
+            <section id="section-experience">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
+                Professional Experience
+              </h2>
+              {data.experience.map(
+                (exp, index) =>
+                  exp.company && (
+                    // Use <details> for each experience
+                    <details
+                      key={index}
+                      className="group mb-2 border-b border-border/50 pb-2 last:border-b-0"
+                    >
+                      {/* Use <summary> for the clickable header */}
+                      <summary className="flex cursor-pointer list-none items-start justify-between rounded-md p-2 hover:bg-muted/50 group-open:mb-1">
+                        <div className="mr-2 flex-grow text-left">
+                          <h3 className="text-base font-semibold text-foreground">
+                            {exp.company}
+                          </h3>
+                          <div className="flex flex-col items-start sm:flex-row sm:items-baseline sm:gap-1">
+                            <p className="text-sm font-medium text-muted-foreground">
+                              {exp.position}
+                            </p>
+                            {exp.location && (
+                              <span className="text-subtle text-xs sm:text-sm sm:before:mx-1 sm:before:content-['|']">
+                                {exp.location}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-subtle ml-auto shrink-0 text-right text-sm">
+                          {[exp.startDate, exp.endDate || "Present"]
+                            .filter(Boolean)
+                            .join(" - ")}
+                        </span>
+                        {/* Optional: Add a chevron icon that rotates */}
+                        <span className="ml-2 transition-transform duration-200 group-open:rotate-90">
+                          ▶
+                        </span>
+                      </summary>
+                      {/* The content inside <details> but outside <summary> is collapsible */}
+                      <div className="px-2 pb-3 pt-1">
+                        <ul className="ml-4 mt-1 list-disc space-y-1">
+                          {exp.bulletPoints?.map(
+                            (bullet, bulletIndex) =>
+                              bullet.text && (
+                                <li
+                                  key={bulletIndex}
+                                  className="text-sm text-muted-foreground"
+                                >
+                                  {bullet.text}
+                                </li>
+                              ),
+                          )}
+                        </ul>
+                      </div>
+                    </details>
+                  ),
+              )}
+            </section>
+          )}
 
         {/* Education */}
-        {isMounted && data.education?.some((edu) => edu.school || edu.degree) && (
-          <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
-              Education
-            </h2>
-            {data.education.map(
-              (edu, index) =>
-                edu.school && (
-                  <div key={index} className="mb-2">
-                    <div className="flex justify-between items-baseline">
-                      <h3 className="font-semibold text-foreground text-base">
-                        {edu.school}
-                      </h3>
-                      <span className="text-subtle text-sm">{edu.graduationYear}</span>
+        {isMounted &&
+          data.education?.some((edu) => edu.school || edu.degree) && (
+            <section id="section-education">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
+                Education
+              </h2>
+              {data.education.map(
+                (edu, index) =>
+                  edu.school && (
+                    <div key={index} className="mb-2">
+                      <div className="flex items-baseline justify-between">
+                        <h3 className="text-base font-semibold text-foreground">
+                          {edu.school}
+                        </h3>
+                        <span className="text-subtle text-sm">
+                          {edu.graduationYear}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {edu.degree}
+                      </p>
                     </div>
-                    <p className="text-muted-foreground text-sm">{edu.degree}</p>
-                  </div>
-                ),
-            )}
-          </section>
-        )}
+                  ),
+              )}
+            </section>
+          )}
 
         {/* Projects */}
-        {isMounted && data.projects?.some((project) => project.name || project.description) && (
-          <section>
-            <h2 className="text-base font-bold mb-2 text-primary uppercase border-b border-border pb-1">
-              Projects
-            </h2>
-            {data.projects.map(
-              (project, index) =>
-                project.name && (
-                  <div key={index} className="mb-2">
-                    <div className="flex justify-between items-baseline">
-                      <h3 className="font-semibold text-foreground text-base">
-                        {project.name}
-                      </h3>
-                      {project.link && (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-sm truncate ml-4"
-                          style={{ maxWidth: "50%" }}
-                        >
-                          {project.link}
-                        </a>
+        {isMounted &&
+          data.projects?.some(
+            (project) => project.name || project.description,
+          ) && (
+            <section id="section-projects">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
+                Projects
+              </h2>
+              {data.projects.map(
+                (project, index) =>
+                  project.name && (
+                    <div key={index} className="mb-2">
+                      <div className="flex items-baseline justify-between">
+                        <h3 className="text-base font-semibold text-foreground">
+                          {project.name}
+                        </h3>
+                        {project.link && (
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-4 truncate text-sm text-primary hover:underline"
+                            style={{ maxWidth: "50%" }}
+                          >
+                            {project.link}
+                          </a>
+                        )}
+                      </div>
+                      {project.description && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {project.description}
+                        </p>
                       )}
                     </div>
-                    {project.description && (
-                      <p className="text-muted-foreground text-sm mt-1">
-                        {project.description}
-                      </p>
-                    )}
-                  </div>
-                ),
-            )}
-          </section>
-        )}
+                  ),
+              )}
+            </section>
+          )}
       </div>
+      <style jsx global>{`
+        @media print {
+          @page {
+            margin: 0.5in;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
     </Card>
   );
 }

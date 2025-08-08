@@ -8,8 +8,9 @@ interface SkillsSectionProps {
 // Helper function to group skills by category
 const groupSkillsByCategory = (skills: Skill[]) => {
   const grouped: { [category: string]: Skill[] } = {};
-  skills.forEach(skill => {
-    if (skill.name) { // Ensure skill has a name
+  skills.forEach((skill) => {
+    if (skill.name) {
+      // Ensure skill has a name
       const category = skill.category || "General Skills";
       if (!grouped[category]) {
         grouped[category] = [];
@@ -43,7 +44,11 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
       groupedSkills = groupSkillsByCategory(skills);
     } catch (error) {
       console.error("Error grouping skills:", error, "\nSkills data:", skills);
-      return <section><p className="text-red-500">Error displaying skills.</p></section>; // Render error message
+      return (
+        <section>
+          <p className="text-red-500">Error displaying skills.</p>
+        </section>
+      ); // Render error message
     }
   }
 
@@ -54,29 +59,31 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
 
   return (
     <section>
-      <h2 className="text-base font-bold text-primary uppercase mb-2 pb-1 border-b border-border">SKILLS</h2>
+      <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
+        SKILLS
+      </h2>
       {/* We know isMounted is true and groupedSkills has keys here */}
       {Object.entries(groupedSkills).map(([category, categorySkills]) => (
         <div key={category} className="mb-4">
-          <h3 className="text-sm font-bold uppercase text-primary mb-2">{category}</h3>
+          <h3 className="mb-2 text-sm font-bold uppercase text-primary">
+            {category}
+          </h3>
           <div className="flex flex-wrap gap-2 pt-2">
-            {categorySkills.map(
-              (skill) => {
-                // Add check for valid skill object and name
-                if (!skill || !skill.name) {
-                  console.warn("Skipping invalid skill object:", skill);
-                  return null;
-                }
-                return (
-                  <span
-                    key={skill.id} // Ensure skill.id is always valid or provide fallback
-                    className="px-2 py-1 rounded-full border text-xs font-medium bg-black text-white border-white dark:bg-white dark:text-black dark:border-black"
-                  >
-                    {skill.name}
-                  </span>
-                );
-              },
-            )}
+            {categorySkills.map((skill) => {
+              // Add check for valid skill object and name
+              if (!skill || !skill.name) {
+                console.warn("Skipping invalid skill object:", skill);
+                return null;
+              }
+              return (
+                <span
+                  key={skill.id} // Ensure skill.id is always valid or provide fallback
+                  className="rounded-full border border-white bg-black px-2 py-1 text-xs font-medium text-white dark:border-black dark:bg-white dark:text-black"
+                >
+                  {skill.name}
+                </span>
+              );
+            })}
           </div>
         </div>
       ))}

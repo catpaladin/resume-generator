@@ -11,7 +11,7 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
 
   return (
     <section>
-      <h2 className="text-base font-bold mb-2 text-foreground">
+      <h2 className="mb-2 text-base font-bold text-foreground">
         Professional Experience
       </h2>
       <div className="space-y-4">
@@ -19,35 +19,35 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
           (exp) =>
             exp.company && (
               <div key={exp.id} className="space-y-1">
-                <div className="flex justify-between items-baseline">
+                <div className="flex items-baseline justify-between">
                   <div>
                     <h3 className="font-semibold text-foreground">
                       {exp.company}
                     </h3>
-                    <div className="flex gap-2 items-baseline">
-                      <p className="font-medium text-foreground text-sm">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-sm font-medium text-foreground">
                         {exp.position}
                       </p>
                       {exp.location && (
-                        <span className="text-muted-foreground text-sm">
+                        <span className="text-sm text-muted-foreground">
                           • {exp.location}
                         </span>
                       )}
                     </div>
                   </div>
-                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
                     {[exp.startDate, exp.endDate].filter(Boolean).join(" - ")}
                   </span>
                 </div>
 
                 {exp.bulletPoints.length > 0 && (
-                  <ul className="list-disc ml-4 space-y-0.5">
+                  <ul className="ml-4 list-disc space-y-0.5">
                     {exp.bulletPoints.map(
                       (bullet) =>
                         bullet.text && (
                           <li
                             key={bullet.id}
-                            className="text-muted-foreground text-sm whitespace-normal overflow-visible"
+                            className="overflow-visible whitespace-normal text-sm text-muted-foreground"
                           >
                             {bullet.text}
                           </li>

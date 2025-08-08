@@ -25,7 +25,10 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
     onChange(skills.filter((skill) => skill.id !== id));
   };
 
-  const updateSkill = (id: string, updatedField: Partial<Omit<Skill, 'id'>>) => {
+  const updateSkill = (
+    id: string,
+    updatedField: Partial<Omit<Skill, "id">>,
+  ) => {
     onChange(
       skills.map((skill) =>
         skill.id === id ? { ...skill, ...updatedField } : skill,
@@ -39,7 +42,7 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
         <CardTitle>Skills</CardTitle>
         <CardDescription>
           Organize skills by category. Unlabeled skills will appear under
-          "General Skills" in the preview and export.
+          &quot;General Skills&quot; in the preview and export.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -53,7 +56,9 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
                 label="Skill"
                 placeholder="e.g., JavaScript"
                 value={skill.name}
-                onChange={(e) => updateSkill(skill.id, { name: e.target.value })}
+                onChange={(e) =>
+                  updateSkill(skill.id, { name: e.target.value })
+                }
               />
               <div className="flex items-end gap-2">
                 <TextInput

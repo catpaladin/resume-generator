@@ -92,7 +92,12 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
           </div>
         ))}
         <div>
-          <Button type="button" variant="link" className="px-0" onClick={addProject}>
+          <Button
+            type="button"
+            variant="link"
+            className="px-0"
+            onClick={addProject}
+          >
             <Plus size={16} className="mr-2" /> Add Project
           </Button>
         </div>

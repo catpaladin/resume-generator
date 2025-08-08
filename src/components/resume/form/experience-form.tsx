@@ -200,7 +200,12 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
           </div>
         ))}
         <div>
-          <Button type="button" variant="link" className="px-0" onClick={addExperience}>
+          <Button
+            type="button"
+            variant="link"
+            className="px-0"
+            onClick={addExperience}
+          >
             <Plus size={16} className="mr-2" /> Add Experience
           </Button>
         </div>

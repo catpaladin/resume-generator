@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { TabConfig } from "@/config/constants";
 import {
@@ -71,19 +71,16 @@ export function ClientResumeBuilder({
 
   return (
     <>
-      <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+      <div className="mb-4 flex space-x-2 overflow-x-auto pb-2">
         {TabConfig.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id as TabType)}
-            className={`
-              flex items-center gap-2 px-4 py-2 rounded-lg transition-colors shrink-0
-              ${
-                activeTab === id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }
-            `}
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 transition-colors ${
+              activeTab === id
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            } `}
           >
             <Icon size={16} />
             {label}
@@ -91,7 +88,7 @@ export function ClientResumeBuilder({
         ))}
       </div>
 
-      <Card className="p-4 flex-1 overflow-y-auto">{renderTabContent()}</Card>
+      <Card className="flex-1 overflow-y-auto p-4">{renderTabContent()}</Card>
     </>
   );
 }

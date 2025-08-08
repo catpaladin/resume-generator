@@ -1,20 +1,20 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import type { ResumeData } from '@/types/resume';
-import { initialResumeData } from '@/config/constants';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type { ResumeData } from "@/types/resume";
+import { initialResumeData } from "@/config/constants";
 
-const STORAGE_KEY = 'resume-data';
+const STORAGE_KEY = "resume-data";
 
 // Helper to check if data is valid ResumeData
 function isValidResumeData(data: unknown): data is ResumeData {
   return (
     data !== null &&
-    typeof data === 'object' &&
-    'personal' in data &&
-    'skills' in data &&
-    'experience' in data &&
-    'education' in data &&
-    'projects' in data &&
+    typeof data === "object" &&
+    "personal" in data &&
+    "skills" in data &&
+    "experience" in data &&
+    "education" in data &&
+    "projects" in data &&
     Array.isArray((data as ResumeData).skills) &&
     Array.isArray((data as ResumeData).experience) &&
     Array.isArray((data as ResumeData).education) &&
@@ -31,13 +31,13 @@ interface ResumeState {
 
 export const useResumeStore = create<ResumeState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       resumeData: initialResumeData, // Default initial state
       setResumeData: (newData) => set({ resumeData: newData }),
       resetResumeData: () => {
         if (
           window.confirm(
-            'Are you sure you want to reset all data? This cannot be undone.',
+            "Are you sure you want to reset all data? This cannot be undone.",
           )
         ) {
           set({ resumeData: initialResumeData });
@@ -47,15 +47,15 @@ export const useResumeStore = create<ResumeState>()(
       importResumeData: (importedData) => {
         try {
           if (!isValidResumeData(importedData)) {
-            throw new Error('Invalid resume data format');
+            throw new Error("Invalid resume data format");
           }
           set({ resumeData: importedData });
           // persist middleware handles saving to localStorage
-          alert('Resume data imported successfully!');
+          alert("Resume data imported successfully!");
         } catch (error) {
-          console.error('Failed to import resume data:', error);
+          console.error("Failed to import resume data:", error);
           alert(
-            'Failed to import resume data. Please check the file format or console for errors.',
+            "Failed to import resume data. Please check the file format or console for errors.",
           );
         }
       },
@@ -64,18 +64,20 @@ export const useResumeStore = create<ResumeState>()(
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
       // Custom hydration logic to validate data from localStorage
-      onRehydrateStorage: (state) => {
-        console.log('Hydrating store from localStorage...');
-        return (state, error) => {
+      onRehydrateStorage: () => {
+        console.log("Hydrating store from localStorage...");
+        return (rehydratedState, error) => {
           if (error) {
-            console.error('Failed to hydrate store:', error);
-          } else if (state) {
-            if (isValidResumeData(state.resumeData)) {
-              console.log('Hydration successful with valid data.');
+            console.error("Failed to hydrate store:", error);
+          } else if (rehydratedState) {
+            if (isValidResumeData(rehydratedState.resumeData)) {
+              console.log("Hydration successful with valid data.");
               // No need to explicitly call set() here, middleware handles it
             } else {
-              console.warn('Invalid data found in localStorage, resetting to initial.');
-              state.resumeData = initialResumeData; // Reset if data is invalid
+              console.warn(
+                "Invalid data found in localStorage, resetting to initial.",
+              );
+              rehydratedState.resumeData = initialResumeData; // Reset if data is invalid
             }
           }
         };

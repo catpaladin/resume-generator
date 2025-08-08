@@ -2,6 +2,7 @@
 
 import { ResumeBuilderContainer } from "@/components/resume/resume-builder-container";
 import { ResumePreviewContainer } from "@/components/resume/resume-preview-container";
+import { SectionsNav } from "@/components/resume/sections-nav";
 import { Printer } from "lucide-react";
 import { useResumeStore } from "@/store/resumeStore";
 
@@ -10,16 +11,14 @@ export default function HomePage() {
   const setResumeData = useResumeStore((state) => state.setResumeData);
 
   return (
-    <div className="container grid items-start gap-6 pb-8 pt-6 md:grid-cols-2">
+    <div className="container grid items-start gap-8 pb-10 pt-6 md:grid-cols-2">
       <div className="flex flex-col space-y-6">
-        <ResumeBuilderContainer
-          data={resumeData}
-          onUpdate={setResumeData}
-        />
+        <ResumeBuilderContainer data={resumeData} onUpdate={setResumeData} />
       </div>
 
       <div className="hidden md:block">
-        <div className="sticky top-20">
+        <SectionsNav />
+        <div className="sticky top-24">
           <ResumePreviewContainer data={resumeData} />
         </div>
       </div>

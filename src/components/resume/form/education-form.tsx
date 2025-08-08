@@ -50,8 +50,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
       <CardHeader>
         <CardTitle>Education</CardTitle>
         <CardDescription>
-          List your most relevant education. Include degree and graduation
-          year.
+          List your most relevant education. Include degree and graduation year.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -96,7 +95,12 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
           </div>
         ))}
         <div>
-          <Button type="button" variant="link" className="px-0" onClick={addEducation}>
+          <Button
+            type="button"
+            variant="link"
+            className="px-0"
+            onClick={addEducation}
+          >
             <Plus size={16} className="mr-2" /> Add Education
           </Button>
         </div>

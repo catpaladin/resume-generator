@@ -22,7 +22,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         )}
         <div className="relative">
           {showIcon && (
-            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           )}
           <input
             id={id}
@@ -42,7 +42,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         {error && (
           <p
             id={`${id}-error`}
-            className="text-sm font-medium text-destructive"
+            className="text-destructive text-sm font-medium"
           >
             {error}
           </p>

@@ -1,4 +1,4 @@
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = "light" | "dark" | "system";
 
 export interface ThemeColor {
   background: string;
@@ -56,14 +56,14 @@ export interface ThemeProviderProps {
 export type ThemeContextValue = {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
-  systemTheme: 'light' | 'dark';
+  systemTheme: "light" | "dark";
   themes: ThemeMode[];
 };
 
 export interface UseThemeResult {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
-  systemTheme: 'light' | 'dark';
+  systemTheme: "light" | "dark";
   isDark: boolean;
   isLoading: boolean;
 }

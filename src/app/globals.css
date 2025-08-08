@@ -62,7 +62,7 @@
 @media print {
   @page {
     margin: 0.5in;
-    size: auto;  /* Allow auto-sizing for multiple pages */
+    size: auto; /* Allow auto-sizing for multiple pages */
   }
 
   body * {

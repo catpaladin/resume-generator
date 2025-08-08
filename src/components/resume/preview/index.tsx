@@ -33,12 +33,12 @@ export function ResumePreview({ data }: ResumePreviewProps) {
   };
 
   return (
-    <Card className="p-6 bg-card">
-      <div className="flex justify-between items-center mb-6">
+    <Card className="bg-card p-6">
+      <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">Resume Preview</h2>
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Download size={18} />
           Export PDF

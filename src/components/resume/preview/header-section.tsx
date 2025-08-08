@@ -26,7 +26,7 @@ export function HeaderSection({ data }: HeaderSectionProps) {
 
       {summary && (
         <div className="mt-4 text-left">
-          <h2 className="text-base font-semibold mb-1 text-foreground">
+          <h2 className="mb-1 text-base font-semibold text-foreground">
             Professional Summary
           </h2>
           <p className="text-sm text-muted-foreground">{summary}</p>

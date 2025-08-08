@@ -33,7 +33,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         {error && (
           <p
             id={`${id}-error`}
-            className="text-sm font-medium text-destructive"
+            className="text-destructive text-sm font-medium"
           >
             {error}
           </p>

@@ -8,24 +8,21 @@ interface ResumeBuilderContainerProps {
 
 export function ResumeBuilderContainer({
   data,
-  onUpdate
+  onUpdate,
 }: ResumeBuilderContainerProps) {
   const handleUpdateSection = <K extends keyof ResumeData>(
     section: K,
-    value: ResumeData[K]
+    value: ResumeData[K],
   ) => {
     onUpdate({
       ...data,
-      [section]: value
+      [section]: value,
     });
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <ClientResumeBuilder
-        data={data}
-        updateSection={handleUpdateSection}
-      />
+    <div className="flex h-screen flex-col">
+      <ClientResumeBuilder data={data} updateSection={handleUpdateSection} />
     </div>
   );
 }

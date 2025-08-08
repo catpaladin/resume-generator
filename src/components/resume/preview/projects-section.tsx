@@ -20,13 +20,13 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
   return (
     <section>
-      <h2 className="text-base font-bold mb-2 text-foreground">Projects</h2>
+      <h2 className="mb-2 text-base font-bold text-foreground">Projects</h2>
       <div className="space-y-3">
         {projects.map(
           (project) =>
             project.name && (
               <div key={project.id} className="space-y-1">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-1">
+                <div className="mb-1 flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
                   <h3 className="font-semibold text-foreground">
                     {project.name}
                   </h3>
@@ -35,14 +35,14 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm mt-0.5 sm:mt-0 sm:ml-4 break-all"
+                      className="mt-0.5 break-all text-sm text-primary hover:underline sm:ml-4 sm:mt-0"
                     >
                       {project.link}
                     </a>
                   )}
                 </div>
                 {project.description && (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-sm text-muted-foreground">
                     {project.description}
                   </p>
                 )}
