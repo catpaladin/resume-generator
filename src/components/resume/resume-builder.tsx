@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button/button";
 import { TabConfig } from "@/config/constants";
 import {
   EducationForm,
@@ -71,24 +72,28 @@ export function ClientResumeBuilder({
 
   return (
     <>
-      <div className="mb-4 flex space-x-2 overflow-x-auto pb-2">
+      <div className="no-scrollbar mb-3 flex items-center gap-1 overflow-x-auto pb-1">
         {TabConfig.map(({ id, icon: Icon, label }) => (
-          <button
+          <Button
             key={id}
+            type="button"
+            variant={activeTab === id ? "default" : "secondary"}
+            size="sm"
+            className="h-8 shrink-0 rounded-full px-3 text-xs md:text-sm"
+            aria-pressed={activeTab === id}
             onClick={() => setActiveTab(id as TabType)}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 transition-colors ${
-              activeTab === id
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            } `}
           >
-            <Icon size={16} />
-            {label}
-          </button>
+            <span className="inline-flex items-center gap-1">
+              <Icon size={14} />
+              <span className="truncate">{label}</span>
+            </span>
+          </Button>
         ))}
       </div>
 
-      <Card className="flex-1 overflow-y-auto p-4">{renderTabContent()}</Card>
+      <Card className="flex-1 overflow-y-auto rounded-xl border border-border bg-card/50 p-4 shadow-sm supports-[backdrop-filter]:bg-card/60">
+        {renderTabContent()}
+      </Card>
     </>
   );
 }

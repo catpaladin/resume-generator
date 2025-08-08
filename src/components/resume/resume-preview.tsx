@@ -312,11 +312,14 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         id="resume-preview"
         className="mx-auto w-[816px] max-w-full space-y-6 rounded-lg border border-border bg-white p-8 text-black shadow-sm sm:p-10 print:w-full print:space-y-4 print:rounded-none print:border-0 print:p-0 print:shadow-none"
       >
-        <div className="text-center" id="section-header">
+        <div
+          className="scroll-mt-24 text-center print:break-inside-avoid"
+          id="section-header"
+        >
           <h1 className="mb-2 text-2xl font-bold uppercase text-primary">
             {isMounted ? data.personal?.fullName || "" : ""}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/80">
             {isMounted
               ? [
                   // Conditionally render contact info
@@ -333,11 +336,14 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
         {/* Professional Summary */}
         {isMounted && data.personal.summary && (
-          <section id="section-summary">
+          <section
+            id="section-summary"
+            className="scroll-mt-24 print:break-inside-avoid"
+          >
             <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
               Professional Summary
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground/80">
               {data.personal.summary}
             </p>
           </section>
@@ -345,7 +351,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
 
         {/* Skills */}
         {data.skills?.some((skill) => skill.name) && (
-          <section id="section-skills">
+          <section
+            id="section-skills"
+            className="scroll-mt-24 print:break-inside-avoid"
+          >
             <SkillsSection skills={data.skills} />
           </section>
         )}
@@ -353,7 +362,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         {/* Professional Experience */}
         {isMounted &&
           data.experience?.some((exp) => exp.company || exp.position) && (
-            <section id="section-experience">
+            <section
+              id="section-experience"
+              className="scroll-mt-24 print:break-inside-avoid"
+            >
               <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Professional Experience
               </h2>
@@ -363,7 +375,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                     // Use <details> for each experience
                     <details
                       key={index}
-                      className="group mb-2 border-b border-border/50 pb-2 last:border-b-0"
+                      className="group mb-2 border-b border-border/50 pb-2 last:border-b-0 print:break-inside-avoid"
                     >
                       {/* Use <summary> for the clickable header */}
                       <summary className="flex cursor-pointer list-none items-start justify-between rounded-md p-2 hover:bg-muted/50 group-open:mb-1">
@@ -400,7 +412,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                               bullet.text && (
                                 <li
                                   key={bulletIndex}
-                                  className="text-sm text-muted-foreground"
+                                  className="text-sm text-foreground/80"
                                 >
                                   {bullet.text}
                                 </li>
@@ -417,7 +429,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
         {/* Education */}
         {isMounted &&
           data.education?.some((edu) => edu.school || edu.degree) && (
-            <section id="section-education">
+            <section
+              id="section-education"
+              className="scroll-mt-24 print:break-inside-avoid"
+            >
               <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Education
               </h2>
@@ -433,9 +448,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                           {edu.graduationYear}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {edu.degree}
-                      </p>
+                      <p className="text-sm text-foreground/80">{edu.degree}</p>
                     </div>
                   ),
               )}
@@ -447,7 +460,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
           data.projects?.some(
             (project) => project.name || project.description,
           ) && (
-            <section id="section-projects">
+            <section
+              id="section-projects"
+              className="scroll-mt-24 print:break-inside-avoid"
+            >
               <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Projects
               </h2>
@@ -472,7 +488,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                         )}
                       </div>
                       {project.description && (
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-sm text-foreground/80">
                           {project.description}
                         </p>
                       )}

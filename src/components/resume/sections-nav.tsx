@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button/button";
 import {
@@ -36,6 +37,33 @@ const sections: SectionItem[] = [
 ];
 
 export function SectionsNav() {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      {
+        root: null,
+        // Account for sticky offset to trigger a bit earlier
+        rootMargin: "-100px 0px -50% 0px",
+        threshold: 0.3,
+      },
+    );
+
+    const els = sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => Boolean(el));
+
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const handleJump = (targetId: string) => {
     const el = document.getElementById(targetId);
     if (el) {
@@ -44,7 +72,7 @@ export function SectionsNav() {
   };
 
   return (
-    <Card className="mb-4 hidden md:block">
+    <Card className="mb-4 hidden md:block print:hidden">
       <CardHeader className="py-3">
         <CardTitle className="text-sm">Sections</CardTitle>
       </CardHeader>
@@ -52,10 +80,11 @@ export function SectionsNav() {
         {sections.map((s) => (
           <Button
             key={s.id}
-            variant="ghost"
+            variant={activeId === s.id ? "secondary" : "ghost"}
             size="sm"
             className="justify-start"
             onClick={() => handleJump(s.id)}
+            aria-current={activeId === s.id ? "page" : undefined}
             aria-label={`Jump to ${s.label}`}
           >
             <span className="mr-2 inline-flex items-center">{s.icon}</span>

@@ -5,6 +5,7 @@ import { ResumePreviewContainer } from "@/components/resume/resume-preview-conta
 import { SectionsNav } from "@/components/resume/sections-nav";
 import { Printer } from "lucide-react";
 import { useResumeStore } from "@/store/resumeStore";
+import { ThemeProvider } from "@/components/ui/theme/theme-provider";
 
 export default function HomePage() {
   const resumeData = useResumeStore((state) => state.resumeData);
@@ -19,11 +20,13 @@ export default function HomePage() {
       <div className="hidden md:block">
         <SectionsNav />
         <div className="sticky top-24">
-          <ResumePreviewContainer data={resumeData} />
+          <ThemeProvider forcedTheme="light" attribute="class">
+            <ResumePreviewContainer data={resumeData} />
+          </ThemeProvider>
         </div>
       </div>
 
-      <div className="fixed bottom-6 right-6 md:hidden">
+      <div className="fixed bottom-6 right-6 md:hidden print:hidden">
         <button
           onClick={() => window.print()}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
