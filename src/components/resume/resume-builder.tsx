@@ -91,9 +91,9 @@ export function ClientResumeBuilder({
         ))}
       </div>
 
-      <Card className="flex-1 overflow-y-auto rounded-xl border border-border bg-card/50 p-4 shadow-sm supports-[backdrop-filter]:bg-card/60">
+      <div className="min-h-0 flex-1">
         {renderTabContent()}
-      </Card>
+      </div>
     </>
   );
 }

@@ -9,7 +9,23 @@ import {
 import { TextInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button/button";
 import { IconButton } from "@/components/ui/button/icon-button";
-import { Plus, X } from "lucide-react";
+import { SortableItem } from "@/components/ui/sortable-item";
+import { Plus, X, GraduationCap } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface EducationFormProps {
   education: Education[];
@@ -17,6 +33,13 @@ interface EducationFormProps {
 }
 
 export function EducationForm({ education, onChange }: EducationFormProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
   const addEducation = () => {
     onChange([
       ...education,
@@ -45,60 +68,91 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
     );
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = education.findIndex((edu) => edu.id === active.id);
+      const newIndex = education.findIndex((edu) => edu.id === over?.id);
+      onChange(arrayMove(education, oldIndex, newIndex));
+    }
+  };
+
   return (
-    <Card>
+    <Card className="border-gradient-to-br from-info/10 to-primary/5">
       <CardHeader>
-        <CardTitle>Education</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <GraduationCap size={20} className="text-info" />
+          Education
+        </CardTitle>
         <CardDescription>
-          List your most relevant education. Include degree and graduation year.
+          Drag to reorder • List your most relevant education background
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {education.map((edu) => (
-          <div key={edu.id} className="rounded-lg border p-4">
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-3">
-                <TextInput
-                  label="School"
-                  placeholder="e.g., University of Somewhere"
-                  value={edu.school}
-                  onChange={(e) =>
-                    updateEducation(edu.id, "school", e.target.value)
-                  }
-                />
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <TextInput
-                    label="Degree"
-                    placeholder="e.g., B.Sc. Computer Science"
-                    value={edu.degree}
-                    onChange={(e) =>
-                      updateEducation(edu.id, "degree", e.target.value)
-                    }
-                  />
-                  <TextInput
-                    label="Graduation Year"
-                    placeholder="e.g., 2024"
-                    value={edu.graduationYear}
-                    onChange={(e) =>
-                      updateEducation(edu.id, "graduationYear", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              <IconButton
-                variant="ghost"
-                aria-label="Remove education"
-                icon={<X size={18} />}
-                onClick={() => removeEducation(edu.id)}
-              />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={education.map((edu) => edu.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {education.map((edu) => (
+                <SortableItem key={edu.id} id={edu.id}>
+                  <div className="flex gap-4 p-4">
+                    <div className="flex-1 space-y-3">
+                      <TextInput
+                        label="School"
+                        placeholder="e.g., University of Somewhere"
+                        value={edu.school}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "school", e.target.value)
+                        }
+                      />
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <TextInput
+                          label="Degree"
+                          placeholder="e.g., B.Sc. Computer Science"
+                          value={edu.degree}
+                          onChange={(e) =>
+                            updateEducation(edu.id, "degree", e.target.value)
+                          }
+                        />
+                        <TextInput
+                          label="Graduation Year"
+                          placeholder="e.g., 2024"
+                          value={edu.graduationYear}
+                          onChange={(e) =>
+                            updateEducation(
+                              edu.id,
+                              "graduationYear",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <IconButton
+                      variant="ghost"
+                      aria-label="Remove education"
+                      icon={<X size={18} />}
+                      onClick={() => removeEducation(edu.id)}
+                      className="hover:bg-destructive/10 hover:text-destructive"
+                    />
+                  </div>
+                </SortableItem>
+              ))}
             </div>
-          </div>
-        ))}
-        <div>
+          </SortableContext>
+        </DndContext>
+        <div className="pt-2">
           <Button
             type="button"
-            variant="link"
-            className="px-0"
+            variant="outline"
+            className="border-dashed border-info/30 text-info hover:bg-info/5"
             onClick={addEducation}
           >
             <Plus size={16} className="mr-2" /> Add Education

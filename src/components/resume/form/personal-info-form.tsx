@@ -7,6 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { TextInput, TextArea } from "@/components/ui/input";
+import { User } from "lucide-react";
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
@@ -22,22 +23,25 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
   const { fullName, location, email, phone, linkedin, summary } = data;
 
   return (
-    <Card>
+    <Card className="border-gradient-to-br from-primary/10 to-accent/5">
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <User size={20} className="text-primary" />
+          Personal Information
+        </CardTitle>
         <CardDescription>
-          Your name and contact details. Keep it concise and professional.
+          Your professional identity • Keep it concise and impactful
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3">
+        <div className="grid gap-4">
           <TextInput
             label="Full Name"
             placeholder="e.g., Taylor Morgan"
             value={fullName}
             onChange={(e) => onChange("fullName", e.target.value)}
           />
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <TextInput
               label="Location"
               placeholder="City, Country"
@@ -52,7 +56,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
               onChange={(e) => onChange("email", e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <TextInput
               type="tel"
               label="Phone"
@@ -73,7 +77,6 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
             placeholder="2–3 lines highlighting your impact and strengths"
             value={summary}
             onChange={(e) => onChange("summary", e.target.value)}
-            className="min-h-[100px] resize-y"
           />
         </div>
       </CardContent>

@@ -7,7 +7,7 @@ interface ResumePreviewContainerProps {
 
 export function ResumePreviewContainer({ data }: ResumePreviewContainerProps) {
   return (
-    <div className="preview-light h-screen overflow-y-auto p-4">
+    <div className="preview-light p-4">
       <ClientResumePreview data={data} />
     </div>
   );

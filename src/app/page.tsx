@@ -12,18 +12,16 @@ export default function HomePage() {
   const setResumeData = useResumeStore((state) => state.setResumeData);
 
   return (
-    <div className="container grid items-start gap-8 pb-10 pt-6 md:grid-cols-2">
+    <div className="container grid items-start gap-8 pb-8 pt-6 md:grid-cols-2">
       <div className="flex flex-col space-y-6">
         <ResumeBuilderContainer data={resumeData} onUpdate={setResumeData} />
       </div>
 
       <div className="hidden md:block">
         <SectionsNav />
-        <div className="sticky top-24">
-          <ThemeProvider forcedTheme="light" attribute="class">
-            <ResumePreviewContainer data={resumeData} />
-          </ThemeProvider>
-        </div>
+        <ThemeProvider forcedTheme="light" attribute="class">
+          <ResumePreviewContainer data={resumeData} />
+        </ThemeProvider>
       </div>
 
       <div className="fixed bottom-6 right-6 md:hidden print:hidden">

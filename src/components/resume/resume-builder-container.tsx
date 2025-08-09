@@ -21,7 +21,7 @@ export function ResumeBuilderContainer({
   };
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex min-h-0 flex-col">
       <ClientResumeBuilder data={data} updateSection={handleUpdateSection} />
     </div>
   );
