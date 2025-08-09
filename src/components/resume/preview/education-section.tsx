@@ -5,7 +5,7 @@ interface EducationSectionProps {
 }
 
 export function EducationSection({ education }: EducationSectionProps) {
-  if (!education.some((edu) => edu.school || edu.degree)) {
+  if (!education || !education.some((edu) => edu.school || edu.degree)) {
     return null;
   }
 

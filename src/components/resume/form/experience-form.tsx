@@ -211,7 +211,11 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                             placeholder="e.g., Present"
                             value={exp.endDate}
                             onChange={(e) =>
-                              updateExperience(exp.id, "endDate", e.target.value)
+                              updateExperience(
+                                exp.id,
+                                "endDate",
+                                e.target.value,
+                              )
                             }
                           />
                         </div>
@@ -226,12 +230,15 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <h4 className="font-medium text-xs text-muted-foreground">
+                      <h4 className="text-xs font-medium text-muted-foreground">
                         Key Achievements
                       </h4>
                       <div className="space-y-1.5">
                         {exp.bulletPoints.map((bullet) => (
-                          <div key={bullet.id} className="flex items-start gap-2">
+                          <div
+                            key={bullet.id}
+                            className="flex items-start gap-2"
+                          >
                             <div className="mt-2">
                               <GripVertical
                                 size={12}
@@ -249,7 +256,7 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                                 )
                               }
                               minRows={1}
-                              className="flex-1 rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 resize-none"
+                              className="flex-1 resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                             />
                             <IconButton
                               variant="ghost"
@@ -258,7 +265,7 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                               onClick={() =>
                                 removeBulletPoint(exp.id, bullet.id)
                               }
-                              className="mt-1 hover:bg-destructive/10 hover:text-destructive"
+                              className="hover:bg-destructive/10 hover:text-destructive mt-1"
                             />
                           </div>
                         ))}

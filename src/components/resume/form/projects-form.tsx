@@ -68,7 +68,9 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = projects.findIndex((project) => project.id === active.id);
+      const oldIndex = projects.findIndex(
+        (project) => project.id === active.id,
+      );
       const newIndex = projects.findIndex((project) => project.id === over?.id);
       onChange(arrayMove(projects, oldIndex, newIndex));
     }
@@ -122,7 +124,11 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                         placeholder="What it does, your role, and impact"
                         value={project.description}
                         onChange={(e) =>
-                          updateProject(project.id, "description", e.target.value)
+                          updateProject(
+                            project.id,
+                            "description",
+                            e.target.value,
+                          )
                         }
                       />
                     </div>

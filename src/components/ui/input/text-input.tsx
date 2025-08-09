@@ -29,9 +29,10 @@ const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
             id={id}
             type={type}
             className={cn(
-              "flex h-11 w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:shadow-sm disabled:cursor-not-allowed disabled:opacity-50",
+              "flex h-11 w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50",
               icon && "pl-11",
-              error && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
+              error &&
+                "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
               className,
             )}
             ref={ref}

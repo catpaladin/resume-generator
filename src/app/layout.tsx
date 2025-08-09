@@ -56,7 +56,7 @@ export default function RootLayout({
 
             <main className="flex-1">{children}</main>
 
-            <footer className="mt-auto border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-6 md:py-0">
+            <footer className="mt-auto border-t bg-background/95 py-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:py-0">
               <div className="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
                 <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
                   A modern, professional resume builder application. Built with{" "}

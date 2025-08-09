@@ -5,7 +5,7 @@ interface ExperienceSectionProps {
 }
 
 export function ExperienceSection({ experiences }: ExperienceSectionProps) {
-  if (!experiences.some((exp) => exp.company || exp.position)) {
+  if (!experiences || !experiences.some((exp) => exp.company || exp.position)) {
     return null;
   }
 

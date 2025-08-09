@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Resume Generator
 
-## Getting Started
+An opinionated, modern resume builder built with Next.js 15, Tailwind CSS,
+and Zustand. Edit your resume on the left, see a live, print‑ready preview on
+the right, and export to PDF using your browser’s print dialog.
 
-First, run the development server:
+## Features
+
+- **Skills by Category** — Enter a category per skill in the form. The preview
+  groups skills under their categories. Skills without a category appear under
+  "General Skills".
+- **Accessible Skill Pills** — In light mode, pills are black background with
+  white text and white border; in dark mode, white background with black text
+  and black border.
+- **Modern Preview Sheet** — Bordered, print‑safe, ATS‑friendly layout.
+- **Quick Section Navigation** — Simple sidebar to jump between sections.
+- **Theme Support** — Light/dark via `next-themes` with a consistent color
+  system.
+- **Local Persistence** — Your progress auto‑saves to `localStorage` using
+  Zustand. Refresh without losing edits.
+- **Drag & Drop Ordering** — Reorder list sections via `@dnd-kit`.
+
+## Tech Stack
+
+- Next.js (App Router)
+- React 19
+- Tailwind CSS + Prettier Tailwind sorting
+- Zustand for state
+- `@dnd-kit` for drag & drop
+- Lucide icons
+
+## Requirements
+
+- Node.js 22+
+- npm (or pnpm/yarn/bun)
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` — Start the dev server
+- `npm run build` — Build for production
+- `npm run start` — Run the production build
+- `npm run lint` — Run ESLint
+- `npm run lint-format` — Fix lint and format with Prettier (mandatory before
+  commits)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+Key paths you’ll work with:
 
-To learn more about Next.js, take a look at the following resources:
+- `src/components/resume/form/` — Form components for editing
+- `src/components/resume/preview/` — Components for the live preview
+- `src/components/ui/` — Reusable UI (shadcn/ui)
+- `src/types/` — TypeScript interfaces
+- `src/store/` — Zustand stores (`resumeStore.ts`)
+- `src/lib/` — Utility functions
+- `src/hooks/` — Custom hooks
+- `src/app/page.tsx` — Main page composing the builder and preview
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Theming and PDF Export
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Preview defaults to light theme for print clarity.
+- Use your browser’s Print dialog to export to PDF.
+- Ensure margins are default and background graphics are enabled for best
+  results.
 
-## Deploy on Vercel
+## Notes on Testing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Unit and integration tests are planned. When adding utilities or store
+actions, include tests with Jest + React Testing Library per our project
+standards.

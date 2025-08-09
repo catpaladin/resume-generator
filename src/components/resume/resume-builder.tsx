@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button/button";
 import { TabConfig } from "@/config/constants";
 import {
@@ -91,9 +90,7 @@ export function ClientResumeBuilder({
         ))}
       </div>
 
-      <div className="min-h-0 flex-1">
-        {renderTabContent()}
-      </div>
+      <div className="min-h-0 flex-1">{renderTabContent()}</div>
     </>
   );
 }
