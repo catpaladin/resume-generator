@@ -21,7 +21,9 @@ export interface Experience {
   location: string;
   startDate: string;
   endDate: string;
+  isCurrent?: boolean;
   bulletPoints: BulletPoint[];
+  jobDescription?: string;
 }
 
 export interface Education {
@@ -84,4 +86,22 @@ export interface ImportResult {
 export interface ExportOptions {
   format: "json" | "pdf";
   fileName?: string;
+}
+
+export interface AISettings {
+  provider: "openai" | "anthropic" | "gemini";
+  model?: string;
+  customModel?: string;
+  jobDescription?: string;
+  hasApiKey?: boolean; // Flag to indicate if API key is stored securely
+}
+
+export interface AIEnhancementRequest {
+  originalText: string;
+  jobDescription?: string;
+  context: {
+    company: string;
+    position: string;
+  };
+  existingBulletPoints?: string[];
 }

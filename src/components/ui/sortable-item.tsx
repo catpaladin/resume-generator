@@ -8,9 +8,11 @@ interface SortableItemProps {
   id: string;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
+  alwaysShowDragHandle?: boolean;
 }
 
-export function SortableItem({ id, children, className }: SortableItemProps) {
+export function SortableItem({ id, children, className, contentClassName, alwaysShowDragHandle = false }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -38,11 +40,12 @@ export function SortableItem({ id, children, className }: SortableItemProps) {
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-2 top-3 cursor-grab p-1 opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
+        className={`absolute left-2 top-1/2 -translate-y-1/2 cursor-grab p-1 ${alwaysShowDragHandle ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        style={{ touchAction: 'none', cursor: 'grab' }}
       >
         <GripVertical size={16} className="text-muted-foreground" />
       </div>
-      <div className="pl-8">{children}</div>
+      <div className={contentClassName || "pl-8"}>{children}</div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   ProjectsForm,
   SkillsForm,
 } from "./form";
+import { AISettings } from "@/components/ai/ai-settings";
 import type { ResumeData } from "@/types/resume";
 import type { TabType } from "@/types/common";
 
@@ -50,6 +51,7 @@ export function ClientResumeBuilder({
           <ExperienceForm
             experiences={data.experience}
             onChange={(experiences) => updateSection("experience", experiences)}
+            onNavigateToAISettings={() => setActiveTab("ai-settings")}
           />
         );
       case "education":
@@ -66,6 +68,8 @@ export function ClientResumeBuilder({
             onChange={(projects) => updateSection("projects", projects)}
           />
         );
+      case "ai-settings":
+        return <AISettings />;
     }
   };
 

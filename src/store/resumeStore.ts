@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ResumeData } from "@/types/resume";
+import type { ResumeData, AISettings } from "@/types/resume";
 import { initialResumeData } from "@/config/constants";
 
 const STORAGE_KEY = "resume-data";
@@ -24,7 +24,9 @@ function isValidResumeData(data: unknown): data is ResumeData {
 
 interface ResumeState {
   resumeData: ResumeData;
+  aiSettings: AISettings | null;
   setResumeData: (newData: ResumeData) => void;
+  setAISettings: (settings: AISettings | null) => void;
   resetResumeData: () => void;
   importResumeData: (importedData: unknown) => void; // Takes unknown first for validation
 }
@@ -33,7 +35,9 @@ export const useResumeStore = create<ResumeState>()(
   persist(
     (set) => ({
       resumeData: initialResumeData, // Default initial state
+      aiSettings: null,
       setResumeData: (newData) => set({ resumeData: newData }),
+      setAISettings: (settings) => set({ aiSettings: settings }),
       resetResumeData: () => {
         if (
           window.confirm(

@@ -3,7 +3,8 @@ export type TabType =
   | "skills"
   | "experience"
   | "education"
-  | "projects";
+  | "projects"
+  | "ai-settings";
 
 export interface Tab {
   id: TabType;

@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { Experience } from "@/types/resume";
+import { useResumeStore } from "@/store/resumeStore";
+import { createAIService } from "@/services/aiService";
+import { AIConfirmationModal } from "@/components/ui/ai-confirmation-modal";
 import {
   Card,
   CardHeader,
@@ -10,7 +14,7 @@ import { TextInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button/button";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { SortableItem } from "@/components/ui/sortable-item";
-import { Plus, X, GripVertical, Briefcase } from "lucide-react";
+import { Plus, X, Briefcase, Sparkles, FileText, Loader2, Settings } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
 import {
   DndContext,
@@ -31,44 +35,57 @@ import {
 interface ExperienceFormProps {
   experiences: Experience[];
   onChange: (experiences: Experience[]) => void;
+  onNavigateToAISettings?: () => void;
 }
 
-export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
+export function ExperienceForm({ experiences, onChange, onNavigateToAISettings }: ExperienceFormProps) {
+  const { aiSettings } = useResumeStore();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [showJobDescription, setShowJobDescription] = useState<Record<string, boolean>>({});
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    originalText: string;
+    enhancedText: string;
+    experienceId: string;
+    bulletId: string;
+  } | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const addExperience = () => {
-    onChange([
-      ...experiences,
-      {
-        id: crypto.randomUUID(),
-        company: "",
-        position: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        bulletPoints: [{ id: crypto.randomUUID(), text: "" }],
-      },
-    ]);
+    const newExperience: Experience = {
+      id: Date.now().toString(),
+      company: "",
+      position: "",
+      startDate: "",
+      endDate: "",
+      isCurrent: false,
+      location: "",
+      jobDescription: "",
+      bulletPoints: [
+        {
+          id: Date.now().toString() + "-1",
+          text: "",
+        },
+      ],
+    };
+    onChange([...experiences, newExperience]);
   };
 
   const removeExperience = (id: string) => {
     onChange(experiences.filter((exp) => exp.id !== id));
   };
 
-  const updateExperience = (
-    id: string,
-    field: keyof Experience,
-    value: string,
-  ) => {
+  const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
     onChange(
       experiences.map((exp) =>
-        exp.id === id ? { ...exp, [field]: value } : exp,
-      ),
+        exp.id === id ? { ...exp, [field]: value } : exp
+      )
     );
   };
 
@@ -80,30 +97,29 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
               ...exp,
               bulletPoints: [
                 ...exp.bulletPoints,
-                { id: crypto.randomUUID(), text: "" },
+                {
+                  id: Date.now().toString(),
+                  text: "",
+                },
               ],
             }
-          : exp,
-      ),
+          : exp
+      )
     );
   };
 
-  const updateBulletPoint = (
-    experienceId: string,
-    bulletId: string,
-    text: string,
-  ) => {
+  const updateBulletPoint = (experienceId: string, bulletId: string, text: string) => {
     onChange(
       experiences.map((exp) =>
         exp.id === experienceId
           ? {
               ...exp,
               bulletPoints: exp.bulletPoints.map((bullet) =>
-                bullet.id === bulletId ? { ...bullet, text } : bullet,
+                bullet.id === bulletId ? { ...bullet, text } : bullet
               ),
             }
-          : exp,
-      ),
+          : exp
+      )
     );
   };
 
@@ -114,40 +130,130 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
           ? {
               ...exp,
               bulletPoints: exp.bulletPoints.filter(
-                (bullet) => bullet.id !== bulletId,
+                (bullet) => bullet.id !== bulletId
               ),
             }
-          : exp,
-      ),
+          : exp
+      )
     );
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const enhanceBulletPoint = async (experienceId: string, bulletId: string) => {
+    const experience = experiences.find((exp) => exp.id === experienceId);
+    if (!experience) return;
+
+    const bulletPoint = experience.bulletPoints.find((bp) => bp.id === bulletId);
+    if (!bulletPoint) return;
+
+    // Set loading state
+    setLoadingStates((prev) => ({ ...prev, [`${experienceId}-${bulletId}`]: true }));
+
+    try {
+      const aiService = createAIService(aiSettings || { provider: "openai" }); // TODO: Implement proper API key handling
+      
+      // Get other bullet points in the same experience for context
+      const otherBulletPoints = experience.bulletPoints
+        .filter(bp => bp.id !== bulletId && bp.text.trim())
+        .map(bp => bp.text);
+      
+      const enhancedText = await aiService.summarizeAndEnhance(
+        bulletPoint.text,
+        {
+          company: experience.company,
+          position: experience.position
+        },
+        "concise",
+        otherBulletPoints
+      );
+
+      // Show confirmation modal
+      setConfirmationModal({
+        isOpen: true,
+        originalText: bulletPoint.text,
+        enhancedText,
+        experienceId,
+        bulletId,
+      });
+    } catch (error) {
+      console.error("Error enhancing bullet point:", error);
+      // Reset loading state on error
+      setLoadingStates((prev) => ({ ...prev, [`${experienceId}-${bulletId}`]: false }));
+    }
+  };
+
+  const handleAcceptEnhancement = () => {
+    if (!confirmationModal) return;
+    
+    const { experienceId, bulletId, enhancedText } = confirmationModal;
+    updateBulletPoint(experienceId, bulletId, enhancedText);
+    
+    // Reset loading state and close modal
+    setLoadingStates((prev) => ({ ...prev, [`${experienceId}-${bulletId}`]: false }));
+    setConfirmationModal(null);
+  };
+
+  const handleRejectEnhancement = () => {
+    if (!confirmationModal) return;
+    
+    const { experienceId, bulletId } = confirmationModal;
+    // Just reset loading state and close modal
+    setLoadingStates((prev) => ({ ...prev, [`${experienceId}-${bulletId}`]: false }));
+    setConfirmationModal(null);
+  };
+
+  const handleExperienceDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      const oldIndex = experiences.findIndex((exp) => exp.id === active.id);
-      const newIndex = experiences.findIndex((exp) => exp.id === over?.id);
-      onChange(arrayMove(experiences, oldIndex, newIndex));
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = experiences.findIndex((exp) => exp.id === active.id);
+    const newIndex = experiences.findIndex((exp) => exp.id === over.id);
+    onChange(arrayMove(experiences, oldIndex, newIndex));
+  };
+
+  const handleBulletPointDragEnd = (experienceId: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const experience = experiences.find(exp => exp.id === experienceId);
+    if (!experience) return;
+
+    const bulletPoints = experience.bulletPoints;
+    const oldIndex = bulletPoints.findIndex(bp => bp.id === active.id);
+    const newIndex = bulletPoints.findIndex(bp => bp.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newBulletPoints = arrayMove(bulletPoints, oldIndex, newIndex);
+      
+      onChange(experiences.map(exp => 
+        exp.id === experienceId 
+          ? { ...exp, bulletPoints: newBulletPoints }
+          : exp
+      ));
     }
   };
 
   return (
-    <Card className="border-gradient-to-br from-primary/10 to-accent/5">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Briefcase size={20} className="text-primary" />
-          Experience
+        <CardTitle className="flex items-center gap-2">
+          <Briefcase className="h-5 w-5" />
+          Work Experience
         </CardTitle>
         <CardDescription>
-          Drag to reorder • Focus on impact and quantifiable results
+          List your professional experience, including company, position, and key achievements
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent>
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
+          onDragEnd={handleExperienceDragEnd}
         >
           <SortableContext
             items={experiences.map((exp) => exp.id)}
@@ -161,124 +267,224 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
                       <div className="flex-1 space-y-3">
                         <TextInput
                           label="Company"
-                          placeholder="e.g., Acme Inc."
+                          placeholder="Company name"
                           value={exp.company}
-                          onChange={(e) =>
-                            updateExperience(exp.id, "company", e.target.value)
-                          }
+                          onChange={(e) => updateExperience(exp.id, "company", e.target.value)}
                         />
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                          <TextInput
-                            label="Position"
-                            placeholder="e.g., Senior Software Engineer"
-                            value={exp.position}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "position",
-                                e.target.value,
-                              )
-                            }
-                          />
-                          <TextInput
-                            label="Location"
-                            placeholder="City, Country"
-                            value={exp.location}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "location",
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <TextInput
+                          label="Position"
+                          placeholder="Job title"
+                          value={exp.position}
+                          onChange={(e) => updateExperience(exp.id, "position", e.target.value)}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <TextInput
                             label="Start Date"
-                            placeholder="e.g., Jan 2023"
+                            placeholder="MM/YYYY"
                             value={exp.startDate}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "startDate",
-                                e.target.value,
-                              )
-                            }
+                            onChange={(e) => updateExperience(exp.id, "startDate", e.target.value)}
                           />
                           <TextInput
                             label="End Date"
-                            placeholder="e.g., Present"
-                            value={exp.endDate}
-                            onChange={(e) =>
-                              updateExperience(
-                                exp.id,
-                                "endDate",
-                                e.target.value,
-                              )
-                            }
+                            placeholder="MM/YYYY or 'Present'"
+                            value={exp.isCurrent ? "Present" : exp.endDate}
+                            onChange={(e) => updateExperience(exp.id, "endDate", e.target.value)}
+                            disabled={exp.isCurrent}
                           />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`current-${exp.id}`}
+                            checked={exp.isCurrent}
+                            onChange={(e) => updateExperience(exp.id, "isCurrent", e.target.checked)}
+                            className="h-4 w-4 rounded border-input bg-background"
+                          />
+                          <label
+                            htmlFor={`current-${exp.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            I currently work here
+                          </label>
+                        </div>
+                        <TextInput
+                          label="Location"
+                          placeholder="City, State or Remote"
+                          value={exp.location}
+                          onChange={(e) => updateExperience(exp.id, "location", e.target.value)}
+                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText size={16} className="text-muted-foreground" />
+                              <h4 className="text-sm font-medium text-muted-foreground">
+                                Job Description (for AI tailoring)
+                              </h4>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setShowJobDescription((prev) => ({
+                                  ...prev,
+                                  [exp.id]: !prev[exp.id],
+                                }))
+                              }
+                              className="text-xs"
+                            >
+                              {showJobDescription[exp.id] ? "Hide" : "Show"}
+                            </Button>
+                          </div>
+                          {showJobDescription[exp.id] && (
+                            <div className="space-y-1">
+                              <TextareaAutosize
+                                placeholder="Paste the job description here to help AI tailor your achievements..."
+                                value={exp.jobDescription || ""}
+                                onChange={(e) =>
+                                  updateExperience(exp.id, "jobDescription", e.target.value)
+                                }
+                                minRows={3}
+                                className="w-full resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                       <IconButton
                         variant="ghost"
                         aria-label="Remove experience"
-                        icon={<X size={18} />}
+                        icon={<X size={16} />}
                         onClick={() => removeExperience(exp.id)}
-                        className="hover:bg-destructive/10 hover:text-destructive"
+                        className="ml-2 mt-2 text-muted-foreground hover:text-foreground"
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <h4 className="text-xs font-medium text-muted-foreground">
-                        Key Achievements
-                      </h4>
-                      <div className="space-y-1.5">
-                        {exp.bulletPoints.map((bullet) => (
-                          <div
-                            key={bullet.id}
-                            className="flex items-start gap-2"
-                          >
-                            <div className="mt-2">
-                              <GripVertical
-                                size={12}
-                                className="text-muted-foreground"
-                              />
-                            </div>
-                            <TextareaAutosize
-                              placeholder="Describe your achievement or responsibility"
-                              value={bullet.text}
-                              onChange={(e) =>
-                                updateBulletPoint(
-                                  exp.id,
-                                  bullet.id,
-                                  e.target.value,
-                                )
-                              }
-                              minRows={1}
-                              className="flex-1 resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                            />
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-medium text-muted-foreground">
+                          Key Achievements
+                        </h4>
+                        {onNavigateToAISettings && (
+                          <div className="flex items-center gap-1">
+                            {!aiSettings?.hasApiKey && (
+                              <span className="text-xs text-amber-600 font-medium">
+                                Configure AI →
+                              </span>
+                            )
+                            }
                             <IconButton
                               variant="ghost"
-                              aria-label="Remove bullet point"
-                              icon={<X size={16} />}
-                              onClick={() =>
-                                removeBulletPoint(exp.id, bullet.id)
-                              }
-                              className="hover:bg-destructive/10 hover:text-destructive mt-1"
+                              aria-label="AI Settings"
+                              icon={<Settings size={14} />}
+                              onClick={onNavigateToAISettings}
+                              className={`
+                                ${aiSettings?.hasApiKey 
+                                  ? "hover:bg-blue-50 hover:text-blue-600 text-blue-500" 
+                                  : "hover:bg-amber-50 hover:text-amber-600 text-amber-500"
+                                }
+                              `}
+                              title="Go to AI Settings"
                             />
                           </div>
-                        ))}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="border-dashed border-primary/30 text-primary hover:bg-primary/5"
-                          onClick={() => addBulletPoint(exp.id)}
-                        >
-                          <Plus size={14} className="mr-1" /> Add Achievement
-                        </Button>
+                        )}
                       </div>
+                      {!aiSettings?.hasApiKey && onNavigateToAISettings && (
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950/50 dark:border-amber-900">
+                          <div className="flex items-center gap-2">
+                            <Sparkles size={16} className="text-amber-600 flex-shrink-0" />
+                            <div className="text-xs">
+                              <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">
+                                AI Enhancement Available
+                              </p>
+                              <p className="text-amber-700 dark:text-amber-300 mb-2">
+                                Configure your AI settings to enhance, summarize, and tailor your achievements automatically.
+                              </p>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={onNavigateToAISettings}
+                                className="text-xs bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200"
+                              >
+                                <Settings size={12} className="mr-1" />
+                                Set up AI
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleBulletPointDragEnd(exp.id)}
+                      >
+                        <SortableContext
+                          items={exp.bulletPoints.map((bullet) => bullet.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-1.5">
+                            {exp.bulletPoints.map((bullet) => (
+                              <SortableItem 
+                                key={bullet.id} 
+                                id={bullet.id}
+                                className="w-full hover:border-primary rounded-lg bg-background/20"
+                                contentClassName="w-full pl-10 pr-2 py-2"
+                                alwaysShowDragHandle={true}
+                              >
+                                <div className="flex items-start w-full gap-2">
+                                  <TextareaAutosize
+                                    placeholder="Describe your achievement or responsibility"
+                                    value={bullet.text || ""}
+                                    onChange={(e) =>
+                                      updateBulletPoint(
+                                        exp.id,
+                                        bullet.id,
+                                        e.target.value,
+                                      )
+                                    }
+                                    minRows={2}
+                                    className="flex-1 resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                                  />
+                                  <div className="flex flex-col gap-1 flex-shrink-0 items-center justify-start pt-2">
+                                    {aiSettings?.hasApiKey && (
+                                      <IconButton
+                                        variant="ghost"
+                                        aria-label="Enhance with AI (concise)"
+                                        icon={
+                                          loadingStates[`${exp.id}-${bullet.id}`] ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                          ) : (
+                                            <Sparkles size={14} />
+                                          )
+                                        }
+                                        onClick={() => enhanceBulletPoint(exp.id, bullet.id)}
+                                        disabled={loadingStates[`${exp.id}-${bullet.id}`]}
+                                        className="h-8 w-8"
+                                      />
+                                    )}
+                                    <IconButton
+                                      variant="ghost"
+                                      aria-label="Remove bullet point"
+                                      title="Remove bullet point"
+                                      icon={<X size={14} />}
+                                      onClick={() => removeBulletPoint(exp.id, bullet.id)}
+                                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    />
+                                  </div>
+                                </div>
+                              </SortableItem>
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addBulletPoint(exp.id)}
+                      >
+                        <Plus size={14} className="mr-1" /> Add Achievement
+                      </Button>
                     </div>
                   </div>
                 </SortableItem>
@@ -286,17 +492,25 @@ export function ExperienceForm({ experiences, onChange }: ExperienceFormProps) {
             </div>
           </SortableContext>
         </DndContext>
-        <div className="pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="border-dashed border-primary/30 text-primary hover:bg-primary/5"
-            onClick={addExperience}
-          >
-            <Plus size={16} className="mr-2" /> Add Experience
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addExperience}
+          className="mt-3 w-full"
+        >
+          <Plus size={16} className="mr-2" /> Add Experience
+        </Button>
       </CardContent>
+      {/* AI Enhancement Confirmation Modal */}
+      {confirmationModal && (
+        <AIConfirmationModal
+          isOpen={confirmationModal.isOpen}
+          originalText={confirmationModal.originalText}
+          enhancedText={confirmationModal.enhancedText}
+          onAccept={handleAcceptEnhancement}
+          onReject={handleRejectEnhancement}
+        />
+      )}
     </Card>
   );
 }
