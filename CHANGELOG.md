@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.5...resume-generator-v0.2.6) (2025-08-10)
+
+
+### Bug Fixes
+
+* api router fixes for electron ([7354b04](https://github.com/catpaladin/resume-generator/commit/7354b04b156c8e274d86b94aaa61302a2aebeffd))
+
 ## [0.2.5](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.4...resume-generator-v0.2.5) (2025-08-10)
 
 
