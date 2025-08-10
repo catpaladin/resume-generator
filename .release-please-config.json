@@ -2,6 +2,7 @@
   "packages": {
     ".": {
       "release-type": "node",
+      "initial-version": "0.2.0",
       "package-name": "resume-generator",
       "changelog-path": "CHANGELOG.md",
       "changelog-sections": [
