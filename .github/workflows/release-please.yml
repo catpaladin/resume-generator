@@ -53,6 +53,7 @@ jobs:
           echo "Installing dependencies..."
           npm ci --verbose
           echo "Dependencies installed successfully"
+        shell: bash
 
       - name: Verify Dependencies
         run: |
@@ -60,34 +61,54 @@ jobs:
           echo "NPM version: $(npm --version)"
           echo "Electron version: $(npx electron --version)"
           echo "Available scripts:"
-          npm run --silent 2>/dev/null || echo "No scripts available"
+        shell: bash
+
+      - name: List Available Scripts
+        run: npm run
+        continue-on-error: true
 
       - name: Build Next.js App
         run: |
           echo "Building Next.js application..."
           npm run build
           echo "Next.js build completed"
+        shell: bash
+
+      - name: Check Build Output
+        run: |
           echo "Build output:"
-          ls -la out/ || echo "No out directory found"
+          if [ -d "out" ]; then ls -la out/; else echo "No out directory found"; fi
+        shell: bash
 
       - name: Prepare Build Environment (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libxkbfile-dev libxss1 libgconf-2-4
+          sudo apt-get install -y \
+            libnss3-dev \
+            libatk-bridge2.0-dev \
+            libdrm2 \
+            libxkbfile-dev \
+            libxcomposite-dev \
+            libxdamage1 \
+            libxrandr2 \
+            libgbm-dev \
+            libxss1 \
+            libasound2-dev \
+            libatspi2.0-0 \
+            libgtk-3-0
+        shell: bash
 
       - name: Build Electron App (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           echo "Building Electron app for macOS..."
-          echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
           npm run dist:mac -- --publish=never
           echo "macOS build completed"
-          echo "Build artifacts:"
-          ls -la dist/ || echo "No dist directory found"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
+        shell: bash
 
       - name: Build Electron App (Windows)
         if: matrix.os == 'windows-latest'
@@ -95,10 +116,9 @@ jobs:
           echo "Building Electron app for Windows..."
           npm run dist:win -- --publish=never
           echo "Windows build completed"
-          echo "Build artifacts:"
-          dir dist\ || echo "No dist directory found"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
 
       - name: Build Electron App (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -106,19 +126,23 @@ jobs:
           echo "Building Electron app for Linux..."
           npm run dist:linux -- --publish=never
           echo "Linux build completed"
-          echo "Build artifacts:"
-          ls -la dist/ || echo "No dist directory found"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
 
-      - name: Debug Build Output
+      - name: Check Build Artifacts (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          echo "=== Build Directory Contents ==="
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            dir dist\ /s || echo "No dist directory found"
-          else
-            find dist -type f 2>/dev/null || echo "No dist directory found"
-          fi
+          echo "=== Windows Build Artifacts ==="
+          if (Test-Path "dist") { Get-ChildItem -Path "dist" -Recurse } else { echo "No dist directory found" }
+        shell: powershell
+
+      - name: Check Build Artifacts (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          echo "=== Build Artifacts ==="
+          if [ -d "dist" ]; then find dist -type f; else echo "No dist directory found"; fi
+        shell: bash
 
       - name: Upload Artifacts (macOS)
         if: matrix.os == 'macos-latest'
