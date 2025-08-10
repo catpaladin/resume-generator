@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        
+
       - uses: googleapis/release-please-action@v4
         id: release
         with:
@@ -32,7 +32,7 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -45,8 +45,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install Dependencies
         run: |
@@ -192,37 +192,37 @@ jobs:
           find ./artifacts -name "*.dmg" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" \; 2>/dev/null || true
           find ./artifacts -name "*.exe" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" \; 2>/dev/null || true
           find ./artifacts -name "*.AppImage" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" \; 2>/dev/null || true
-          
+
           # Upload assets to the existing release created by release-please
           assets=""
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg"
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe"
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage"
-          
+
           if [ -n "$assets" ]; then
             # Add download section to existing release
             current_body=$(gh release view ${{ needs.release-please.outputs.tag_name }} --json body -q .body)
             
             cat > download_section.md << 'EOF'
-          
+
           ## 📦 Downloads
-          
+
           Choose the installer for your operating system:
-          
+
           - **Windows**: Download the `.exe` file below
           - **macOS**: Download the `.dmg` file below (supports Intel and Apple Silicon)
           - **Linux**: Download the `.AppImage` or `.deb` file below
-          
+
           ### Installation
           - **Windows**: Run the `.exe` installer
           - **macOS**: Open the `.dmg` file and drag to Applications folder
           - **Linux**: Make the `.AppImage` executable (`chmod +x *.AppImage`)
-          
+
           ---
-          
+
           Built with ❤️ using Next.js, React, and Electron
           EOF
-          
+
             # Update release with new body and upload assets
             gh release edit ${{ needs.release-please.outputs.tag_name }} \
               --notes "$current_body$(cat download_section.md)"

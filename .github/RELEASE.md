@@ -22,6 +22,7 @@ Use [conventional commits](https://www.conventionalcommits.org/) for automatic c
 ```
 
 ### Types:
+
 - `feat`: New features (triggers minor version bump)
 - `fix`: Bug fixes (triggers patch version bump)
 - `docs`: Documentation changes
@@ -35,6 +36,7 @@ Use [conventional commits](https://www.conventionalcommits.org/) for automatic c
 - `revert`: Reverting changes
 
 ### Examples:
+
 ```bash
 git commit -m "feat: add AI-powered resume suggestions"
 git commit -m "fix: resolve PDF export formatting issue"
@@ -58,6 +60,7 @@ git commit -m "feat(ui): implement dark mode toggle"
 ## What Gets Built
 
 When a release is created, the workflow automatically builds:
+
 - **Windows**: `.exe` installer (NSIS) for x64
 - **macOS**: `.dmg` disk image (Intel + Apple Silicon)
 - **Linux**: `.AppImage` portable app for x64
@@ -65,6 +68,7 @@ When a release is created, the workflow automatically builds:
 ## Changelog Categories
 
 Commits are automatically categorized in the changelog:
+
 - **Features**: New functionality
 - **Bug Fixes**: Bug fixes and patches
 - **Documentation**: Documentation updates

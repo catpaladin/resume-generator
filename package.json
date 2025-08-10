@@ -74,14 +74,15 @@
     "files": [
       "out/**/*",
       "electron/**/*",
-      "package.json",
-      "node_modules/serve/bin/serve.js",
-      "!node_modules/**/{CHANGELOG.md,README.md,*.md}",
-      "!node_modules/**/{.nyc_output,coverage,test,tests,__tests__}",
-      "!node_modules/**/example*",
-      "!node_modules/**/{*.map,*.ts,!*.d.ts}"
+      "package.json"
     ],
     "extraResources": [
+      {
+        "from": "node_modules/serve",
+        "to": "serve"
+      }
+    ],
+    "asarUnpack": [
       "node_modules/serve/**/*"
     ],
     "mac": {
