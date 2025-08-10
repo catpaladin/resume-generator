@@ -1,0 +1,170 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          release-type: node
+          package-name: resume-generator
+          changelog-sections: |
+            [
+              {"type":"feat","section":"Features","hidden":false},
+              {"type":"fix","section":"Bug Fixes","hidden":false},
+              {"type":"docs","section":"Documentation","hidden":false},
+              {"type":"style","section":"Styles","hidden":false},
+              {"type":"refactor","section":"Code Refactoring","hidden":false},
+              {"type":"perf","section":"Performance Improvements","hidden":false},
+              {"type":"test","section":"Tests","hidden":false},
+              {"type":"build","section":"Build System","hidden":false},
+              {"type":"ci","section":"Continuous Integration","hidden":false},
+              {"type":"chore","section":"Miscellaneous Chores","hidden":true},
+              {"type":"revert","section":"Reverts","hidden":false}
+            ]
+          extra-files: |
+            package-lock.json
+
+  build-and-release:
+    needs: release-please
+    if: needs.release-please.outputs.release_created
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js App
+        run: npm run build
+
+      - name: Build Electron App (macOS)
+        if: matrix.os == 'macos-latest'
+        run: npm run dist:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron App (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron App (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: dist/*.dmg
+
+      - name: Upload Artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: dist/*.exe
+
+      - name: Upload Artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+
+  upload-release-assets:
+    needs: [release-please, build-and-release]
+    if: needs.release-please.outputs.release_created
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Display Structure of Downloaded Files
+        run: ls -la ./artifacts/
+
+      - name: Upload Release Assets
+        run: |
+          # Find and rename files for consistent naming
+          find ./artifacts -name "*.dmg" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" \; 2>/dev/null || true
+          find ./artifacts -name "*.exe" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" \; 2>/dev/null || true
+          find ./artifacts -name "*.AppImage" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" \; 2>/dev/null || true
+          find ./artifacts -name "*.deb" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb" \; 2>/dev/null || true
+          
+          # Upload assets to the existing release created by release-please
+          assets=""
+          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg"
+          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe"
+          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage"
+          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb"
+          
+          if [ -n "$assets" ]; then
+            # Add download section to existing release
+            current_body=$(gh release view ${{ needs.release-please.outputs.tag_name }} --json body -q .body)
+            
+            cat > download_section.md << 'EOF'
+          
+          ## 📦 Downloads
+          
+          Choose the installer for your operating system:
+          
+          - **Windows**: Download the `.exe` file below
+          - **macOS**: Download the `.dmg` file below (supports Intel and Apple Silicon)
+          - **Linux**: Download the `.AppImage` or `.deb` file below
+          
+          ### Installation
+          - **Windows**: Run the `.exe` installer
+          - **macOS**: Open the `.dmg` file and drag to Applications folder
+          - **Linux**: Make the `.AppImage` executable (`chmod +x *.AppImage`) or install the `.deb` package
+          
+          ---
+          
+          Built with ❤️ using Next.js, React, and Electron
+          EOF
+          
+            # Update release with new body and upload assets
+            gh release edit ${{ needs.release-please.outputs.tag_name }} \
+              --notes "$current_body$(cat download_section.md)"
+            
+            gh release upload ${{ needs.release-please.outputs.tag_name }} $assets
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
