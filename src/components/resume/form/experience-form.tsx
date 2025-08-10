@@ -258,6 +258,7 @@ export function ExperienceForm({
       // Create enhanced AI settings with refinement instructions
       const refinedAISettings = {
         ...aiSettings,
+        provider: aiSettings?.provider || "anthropic",
         userInstructions:
           `${aiSettings?.userInstructions || ""}\n\nREFINEMENT REQUEST: ${refinementInstructions}`.trim(),
       };
