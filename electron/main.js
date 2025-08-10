@@ -304,12 +304,207 @@ function getContentType(filePath) {
   return contentTypes[ext] || "text/plain";
 }
 
+// Handle API routes locally in Electron
+async function handleApiRoute(request, pathname) {
+  console.log("Handling API route:", pathname);
+  
+  if (pathname === "/api/ai/chat") {
+    return handleAIChatRoute(request);
+  }
+  
+  if (pathname === "/api/ai/models") {
+    return handleAIModelsRoute(request);
+  }
+  
+  return new Response("API route not found", { status: 404 });
+}
+
+async function handleAIChatRoute(request) {
+  try {
+    const body = await request.json();
+    const { provider, apiKey, model, messages, maxTokens = 500 } = body;
+
+    if (!provider || !apiKey || !messages) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: provider, apiKey, messages" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    let response;
+    switch (provider) {
+      case "openai":
+        response = await callOpenAI(apiKey, model || "gpt-4", messages, maxTokens);
+        break;
+      case "anthropic":
+        response = await callAnthropic(apiKey, model || "claude-3-5-sonnet-20240620", messages, maxTokens);
+        break;
+      case "gemini":
+        response = await callGemini(apiKey, model || "gemini-pro", messages, maxTokens);
+        break;
+      default:
+        return new Response(
+          JSON.stringify({ error: `Unsupported provider: ${provider}` }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+    }
+
+    return new Response(
+      JSON.stringify({ content: response }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("AI API Error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+
+async function handleAIModelsRoute(request) {
+  try {
+    const body = await request.json();
+    const { provider, apiKey } = body;
+
+    if (!provider || !apiKey) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: provider, apiKey" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Return fallback models for now - can be enhanced later
+    const fallbackModels = getFallbackModels(provider);
+    
+    return new Response(
+      JSON.stringify({ models: fallbackModels }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("AI Models API Error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+
+// AI Provider API functions
+async function callOpenAI(apiKey, model, messages, maxTokens) {
+  const fetch = require('node-fetch');
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens: maxTokens,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`OpenAI API error (${response.status}): ${errorData}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "";
+}
+
+async function callAnthropic(apiKey, model, messages, maxTokens) {
+  const fetch = require('node-fetch');
+  const prompt = messages
+    .map(msg => `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`)
+    .join("\n\n");
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Anthropic API error (${response.status}): ${errorData}`);
+  }
+
+  const data = await response.json();
+  return data.content[0]?.text || "";
+}
+
+async function callGemini(apiKey, model, messages, maxTokens) {
+  const fetch = require('node-fetch');
+  const prompt = messages.map(msg => msg.content).join("\n\n");
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          temperature: 0.7,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorData}`);
+  }
+
+  const data = await response.json();
+  return data.candidates[0]?.content?.parts[0]?.text || "";
+}
+
+function getFallbackModels(provider) {
+  const fallbackModels = {
+    openai: [
+      { id: "gpt-4", name: "GPT-4", description: "Most capable model", isRecommended: true },
+      { id: "gpt-4o", name: "GPT-4o", description: "Multimodal model" },
+      { id: "gpt-4o-mini", name: "GPT-4o Mini", description: "Faster and cost-effective" },
+    ],
+    anthropic: [
+      { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", description: "Balanced performance", isRecommended: true },
+      { id: "claude-3-5-haiku-latest", name: "Claude 3.5 Haiku", description: "Fast and cost-effective" },
+    ],
+    gemini: [
+      { id: "gemini-pro", name: "Gemini Pro", description: "Google's flagship model", isRecommended: true },
+    ],
+  };
+  
+  return fallbackModels[provider] || [];
+}
+
 // App event listeners
 app.whenReady().then(() => {
-  // Register custom protocol for serving static files
-  protocol.handle("app", (request) => {
+  // Register custom protocol for serving static files and handling API routes
+  protocol.handle("app", async (request) => {
     const url = new URL(request.url);
     const pathname = decodeURIComponent(url.pathname);
+
+    // Handle API routes
+    if (pathname.startsWith("/api/")) {
+      return handleApiRoute(request, pathname);
+    }
 
     // Map /_next/static paths to the actual file locations
     let filePath;
