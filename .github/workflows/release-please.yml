@@ -159,9 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            dist/*.exe
-            dist/*.msi
+          path: dist/*.exe
         continue-on-error: true
 
       - name: Upload Artifacts (Linux)
@@ -169,10 +167,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-build
-          path: |
-            dist/*.AppImage
-            dist/*.deb
-            dist/*.rpm
+          path: dist/*.AppImage
         continue-on-error: true
 
   upload-release-assets:
@@ -197,14 +192,12 @@ jobs:
           find ./artifacts -name "*.dmg" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" \; 2>/dev/null || true
           find ./artifacts -name "*.exe" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" \; 2>/dev/null || true
           find ./artifacts -name "*.AppImage" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" \; 2>/dev/null || true
-          find ./artifacts -name "*.deb" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb" \; 2>/dev/null || true
           
           # Upload assets to the existing release created by release-please
           assets=""
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg"
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe"
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage"
-          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.deb"
           
           if [ -n "$assets" ]; then
             # Add download section to existing release
@@ -223,7 +216,7 @@ jobs:
           ### Installation
           - **Windows**: Run the `.exe` installer
           - **macOS**: Open the `.dmg` file and drag to Applications folder
-          - **Linux**: Make the `.AppImage` executable (`chmod +x *.AppImage`) or install the `.deb` package
+          - **Linux**: Make the `.AppImage` executable (`chmod +x *.AppImage`)
           
           ---
           

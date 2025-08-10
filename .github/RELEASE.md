@@ -58,9 +58,9 @@ git commit -m "feat(ui): implement dark mode toggle"
 ## What Gets Built
 
 When a release is created, the workflow automatically builds:
-- **Windows**: `.exe` installer (NSIS)
+- **Windows**: `.exe` installer (NSIS) for x64
 - **macOS**: `.dmg` disk image (Intel + Apple Silicon)
-- **Linux**: `.AppImage` portable app and `.deb` package
+- **Linux**: `.AppImage` portable app for x64
 
 ## Changelog Categories
 
