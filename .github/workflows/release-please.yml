@@ -17,8 +17,14 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
       - uses: googleapis/release-please-action@v4
         id: release
+        with:
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
 
   build-and-release:
     needs: release-please
