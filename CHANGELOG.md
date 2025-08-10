@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.4...resume-generator-v0.2.5) (2025-08-10)
+
+
+### Features
+
+* added app:// protocol as fallback and fmt+lint ([499eb5f](https://github.com/catpaladin/resume-generator/commit/499eb5f90b835f0343e4228a115c5326060219c1))
+
 ## [0.2.4](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.3...resume-generator-v0.2.4) (2025-08-10)
 
 ### Bug Fixes
