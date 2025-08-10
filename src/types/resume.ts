@@ -94,6 +94,7 @@ export interface AISettings {
   customModel?: string;
   jobDescription?: string;
   hasApiKey?: boolean; // Flag to indicate if API key is stored securely
+  userInstructions?: string; // Additional user instructions for AI refinement
 }
 
 export interface AIEnhancementRequest {

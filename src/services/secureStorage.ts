@@ -1,18 +1,18 @@
 /**
  * Secure Storage Service
- * 
+ *
  * Provides encrypted storage for sensitive data like API keys using browser's
  * Web Crypto API. This is more secure than plain localStorage but still has
  * limitations in a browser environment.
  */
 
-const ALGORITHM = 'AES-GCM';
+const ALGORITHM = "AES-GCM";
 const KEY_LENGTH = 256;
 const IV_LENGTH = 12; // 96 bits for GCM
 
 // Storage keys
-const ENCRYPTED_DATA_KEY = 'encrypted-api-keys';
-const SALT_KEY = 'crypto-salt';
+const ENCRYPTED_DATA_KEY = "encrypted-api-keys";
+const SALT_KEY = "crypto-salt";
 
 class SecureStorage {
   private cryptoKey: CryptoKey | null = null;
@@ -24,10 +24,10 @@ class SecureStorage {
 
   private checkCryptoSupport(): boolean {
     return (
-      typeof window !== 'undefined' &&
-      'crypto' in window &&
-      'subtle' in window.crypto &&
-      typeof window.crypto.subtle.encrypt === 'function'
+      typeof window !== "undefined" &&
+      "crypto" in window &&
+      "subtle" in window.crypto &&
+      typeof window.crypto.subtle.encrypt === "function"
     );
   }
 
@@ -40,11 +40,13 @@ class SecureStorage {
     }
 
     let salt = localStorage.getItem(SALT_KEY);
-    
+
     if (!salt) {
       // Generate new salt
       const saltBuffer = crypto.getRandomValues(new Uint8Array(16));
-      salt = Array.from(saltBuffer).map(b => b.toString(16).padStart(2, '0')).join('');
+      salt = Array.from(saltBuffer)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
       localStorage.setItem(SALT_KEY, salt);
     }
 
@@ -52,24 +54,24 @@ class SecureStorage {
     // Note: In a real app, you'd want to prompt for a master password
     // For now, we'll use a combination of browser fingerprinting and a static key
     const keyMaterial = await crypto.subtle.importKey(
-      'raw',
+      "raw",
       new TextEncoder().encode(this.getBrowserFingerprint() + salt),
-      'PBKDF2',
+      "PBKDF2",
       false,
-      ['deriveBits', 'deriveKey']
+      ["deriveBits", "deriveKey"],
     );
 
     this.cryptoKey = await crypto.subtle.deriveKey(
       {
-        name: 'PBKDF2',
+        name: "PBKDF2",
         salt: new TextEncoder().encode(salt),
         iterations: 100000,
-        hash: 'SHA-256'
+        hash: "SHA-256",
       },
       keyMaterial,
       { name: ALGORITHM, length: KEY_LENGTH },
       false,
-      ['encrypt', 'decrypt']
+      ["encrypt", "decrypt"],
     );
 
     return this.cryptoKey;
@@ -79,19 +81,21 @@ class SecureStorage {
    * Simple browser fingerprinting for key derivation
    */
   private getBrowserFingerprint(): string {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx!.textBaseline = 'top';
-    ctx!.font = '14px Arial';
-    ctx!.fillText('Browser fingerprint', 2, 2);
-    
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx!.textBaseline = "top";
+    ctx!.font = "14px Arial";
+    ctx!.fillText("Browser fingerprint", 2, 2);
+
     return [
       navigator.userAgent,
       navigator.language,
-      screen.width + 'x' + screen.height,
+      screen.width + "x" + screen.height,
       new Date().getTimezoneOffset(),
-      canvas.toDataURL()
-    ].join('|').slice(0, 100); // Limit length
+      canvas.toDataURL(),
+    ]
+      .join("|")
+      .slice(0, 100); // Limit length
   }
 
   /**
@@ -99,7 +103,9 @@ class SecureStorage {
    */
   async setSecure(key: string, value: string): Promise<void> {
     if (!this.isSupported) {
-      console.warn('Secure storage not supported, falling back to localStorage');
+      console.warn(
+        "Secure storage not supported, falling back to localStorage",
+      );
       localStorage.setItem(key, value);
       return;
     }
@@ -107,11 +113,11 @@ class SecureStorage {
     try {
       const cryptoKey = await this.getOrCreateKey();
       const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-      
+
       const encryptedData = await crypto.subtle.encrypt(
         { name: ALGORITHM, iv },
         cryptoKey,
-        new TextEncoder().encode(value)
+        new TextEncoder().encode(value),
       );
 
       const encryptedArray = new Uint8Array(encryptedData);
@@ -120,15 +126,14 @@ class SecureStorage {
       combined.set(encryptedArray, iv.length);
 
       const encryptedBase64 = btoa(String.fromCharCode(...combined));
-      
+
       // Store encrypted data
       const existingData = this.getEncryptedStore();
       existingData[key] = encryptedBase64;
       localStorage.setItem(ENCRYPTED_DATA_KEY, JSON.stringify(existingData));
-      
     } catch (error) {
-      console.error('Encryption failed:', error);
-      throw new Error('Failed to securely store data');
+      console.error("Encryption failed:", error);
+      throw new Error("Failed to securely store data");
     }
   }
 
@@ -143,7 +148,7 @@ class SecureStorage {
     try {
       const encryptedStore = this.getEncryptedStore();
       const encryptedBase64 = encryptedStore[key];
-      
+
       if (!encryptedBase64) {
         return null;
       }
@@ -151,8 +156,8 @@ class SecureStorage {
       const cryptoKey = await this.getOrCreateKey();
       const combined = new Uint8Array(
         atob(encryptedBase64)
-          .split('')
-          .map(char => char.charCodeAt(0))
+          .split("")
+          .map((char) => char.charCodeAt(0)),
       );
 
       const iv = combined.slice(0, IV_LENGTH);
@@ -161,13 +166,12 @@ class SecureStorage {
       const decryptedData = await crypto.subtle.decrypt(
         { name: ALGORITHM, iv },
         cryptoKey,
-        encryptedData
+        encryptedData,
       );
 
       return new TextDecoder().decode(decryptedData);
-      
     } catch (error) {
-      console.error('Decryption failed:', error);
+      console.error("Decryption failed:", error);
       return null;
     }
   }
@@ -183,7 +187,7 @@ class SecureStorage {
 
     const encryptedStore = this.getEncryptedStore();
     delete encryptedStore[key];
-    
+
     if (Object.keys(encryptedStore).length === 0) {
       localStorage.removeItem(ENCRYPTED_DATA_KEY);
     } else {
@@ -230,24 +234,24 @@ class SecureStorage {
     if (this.isSupported) {
       return {
         isSecure: true,
-        method: 'AES-GCM encryption with PBKDF2 key derivation',
+        method: "AES-GCM encryption with PBKDF2 key derivation",
         limitations: [
-          'Data is encrypted but stored in browser local storage',
-          'Vulnerable if device is compromised or shared',
-          'Browser extensions may have access to encrypted data',
-          'Consider using environment variables for production'
-        ]
+          "Data is encrypted but stored in browser local storage",
+          "Vulnerable if device is compromised or shared",
+          "Browser extensions may have access to encrypted data",
+          "Consider using environment variables for production",
+        ],
       };
     } else {
       return {
         isSecure: false,
-        method: 'Plain text localStorage (fallback)',
+        method: "Plain text localStorage (fallback)",
         limitations: [
-          'API keys stored in plain text',
-          'Visible to anyone with device access',
-          'Browser extensions can read the data',
-          'Not recommended for production use'
-        ]
+          "API keys stored in plain text",
+          "Visible to anyone with device access",
+          "Browser extensions can read the data",
+          "Not recommended for production use",
+        ],
       };
     }
   }
@@ -256,11 +260,11 @@ class SecureStorage {
 export const secureStorage = new SecureStorage();
 
 // Helper functions for common operations
-export const storeApiKey = (provider: string, apiKey: string) => 
+export const storeApiKey = (provider: string, apiKey: string) =>
   secureStorage.setSecure(`api-key-${provider}`, apiKey);
 
-export const getApiKey = (provider: string) => 
+export const getApiKey = (provider: string) =>
   secureStorage.getSecure(`api-key-${provider}`);
 
-export const removeApiKey = (provider: string) => 
+export const removeApiKey = (provider: string) =>
   secureStorage.removeSecure(`api-key-${provider}`);

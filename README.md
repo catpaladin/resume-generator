@@ -6,71 +6,119 @@ the right, and export to PDF using your browser’s print dialog.
 
 ## Features
 
-- **Skills by Category** — Enter a category per skill in the form. The preview
-  groups skills under their categories. Skills without a category appear under
-  "General Skills".
-- **Accessible Skill Pills** — In light mode, pills are black background with
-  white text and white border; in dark mode, white background with black text
-  and black border.
-- **Modern Preview Sheet** — Bordered, print‑safe, ATS‑friendly layout.
-- **Quick Section Navigation** — Simple sidebar to jump between sections.
-- **Theme Support** — Light/dark via `next-themes` with a consistent color
-  system.
-- **Local Persistence** — Your progress auto‑saves to `localStorage` using
-  Zustand. Refresh without losing edits.
-- **Drag & Drop Ordering** — Reorder list sections via `@dnd-kit`.
+- **Skills by Category** — Each skill can have a category; the preview groups
+  them automatically. Unassigned skills show under "General Skills".
+- **Accessible Skill Pills** — Light: black pill with white text/border.
+  Dark: white pill with black text/border.
+- **Modern Preview Sheet** — Bordered, print‑safe, ATS‑friendly.
+- **Quick Section Navigation** — Simple sidebar for fast jumping.
+- **Theme Support** — Light/dark via `next-themes`.
+- **Local Persistence** — Auto‑save to `localStorage` via Zustand.
+- **Drag & Drop Ordering** — Powered by `@dnd-kit`.
 
 ## Tech Stack
 
 - Next.js (App Router)
 - React 19
-- Tailwind CSS + Prettier Tailwind sorting
-- Zustand for state
-- `@dnd-kit` for drag & drop
-- Lucide icons
+- Tailwind CSS
+- Zustand
+- `@dnd-kit`
+
+## Quick Start
+
+```bash
+# 1) Install dependencies
+npm install
+
+# 2) Start in development (http://localhost:3000)
+npm run dev
+```
 
 ## Requirements
 
 - Node.js 22+
 - npm (or pnpm/yarn/bun)
 
-## Setup
+## Local Development
 
 ```bash
 npm install
+npm run dev
 ```
+
+Hot‑reload is enabled. Your data persists in `localStorage`.
+
+## Production Build
+
+```bash
+# Build
+npm run build
+
+# Start the production server
+npm run start
+
+# By default: http://localhost:3000
+```
+
+## Docker
+
+This repo includes a multi‑stage Dockerfile that produces a small, non‑root
+runtime image.
+
+Build the image:
+
+```bash
+docker build -t resume-generator:latest .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 3000:3000 resume-generator:latest
+# App is available at http://localhost:3000
+```
+
+Notes:
+
+- Image runs as a non‑root user and exposes port `3000`.
+- `NEXT_TELEMETRY_DISABLED` and `NODE_ENV=production` are set in the image.
 
 ## Scripts
 
-- `npm run dev` — Start the dev server
-- `npm run build` — Build for production
-- `npm run start` — Run the production build
-- `npm run lint` — Run ESLint
-- `npm run lint-format` — Fix lint and format with Prettier (mandatory before
-  commits)
+- `dev` — Start the dev server
+- `build` — Build for production
+- `start` — Run the production build
+- `lint` — Run ESLint
+- `lint-format` — ESLint fix + Prettier (run before committing)
+- `test` — Run unit tests
+- `test:watch` — Watch mode
+- `test:coverage` — Coverage report
 
 ## Project Structure
 
-Key paths you’ll work with:
-
 - `src/components/resume/form/` — Form components for editing
-- `src/components/resume/preview/` — Components for the live preview
+- `src/components/resume/preview/` — Live preview components
 - `src/components/ui/` — Reusable UI (shadcn/ui)
 - `src/types/` — TypeScript interfaces
-- `src/store/` — Zustand stores (`resumeStore.ts`)
+- `src/store/` — Zustand stores (e.g., `resumeStore.ts`)
 - `src/lib/` — Utility functions
 - `src/hooks/` — Custom hooks
-- `src/app/page.tsx` — Main page composing the builder and preview
+- `src/app/page.tsx` — Main page composing builder + preview
 
 ## Theming and PDF Export
 
 - Preview defaults to light theme for print clarity.
 - Use your browser’s Print dialog to export to PDF.
-- Ensure margins are default and background graphics are enabled for best
-  results.
+- Enable background graphics for best results.
 
-## Notes on Testing
+## Testing
 
-Unit and integration tests are planned. When adding utilities or store
-actions, include tests with Jest + React Testing Library per our project
-standards.
+The project is set up with Jest + React Testing Library.
+
+```bash
+npm run test
+npm run test:watch
+npm run test:coverage
+```
+
+When adding utilities or store actions, include unit tests.
