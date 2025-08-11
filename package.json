@@ -1,6 +1,12 @@
 {
   "name": "resume-generator",
+<<<<<<< Updated upstream
   "version": "0.2.7",
+=======
+  "version": "0.2.6",
+  "description": "A modern, portable resume generator built with Next.js, React, and Electron",
+  "author": "catpaladin",
+>>>>>>> Stashed changes
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -99,7 +105,6 @@
       ],
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "sign": false,
       "identity": null
     },
     "dmg": {
@@ -132,7 +137,6 @@
           ]
         }
       ],
-      "sign": false,
       "verifyUpdateCodeSignature": false
     },
     "portable": {
