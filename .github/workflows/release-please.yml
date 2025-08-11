@@ -108,6 +108,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_LINK: ""
+          CSC_KEY_PASSWORD: ""
+          NOTARIZE_APP: false
         shell: bash
 
       - name: Build Electron App (Windows)
@@ -159,7 +162,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/*.zip
         continue-on-error: true
 
       - name: Upload Artifacts (Linux)
@@ -190,13 +195,13 @@ jobs:
         run: |
           # Find and rename files for consistent naming
           find ./artifacts -name "*.dmg" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" \; 2>/dev/null || true
-          find ./artifacts -name "*.exe" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" \; 2>/dev/null || true
+          find ./artifacts -name "*portable*.exe" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win-portable.exe" \; 2>/dev/null || true
           find ./artifacts -name "*.AppImage" -exec mv {} "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" \; 2>/dev/null || true
 
           # Upload assets to the existing release created by release-please
           assets=""
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-mac.dmg"
-          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win.exe"
+          [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win-portable.exe" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-win-portable.exe"
           [ -f "./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage" ] && assets="$assets ./ResumeGenerator-${{ needs.release-please.outputs.tag_name }}-linux.AppImage"
 
           if [ -n "$assets" ]; then
@@ -207,16 +212,28 @@ jobs:
 
           ## 📦 Downloads
 
-          Choose the installer for your operating system:
+          Choose the portable app for your operating system:
 
-          - **Windows**: Download the `.exe` file below
-          - **macOS**: Download the `.dmg` file below (supports Intel and Apple Silicon)
-          - **Linux**: Download the `.AppImage` or `.deb` file below
+          - **Windows**: Download the portable `.exe` file (no installation required)
+          - **macOS**: Download the `.dmg` file (supports Intel and Apple Silicon)
+          - **Linux**: Download the `.AppImage` file
 
-          ### Installation
-          - **Windows**: Run the `.exe` installer
-          - **macOS**: Open the `.dmg` file and drag to Applications folder
-          - **Linux**: Make the `.AppImage` executable (`chmod +x *.AppImage`)
+          ### Installation Instructions
+
+          #### Windows
+          1. Download the `ResumeGenerator-*-win-portable.exe` file
+          2. Double-click to run directly - no installation needed!
+
+          #### macOS (Unsigned App)
+          1. Download the `ResumeGenerator-*-mac.dmg` file  
+          2. Open the DMG and drag the app to Applications folder
+          3. **Important**: Right-click the app → "Open" → "Open" (bypass Gatekeeper warning)
+          4. Or run: `xattr -cr /Applications/Resume\ Generator.app` in Terminal
+
+          #### Linux
+          1. Download the `ResumeGenerator-*-linux.AppImage` file
+          2. Make it executable: `chmod +x ResumeGenerator-*-linux.AppImage`
+          3. Double-click to run
 
           ---
 
