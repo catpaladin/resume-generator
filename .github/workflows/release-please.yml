@@ -245,6 +245,12 @@ jobs:
               --notes "$current_body$(cat download_section.md)"
             
             gh release upload ${{ needs.release-please.outputs.tag_name }} $assets
+            
+            # Trigger GitHub Pages deployment after successful upload
+            echo "🚀 Triggering GitHub Pages deployment..."
+            gh workflow run deploy-pages.yml \
+              --field tag_name="${{ needs.release-please.outputs.tag_name }}" \
+              --repo ${{ github.repository }}
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,13 +1,13 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_run:
-    workflows: ["Release Please"]
-    types:
-      - completed
-    branches: [main]
-  # Allow manual dispatch for testing
+  # Triggered by release-please workflow after successful upload
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name'
+        required: true
+        type: string
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -22,10 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Only run if the previous workflow succeeded
   deploy:
-    # Only run on successful workflow completion
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -35,22 +32,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get Latest Release Info
+      - name: Get Release Info
         id: release
         run: |
-          # Get the latest release tag and generate download URLs
-          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          echo "Latest release tag: $LATEST_TAG"
+          # Use the tag provided by the release-please workflow
+          RELEASE_TAG="${{ github.event.inputs.tag_name }}"
+          echo "latest_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "Using release tag: $RELEASE_TAG"
           
           # Generate download URLs
           REPO_URL="https://github.com/${{ github.repository }}"
           echo "repo_url=$REPO_URL" >> $GITHUB_OUTPUT
-          echo "win_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-win-portable.exe" >> $GITHUB_OUTPUT
-          echo "mac_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-mac.dmg" >> $GITHUB_OUTPUT
-          echo "linux_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-linux.AppImage" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "win_url=$REPO_URL/releases/download/$RELEASE_TAG/ResumeGenerator-$RELEASE_TAG-win-portable.exe" >> $GITHUB_OUTPUT
+          echo "mac_url=$REPO_URL/releases/download/$RELEASE_TAG/ResumeGenerator-$RELEASE_TAG-mac.dmg" >> $GITHUB_OUTPUT
+          echo "linux_url=$REPO_URL/releases/download/$RELEASE_TAG/ResumeGenerator-$RELEASE_TAG-linux.AppImage" >> $GITHUB_OUTPUT
 
       - name: Create Pages Content
         run: |
