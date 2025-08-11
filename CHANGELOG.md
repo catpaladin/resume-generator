@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.7...resume-generator-v0.2.8) (2025-08-11)
+
+
+### Bug Fixes
+
+* forgot to remove sign field ([cea4217](https://github.com/catpaladin/resume-generator/commit/cea421703739db5064845c7b98bfde3aa1257748))
+
 ## [0.2.7](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.6...resume-generator-v0.2.7) (2025-08-11)
 
 
