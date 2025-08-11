@@ -24,7 +24,17 @@ the right, and export to PDF using your browser’s print dialog.
 - Zustand
 - `@dnd-kit`
 
-## Quick Start
+## 📦 Download Desktop App
+
+**Get the portable desktop app - no installation required!**
+
+**[📥 Download Resume Generator](https://catpaladin.github.io/resume-generator)**
+
+- **Windows**: Portable .exe
+- **macOS**: Universal .dmg (Intel + Apple Silicon)  
+- **Linux**: AppImage
+
+## Quick Start (Development)
 
 ```bash
 # 1) Install dependencies
@@ -85,6 +95,7 @@ Notes:
 
 ## Scripts
 
+### Web Development
 - `dev` — Start the dev server
 - `build` — Build for production
 - `start` — Run the production build
@@ -93,6 +104,13 @@ Notes:
 - `test` — Run unit tests
 - `test:watch` — Watch mode
 - `test:coverage` — Coverage report
+
+### Desktop App (Electron)
+- `electron:dev` — Build and run in Electron
+- `electron:pack` — Create unpacked Electron build
+- `dist:win` — Build Windows portable executable
+- `dist:mac` — Build macOS DMG (unsigned)
+- `dist:linux` — Build Linux AppImage
 
 ## Project Structure
 

@@ -1,0 +1,422 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Release Please"]
+    types:
+      - completed
+    branches: [main]
+  # Allow manual dispatch for testing
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Only run if the previous workflow succeeded
+  deploy:
+    # Only run on successful workflow completion
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Latest Release Info
+        id: release
+        run: |
+          # Get the latest release tag and generate download URLs
+          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest release tag: $LATEST_TAG"
+          
+          # Generate download URLs
+          REPO_URL="https://github.com/${{ github.repository }}"
+          echo "repo_url=$REPO_URL" >> $GITHUB_OUTPUT
+          echo "win_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-win-portable.exe" >> $GITHUB_OUTPUT
+          echo "mac_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-mac.dmg" >> $GITHUB_OUTPUT
+          echo "linux_url=$REPO_URL/releases/download/$LATEST_TAG/ResumeGenerator-$LATEST_TAG-linux.AppImage" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Pages Content
+        run: |
+          # Create docs directory
+          mkdir -p docs
+          
+          # Create index.html with installation instructions
+          cat > docs/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Resume Generator - Download & Installation</title>
+              <style>
+                  :root {
+                      --primary: #2563eb;
+                      --primary-dark: #1d4ed8;
+                      --secondary: #64748b;
+                      --success: #059669;
+                      --background: #f8fafc;
+                      --surface: #ffffff;
+                      --text: #1e293b;
+                      --text-light: #64748b;
+                  }
+                  
+                  * {
+                      margin: 0;
+                      padding: 0;
+                      box-sizing: border-box;
+                  }
+                  
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+                      line-height: 1.6;
+                      color: var(--text);
+                      background-color: var(--background);
+                  }
+                  
+                  .container {
+                      max-width: 1200px;
+                      margin: 0 auto;
+                      padding: 0 20px;
+                  }
+                  
+                  header {
+                      background: var(--surface);
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                      padding: 1rem 0;
+                  }
+                  
+                  .header-content {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                  }
+                  
+                  h1 {
+                      color: var(--primary);
+                      font-size: 1.875rem;
+                      font-weight: 700;
+                  }
+                  
+                  .version {
+                      background: var(--primary);
+                      color: white;
+                      padding: 0.25rem 0.75rem;
+                      border-radius: 1rem;
+                      font-size: 0.875rem;
+                      font-weight: 600;
+                  }
+                  
+                  main {
+                      padding: 3rem 0;
+                  }
+                  
+                  .hero {
+                      text-align: center;
+                      margin-bottom: 3rem;
+                  }
+                  
+                  .hero h2 {
+                      font-size: 2.5rem;
+                      font-weight: 800;
+                      margin-bottom: 1rem;
+                      background: linear-gradient(45deg, var(--primary), var(--success));
+                      -webkit-background-clip: text;
+                      -webkit-text-fill-color: transparent;
+                      background-clip: text;
+                  }
+                  
+                  .hero p {
+                      font-size: 1.25rem;
+                      color: var(--text-light);
+                      max-width: 600px;
+                      margin: 0 auto;
+                  }
+                  
+                  .download-section {
+                      background: var(--surface);
+                      border-radius: 1rem;
+                      padding: 2rem;
+                      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                      margin-bottom: 3rem;
+                  }
+                  
+                  .download-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                      gap: 1.5rem;
+                      margin-top: 2rem;
+                  }
+                  
+                  .download-card {
+                      background: var(--background);
+                      border: 2px solid #e2e8f0;
+                      border-radius: 0.75rem;
+                      padding: 1.5rem;
+                      text-align: center;
+                      transition: all 0.3s ease;
+                  }
+                  
+                  .download-card:hover {
+                      border-color: var(--primary);
+                      transform: translateY(-2px);
+                      box-shadow: 0 8px 25px rgba(37,99,235,0.15);
+                  }
+                  
+                  .download-card h3 {
+                      font-size: 1.5rem;
+                      margin-bottom: 0.5rem;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 0.5rem;
+                  }
+                  
+                  .download-btn {
+                      display: inline-block;
+                      background: var(--primary);
+                      color: white;
+                      padding: 0.75rem 1.5rem;
+                      border-radius: 0.5rem;
+                      text-decoration: none;
+                      font-weight: 600;
+                      margin: 1rem 0;
+                      transition: background-color 0.3s ease;
+                  }
+                  
+                  .download-btn:hover {
+                      background: var(--primary-dark);
+                  }
+                  
+                  .platform-info {
+                      color: var(--text-light);
+                      font-size: 0.875rem;
+                      line-height: 1.5;
+                  }
+                  
+                  .installation-guide {
+                      background: var(--surface);
+                      border-radius: 1rem;
+                      padding: 2rem;
+                      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                  }
+                  
+                  .guide-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                      gap: 2rem;
+                      margin-top: 2rem;
+                  }
+                  
+                  .guide-card {
+                      background: var(--background);
+                      border-radius: 0.75rem;
+                      padding: 1.5rem;
+                      border-left: 4px solid var(--primary);
+                  }
+                  
+                  .guide-card h4 {
+                      color: var(--primary);
+                      margin-bottom: 1rem;
+                      font-size: 1.25rem;
+                  }
+                  
+                  .guide-card ol {
+                      margin-left: 1.25rem;
+                  }
+                  
+                  .guide-card li {
+                      margin-bottom: 0.5rem;
+                  }
+                  
+                  .warning {
+                      background: #fef3c7;
+                      border: 1px solid #f59e0b;
+                      border-radius: 0.5rem;
+                      padding: 1rem;
+                      margin: 1rem 0;
+                  }
+                  
+                  .warning-title {
+                      color: #92400e;
+                      font-weight: 600;
+                      margin-bottom: 0.5rem;
+                  }
+                  
+                  code {
+                      background: #f1f5f9;
+                      padding: 0.25rem 0.5rem;
+                      border-radius: 0.25rem;
+                      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                      font-size: 0.875rem;
+                  }
+                  
+                  .code-block {
+                      background: #1e293b;
+                      color: #e2e8f0;
+                      padding: 1rem;
+                      border-radius: 0.5rem;
+                      margin: 1rem 0;
+                      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                      overflow-x: auto;
+                  }
+                  
+                  footer {
+                      background: var(--surface);
+                      border-top: 1px solid #e2e8f0;
+                      padding: 2rem 0;
+                      text-align: center;
+                      color: var(--text-light);
+                  }
+                  
+                  @media (max-width: 768px) {
+                      .hero h2 { font-size: 2rem; }
+                      .download-grid { grid-template-columns: 1fr; }
+                      .guide-grid { grid-template-columns: 1fr; }
+                  }
+              </style>
+          </head>
+          <body>
+              <header>
+                  <div class="container">
+                      <div class="header-content">
+                          <h1>Resume Generator</h1>
+                          <div class="version">LATEST_TAG_PLACEHOLDER</div>
+                      </div>
+                  </div>
+              </header>
+              
+              <main>
+                  <div class="container">
+                      <section class="hero">
+                          <h2>Download Resume Generator</h2>
+                          <p>Create professional resumes with our free, portable desktop application. No installation required - just download and run!</p>
+                      </section>
+                      
+                      <section class="download-section">
+                          <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.5rem;">Choose Your Platform</h3>
+                          <div class="download-grid">
+                              <div class="download-card">
+                                  <h3>🪟 Windows</h3>
+                                  <a href="WIN_URL_PLACEHOLDER" class="download-btn">Download Portable .exe</a>
+                                  <div class="platform-info">
+                                      <strong>No installation required!</strong><br>
+                                      Just double-click to run<br>
+                                      Compatible with Windows 10/11
+                                  </div>
+                              </div>
+                              
+                              <div class="download-card">
+                                  <h3>🍎 macOS</h3>
+                                  <a href="MAC_URL_PLACEHOLDER" class="download-btn">Download .dmg</a>
+                                  <div class="platform-info">
+                                      <strong>Universal Binary</strong><br>
+                                      Intel & Apple Silicon support<br>
+                                      macOS 10.15+ required
+                                  </div>
+                              </div>
+                              
+                              <div class="download-card">
+                                  <h3>🐧 Linux</h3>
+                                  <a href="LINUX_URL_PLACEHOLDER" class="download-btn">Download AppImage</a>
+                                  <div class="platform-info">
+                                      <strong>Universal Linux package</strong><br>
+                                      Works on all distributions<br>
+                                      Just make executable & run
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+                      
+                      <section class="installation-guide">
+                          <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.5rem;">Installation Instructions</h3>
+                          
+                          <div class="guide-grid">
+                              <div class="guide-card">
+                                  <h4>Windows Setup</h4>
+                                  <ol>
+                                      <li>Download the portable .exe file</li>
+                                      <li>Double-click to run immediately</li>
+                                      <li>No installation needed!</li>
+                                  </ol>
+                                  <div class="warning">
+                                      <div class="warning-title">⚠️ Security Warning</div>
+                                      Windows may show a SmartScreen warning. Click "More info" then "Run anyway" since this is an unsigned app.
+                                  </div>
+                              </div>
+                              
+                              <div class="guide-card">
+                                  <h4>macOS Setup</h4>
+                                  <ol>
+                                      <li>Download and open the .dmg file</li>
+                                      <li>Drag app to Applications folder</li>
+                                      <li><strong>Right-click</strong> the app → "Open"</li>
+                                      <li>Click "Open" to bypass Gatekeeper</li>
+                                  </ol>
+                                  <div class="warning">
+                                      <div class="warning-title">🔒 Gatekeeper Bypass Required</div>
+                                      This unsigned app requires right-click → "Open" on first launch, or run:<br>
+                                      <code>xattr -cr "/Applications/Resume Generator.app"</code>
+                                  </div>
+                              </div>
+                              
+                              <div class="guide-card">
+                                  <h4>Linux Setup</h4>
+                                  <ol>
+                                      <li>Download the AppImage file</li>
+                                      <li>Make executable: <code>chmod +x *.AppImage</code></li>
+                                      <li>Double-click to run</li>
+                                  </ol>
+                                  <div class="code-block">chmod +x ResumeGenerator-*-linux.AppImage<br>./ResumeGenerator-*-linux.AppImage</div>
+                              </div>
+                          </div>
+                      </section>
+                  </div>
+              </main>
+              
+              <footer>
+                  <div class="container">
+                      <p>Made with ❤️ using Next.js, React, and Electron</p>
+                      <p><a href="https://github.com/REPO_PLACEHOLDER" style="color: var(--primary);">View on GitHub</a></p>
+                  </div>
+              </footer>
+          </body>
+          </html>
+          EOF
+          
+          # Replace placeholders with actual values
+          sed -i "s|LATEST_TAG_PLACEHOLDER|${{ steps.release.outputs.latest_tag }}|g" docs/index.html
+          sed -i "s|WIN_URL_PLACEHOLDER|${{ steps.release.outputs.win_url }}|g" docs/index.html
+          sed -i "s|MAC_URL_PLACEHOLDER|${{ steps.release.outputs.mac_url }}|g" docs/index.html  
+          sed -i "s|LINUX_URL_PLACEHOLDER|${{ steps.release.outputs.linux_url }}|g" docs/index.html
+          sed -i "s|REPO_PLACEHOLDER|${{ github.repository }}|g" docs/index.html
+          
+          echo "Generated pages content for release ${{ steps.release.outputs.latest_tag }}"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
