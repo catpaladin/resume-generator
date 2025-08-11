@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.6...resume-generator-v0.2.7) (2025-08-11)
+
+
+### Features
+
+* create github pages ([1063951](https://github.com/catpaladin/resume-generator/commit/10639519955080a4acf047d1649609e420a90584))
+* update packages and fix hydration issues ([39e1b36](https://github.com/catpaladin/resume-generator/commit/39e1b364a7d80851b1dfacf3d0e4a03f0e5ea242))
+
+
+### Bug Fixes
+
+* electron-builder tweaks and instructions ([3afeab2](https://github.com/catpaladin/resume-generator/commit/3afeab224199218b39a1d8bb91054135b58db8c3))
+* gha workflow trigger for pages ([891ba12](https://github.com/catpaladin/resume-generator/commit/891ba12b2b099232405ca7da0948c9b3019eed75))
+
 ## [0.2.6](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.5...resume-generator-v0.2.6) (2025-08-10)
 
 
