@@ -10,6 +10,7 @@ permissions:
   pull-requests: write
   issues: write
   repository-projects: write
+  actions: write
 
 jobs:
   release-please:
@@ -228,7 +229,7 @@ jobs:
           1. Download the `ResumeGenerator-*-mac.dmg` file  
           2. Open the DMG and drag the app to Applications folder
           3. **Important**: Right-click the app → "Open" → "Open" (bypass Gatekeeper warning)
-          4. Or run: `xattr -cr /Applications/Resume\ Generator.app` in Terminal
+          4. Or run: `xattr -c /Applications/Resume\ Generator.app` in Terminal
 
           #### Linux
           1. Download the `ResumeGenerator-*-linux.AppImage` file

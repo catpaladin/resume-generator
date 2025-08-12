@@ -94,14 +94,14 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
-            "arm64"
+            "universal"
           ]
         }
       ],
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "identity": null
+      "identity": null,
+      "type": "distribution"
     },
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}",

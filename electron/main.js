@@ -41,8 +41,13 @@ function createWindow() {
       webSecurity: !isDev,
     },
     icon: path.join(__dirname, "../public/favicon.ico"),
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    titleBarStyle: process.platform === "darwin" ? "default" : "default",
     show: false, // Don't show until ready-to-show
+    // macOS specific improvements
+    ...(process.platform === "darwin" && {
+      vibrancy: "under-window",
+      visualEffectState: "active"
+    })
   });
 
   // Load the Next.js app
@@ -91,9 +96,17 @@ function createWindow() {
 
   // Handle window closed
   mainWindow.on("closed", () => {
-    mainWindow = null;
-    if (serverProcess) {
-      serverProcess.kill();
+    // Only clean up server if this is the last window on non-macOS
+    if (process.platform !== "darwin" || BrowserWindow.getAllWindows().length === 1) {
+      if (serverProcess) {
+        serverProcess.kill();
+        serverProcess = null;
+      }
+    }
+    
+    // Only set mainWindow to null if it's this specific window
+    if (mainWindow && mainWindow.isDestroyed()) {
+      mainWindow = null;
     }
   });
 
@@ -199,6 +212,13 @@ function createMenu() {
             if (mainWindow) {
               mainWindow.webContents.send("menu-new-resume");
             }
+          },
+        },
+        {
+          label: "New Window",
+          accelerator: "CmdOrCtrl+Shift+N",
+          click: () => {
+            createWindow();
           },
         },
         {
@@ -581,6 +601,12 @@ app.whenReady().then(() => {
     // On macOS, re-create window when dock icon is clicked
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+    } else {
+      // If windows exist, focus the main one
+      const windows = BrowserWindow.getAllWindows();
+      if (windows.length > 0) {
+        windows[0].focus();
+      }
     }
   });
 });

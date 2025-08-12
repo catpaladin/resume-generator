@@ -367,7 +367,7 @@ jobs:
                                   <div class="warning">
                                       <div class="warning-title">🔒 Gatekeeper Bypass Required</div>
                                       This unsigned app requires right-click → "Open" on first launch, or run:<br>
-                                      <code>xattr -cr "/Applications/Resume Generator.app"</code>
+                                      <code>xattr -c "/Applications/Resume Generator.app"</code>
                                   </div>
                               </div>
                               

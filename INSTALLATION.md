@@ -52,7 +52,7 @@ Since the app is unsigned, Windows Defender SmartScreen may show a warning:
 #### Method 2: Terminal Command
 Open Terminal and run:
 ```bash
-xattr -cr "/Applications/Resume Generator.app"
+xattr -c "/Applications/Resume Generator.app"
 open "/Applications/Resume Generator.app"
 ```
 

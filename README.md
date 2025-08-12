@@ -24,16 +24,6 @@ the right, and export to PDF using your browser’s print dialog.
 - Zustand
 - `@dnd-kit`
 
-## 📦 Download Desktop App
-
-**Get the portable desktop app - no installation required!**
-
-**[📥 Download Resume Generator](https://catpaladin.github.io/resume-generator)**
-
-- **Windows**: Portable .exe
-- **macOS**: Universal .dmg (Intel + Apple Silicon)  
-- **Linux**: AppImage
-
 ## Quick Start (Development)
 
 ```bash
