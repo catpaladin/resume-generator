@@ -130,7 +130,7 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="border-dashed border-accent/30 text-accent hover:bg-accent/5"
+            className="border-accent/30 text-accent hover:bg-accent/5 border-dashed"
             onClick={addSkill}
           >
             <Plus size={16} className="mr-2" /> Add Skill

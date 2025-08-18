@@ -20,14 +20,14 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
   return (
     <section>
-      <h2 className="mb-2 text-base font-bold text-foreground">Projects</h2>
+      <h2 className="text-foreground mb-2 text-base font-bold">Projects</h2>
       <div className="space-y-3">
         {projects.map(
           (project) =>
             project.name && (
               <div key={project.id} className="space-y-1">
                 <div className="mb-1 flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
-                  <h3 className="font-semibold text-foreground">
+                  <h3 className="text-foreground font-semibold">
                     {project.name}
                   </h3>
                   {project.link && isValidUrl(project.link) && (
@@ -35,14 +35,14 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-0.5 break-all text-sm text-primary hover:underline sm:ml-4 sm:mt-0"
+                      className="text-primary mt-0.5 text-sm break-all hover:underline sm:mt-0 sm:ml-4"
                     >
                       {project.link}
                     </a>
                   )}
                 </div>
                 {project.description && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {project.description}
                   </p>
                 )}

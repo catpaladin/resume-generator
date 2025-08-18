@@ -152,7 +152,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="border-dashed border-info/30 text-info hover:bg-info/5"
+            className="border-info/30 text-info hover:bg-info/5 border-dashed"
             onClick={addEducation}
           >
             <Plus size={16} className="mr-2" /> Add Education

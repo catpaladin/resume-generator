@@ -38,7 +38,7 @@ export function SortableItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative rounded-lg border bg-card transition-colors",
+        "group bg-card relative rounded-lg border transition-colors",
         isDragging && "z-50 opacity-50",
         className,
       )}
@@ -46,7 +46,7 @@ export function SortableItem({
       <div
         {...attributes}
         {...listeners}
-        className={`absolute left-2 top-1/2 -translate-y-1/2 cursor-grab p-1 ${alwaysShowDragHandle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+        className={`absolute top-1/2 left-2 -translate-y-1/2 cursor-grab p-1 ${alwaysShowDragHandle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
         style={{ touchAction: "none", cursor: "grab" }}
       >
         <GripVertical size={16} className="text-muted-foreground" />

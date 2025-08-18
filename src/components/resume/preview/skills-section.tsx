@@ -29,12 +29,12 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
 
   return (
     <section>
-      <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
+      <h2 className="border-border text-primary mb-2 border-b pb-1 text-base font-bold uppercase">
         SKILLS
       </h2>
       {Object.entries(groupedSkills).map(([category, categorySkills]) => (
         <div key={category} className="mb-4">
-          <h3 className="mb-2 text-sm font-bold uppercase text-primary">
+          <h3 className="text-primary mb-2 text-sm font-bold uppercase">
             {category}
           </h3>
           <div className="flex flex-wrap gap-2 pt-2">

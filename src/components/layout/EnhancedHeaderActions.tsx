@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
-import { Download, Upload, Trash2 } from "lucide-react";
+import { Download, Upload, Trash2, Plus } from "lucide-react";
 import { useResumeStore } from "@/store/resumeStore";
 import { exportResumeData } from "@/lib/utils";
 import { Button } from "@/components/ui/button/button";
@@ -40,11 +39,11 @@ function ImportModal({ isOpen, onClose, onImportSuccess }: ImportModalProps) {
 
   if (!isOpen) return null;
 
-  const modalContent = (
+  return (
     <>
       {/* Main import modal */}
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-        <div className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="relative mx-4 w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Upload size={20} className="text-blue-600" />
@@ -130,13 +129,9 @@ function ImportModal({ isOpen, onClose, onImportSuccess }: ImportModalProps) {
       )}
     </>
   );
-
-  return typeof window !== "undefined"
-    ? createPortal(modalContent, document.body)
-    : null;
 }
 
-export function HeaderActions() {
+export function EnhancedHeaderActions() {
   const resumeData = useResumeStore((state) => state.resumeData);
   const resetData = useResumeStore((state) => state.resetResumeData);
   const setResumeData = useResumeStore((state) => state.setResumeData);
@@ -165,6 +160,7 @@ export function HeaderActions() {
   return (
     <>
       <div className="flex items-center gap-2">
+        {/* Export button */}
         <Button
           size="sm"
           onClick={handleExport}
@@ -172,18 +168,22 @@ export function HeaderActions() {
           className="bg-green-600 hover:bg-green-700"
         >
           <Download size={14} className="mr-1" />
-          Save
+          Export
         </Button>
+
+        {/* Enhanced Import button */}
         <Button
           size="sm"
           variant="outline"
           onClick={() => setShowImportModal(true)}
-          title="Import resume from file (JSON or Word)"
+          title="Import resume from file"
           className="border-blue-200 hover:bg-blue-50"
         >
           <Upload size={14} className="mr-1" />
           Import
         </Button>
+
+        {/* Reset button */}
         <Button
           size="sm"
           variant="destructive"
@@ -195,6 +195,7 @@ export function HeaderActions() {
         </Button>
       </div>
 
+      {/* Import modal */}
       <ImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -202,4 +203,44 @@ export function HeaderActions() {
       />
     </>
   );
+}
+
+// Quick import component for inline usage
+export function QuickImportButton({
+  onImportSuccess,
+  className = "",
+}: {
+  onImportSuccess: (data: ResumeData) => void;
+  className?: string;
+}) {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleSuccess = (data: ResumeData) => {
+    onImportSuccess(data);
+    setShowModal(false);
+  };
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setShowModal(true)}
+        className={className}
+      >
+        <Plus size={16} className="mr-2" />
+        Import Resume
+      </Button>
+
+      <ImportModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onImportSuccess={handleSuccess}
+      />
+    </>
+  );
+}
+
+// Legacy compatibility component
+export function HeaderActions() {
+  return <EnhancedHeaderActions />;
 }

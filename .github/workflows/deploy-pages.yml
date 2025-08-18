@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag name'
+        description: "Release tag name"
         required: true
         type: string
 
@@ -27,7 +27,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
           RELEASE_TAG="${{ github.event.inputs.tag_name }}"
           echo "latest_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
           echo "Using release tag: $RELEASE_TAG"
-          
+
           # Generate download URLs
           REPO_URL="https://github.com/${{ github.repository }}"
           echo "repo_url=$REPO_URL" >> $GITHUB_OUTPUT
@@ -51,7 +51,7 @@ jobs:
         run: |
           # Create docs directory
           mkdir -p docs
-          
+
           # Create index.html with installation instructions
           cat > docs/index.html << 'EOF'
           <!DOCTYPE html>
@@ -394,14 +394,14 @@ jobs:
           </body>
           </html>
           EOF
-          
+
           # Replace placeholders with actual values
           sed -i "s|LATEST_TAG_PLACEHOLDER|${{ steps.release.outputs.latest_tag }}|g" docs/index.html
           sed -i "s|WIN_URL_PLACEHOLDER|${{ steps.release.outputs.win_url }}|g" docs/index.html
           sed -i "s|MAC_URL_PLACEHOLDER|${{ steps.release.outputs.mac_url }}|g" docs/index.html  
           sed -i "s|LINUX_URL_PLACEHOLDER|${{ steps.release.outputs.linux_url }}|g" docs/index.html
           sed -i "s|REPO_PLACEHOLDER|${{ github.repository }}|g" docs/index.html
-          
+
           echo "Generated pages content for release ${{ steps.release.outputs.latest_tag }}"
 
       - name: Setup Pages
@@ -410,7 +410,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs'
+          path: "./docs"
 
       - name: Deploy to GitHub Pages
         id: deployment

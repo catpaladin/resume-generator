@@ -32,7 +32,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(geistSans.variable, geistMono.variable)}
     >
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="bg-background min-h-screen font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -40,10 +40,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
               <div className="container flex h-14 items-center justify-between gap-4">
                 <div>
-                  <h1 className="whitespace-nowrap text-xl font-bold tracking-tight">
+                  <h1 className="text-xl font-bold tracking-tight whitespace-nowrap">
                     Resume Builder
                   </h1>
                 </div>
@@ -56,9 +56,9 @@ export default function RootLayout({
 
             <main className="flex-1">{children}</main>
 
-            <footer className="mt-auto border-t bg-background/95 py-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:py-0">
+            <footer className="bg-background/95 supports-[backdrop-filter]:bg-background/60 mt-auto border-t py-6 backdrop-blur md:py-0">
               <div className="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
-                <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+                <p className="text-muted-foreground text-center text-sm leading-loose md:text-left">
                   A modern, professional resume builder application. Built with{" "}
                   <a
                     href="https://nextjs.org"

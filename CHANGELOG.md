@@ -7,38 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.9](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.8...resume-generator-v0.2.9) (2025-08-12)
 
-
 ### Bug Fixes
 
-* address electron-builder issues with macos along with weird settings ([e133aed](https://github.com/catpaladin/resume-generator/commit/e133aed78869de21b7f799f7ed25a72edb53430d))
+- address electron-builder issues with macos along with weird settings ([e133aed](https://github.com/catpaladin/resume-generator/commit/e133aed78869de21b7f799f7ed25a72edb53430d))
 
 ## [0.2.8](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.7...resume-generator-v0.2.8) (2025-08-11)
 
-
 ### Bug Fixes
 
-* forgot to remove sign field ([cea4217](https://github.com/catpaladin/resume-generator/commit/cea421703739db5064845c7b98bfde3aa1257748))
+- forgot to remove sign field ([cea4217](https://github.com/catpaladin/resume-generator/commit/cea421703739db5064845c7b98bfde3aa1257748))
 
 ## [0.2.7](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.6...resume-generator-v0.2.7) (2025-08-11)
 
-
 ### Features
 
-* create github pages ([1063951](https://github.com/catpaladin/resume-generator/commit/10639519955080a4acf047d1649609e420a90584))
-* update packages and fix hydration issues ([39e1b36](https://github.com/catpaladin/resume-generator/commit/39e1b364a7d80851b1dfacf3d0e4a03f0e5ea242))
-
+- create github pages ([1063951](https://github.com/catpaladin/resume-generator/commit/10639519955080a4acf047d1649609e420a90584))
+- update packages and fix hydration issues ([39e1b36](https://github.com/catpaladin/resume-generator/commit/39e1b364a7d80851b1dfacf3d0e4a03f0e5ea242))
 
 ### Bug Fixes
 
-* electron-builder tweaks and instructions ([3afeab2](https://github.com/catpaladin/resume-generator/commit/3afeab224199218b39a1d8bb91054135b58db8c3))
-* gha workflow trigger for pages ([891ba12](https://github.com/catpaladin/resume-generator/commit/891ba12b2b099232405ca7da0948c9b3019eed75))
+- electron-builder tweaks and instructions ([3afeab2](https://github.com/catpaladin/resume-generator/commit/3afeab224199218b39a1d8bb91054135b58db8c3))
+- gha workflow trigger for pages ([891ba12](https://github.com/catpaladin/resume-generator/commit/891ba12b2b099232405ca7da0948c9b3019eed75))
 
 ## [0.2.6](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.5...resume-generator-v0.2.6) (2025-08-10)
 
-
 ### Bug Fixes
 
-* api router fixes for electron ([7354b04](https://github.com/catpaladin/resume-generator/commit/7354b04b156c8e274d86b94aaa61302a2aebeffd))
+- api router fixes for electron ([7354b04](https://github.com/catpaladin/resume-generator/commit/7354b04b156c8e274d86b94aaa61302a2aebeffd))
 
 ## [0.2.5](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.4...resume-generator-v0.2.5) (2025-08-10)
 

@@ -16,19 +16,19 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={id} className="text-sm font-medium text-foreground">
+          <label htmlFor={id} className="text-foreground text-sm font-medium">
             {label}
           </label>
         )}
         <div className="relative">
           {showIcon && (
-            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <CalendarIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           )}
           <input
             id={id}
             type="date"
             className={cn(
-              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
               showIcon && "pl-10",
               error && "border-destructive focus-visible:ring-destructive",
               className,

@@ -11,24 +11,24 @@ export function EducationSection({ education }: EducationSectionProps) {
 
   return (
     <section>
-      <h2 className="mb-2 text-base font-bold text-foreground">Education</h2>
+      <h2 className="text-foreground mb-2 text-base font-bold">Education</h2>
       <div className="space-y-3">
         {education.map(
           (edu) =>
             edu.school && (
               <div key={edu.id} className="space-y-0.5">
                 <div className="flex items-baseline justify-between">
-                  <h3 className="font-semibold text-foreground">
+                  <h3 className="text-foreground font-semibold">
                     {edu.school}
                   </h3>
                   {edu.graduationYear && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       {edu.graduationYear}
                     </span>
                   )}
                 </div>
                 {edu.degree && (
-                  <p className="text-sm text-muted-foreground">{edu.degree}</p>
+                  <p className="text-muted-foreground text-sm">{edu.degree}</p>
                 )}
               </div>
             ),

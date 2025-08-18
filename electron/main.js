@@ -46,8 +46,8 @@ function createWindow() {
     // macOS specific improvements
     ...(process.platform === "darwin" && {
       vibrancy: "under-window",
-      visualEffectState: "active"
-    })
+      visualEffectState: "active",
+    }),
   });
 
   // Load the Next.js app
@@ -97,13 +97,16 @@ function createWindow() {
   // Handle window closed
   mainWindow.on("closed", () => {
     // Only clean up server if this is the last window on non-macOS
-    if (process.platform !== "darwin" || BrowserWindow.getAllWindows().length === 1) {
+    if (
+      process.platform !== "darwin" ||
+      BrowserWindow.getAllWindows().length === 1
+    ) {
       if (serverProcess) {
         serverProcess.kill();
         serverProcess = null;
       }
     }
-    
+
     // Only set mainWindow to null if it's this specific window
     if (mainWindow && mainWindow.isDestroyed()) {
       mainWindow = null;

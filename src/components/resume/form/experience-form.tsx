@@ -417,11 +417,11 @@ export function ExperienceForm({
                                 e.target.checked,
                               )
                             }
-                            className="h-4 w-4 rounded border-input bg-background"
+                            className="border-input bg-background h-4 w-4 rounded"
                           />
                           <label
                             htmlFor={`current-${exp.id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
                             I currently work here
                           </label>
@@ -441,7 +441,7 @@ export function ExperienceForm({
                                 size={16}
                                 className="text-muted-foreground"
                               />
-                              <h4 className="text-sm font-medium text-muted-foreground">
+                              <h4 className="text-muted-foreground text-sm font-medium">
                                 Job Description (for AI tailoring)
                               </h4>
                             </div>
@@ -473,7 +473,7 @@ export function ExperienceForm({
                                   )
                                 }
                                 minRows={3}
-                                className="w-full resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                                className="border-input bg-background/60 placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:ring-primary/20 w-full resize-none rounded-lg border px-3 py-2 text-sm backdrop-blur-sm transition-all focus-visible:ring-2 focus-visible:outline-none"
                               />
                             </div>
                           )}
@@ -484,12 +484,12 @@ export function ExperienceForm({
                         aria-label="Remove experience"
                         icon={<X size={16} />}
                         onClick={() => removeExperience(exp.id)}
-                        className="ml-2 mt-2 text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground mt-2 ml-2"
                       />
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-medium text-muted-foreground">
+                        <h4 className="text-muted-foreground text-xs font-medium">
                           Key Achievements
                         </h4>
                         {onNavigateToAISettings && (
@@ -558,7 +558,7 @@ export function ExperienceForm({
                               <SortableItem
                                 key={bullet.id}
                                 id={bullet.id}
-                                className="w-full rounded-lg bg-background/20 hover:border-primary"
+                                className="bg-background/20 hover:border-primary w-full rounded-lg"
                                 contentClassName="w-full pl-10 pr-2 py-2"
                                 alwaysShowDragHandle={true}
                               >
@@ -574,7 +574,7 @@ export function ExperienceForm({
                                       )
                                     }
                                     minRows={2}
-                                    className="flex-1 resize-none rounded-lg border border-input bg-background/60 px-3 py-2 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                                    className="border-input bg-background/60 placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:ring-primary/20 flex-1 resize-none rounded-lg border px-3 py-2 text-sm backdrop-blur-sm transition-all focus-visible:ring-2 focus-visible:outline-none"
                                   />
                                   <div className="flex flex-shrink-0 flex-col items-center justify-start gap-1 pt-2">
                                     {aiSettings?.hasApiKey && (

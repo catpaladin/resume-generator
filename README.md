@@ -86,6 +86,7 @@ Notes:
 ## Scripts
 
 ### Web Development
+
 - `dev` — Start the dev server
 - `build` — Build for production
 - `start` — Run the production build
@@ -96,6 +97,7 @@ Notes:
 - `test:coverage` — Coverage report
 
 ### Desktop App (Electron)
+
 - `electron:dev` — Build and run in Electron
 - `electron:pack` — Create unpacked Electron build
 - `dist:win` — Build Windows portable executable
