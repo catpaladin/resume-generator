@@ -11,7 +11,7 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
 
   return (
     <section>
-      <h2 className="text-foreground mb-2 text-base font-bold">
+      <h2 className="mb-2 text-base font-bold text-foreground">
         Professional Experience
       </h2>
       <div className="space-y-4">
@@ -21,21 +21,21 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
               <div key={exp.id} className="space-y-1">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <h3 className="text-foreground font-semibold">
+                    <h3 className="font-semibold text-foreground">
                       {exp.company}
                     </h3>
                     <div className="flex items-baseline gap-2">
-                      <p className="text-foreground text-sm font-medium">
+                      <p className="text-sm font-medium text-foreground">
                         {exp.position}
                       </p>
                       {exp.location && (
-                        <span className="text-muted-foreground text-sm">
+                        <span className="text-sm text-muted-foreground">
                           • {exp.location}
                         </span>
                       )}
                     </div>
                   </div>
-                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
                     {[exp.startDate, exp.endDate].filter(Boolean).join(" - ")}
                   </span>
                 </div>
@@ -47,7 +47,7 @@ export function ExperienceSection({ experiences }: ExperienceSectionProps) {
                         bullet.text && (
                           <li
                             key={bullet.id}
-                            className="text-muted-foreground overflow-visible text-sm whitespace-normal"
+                            className="overflow-visible whitespace-normal text-sm text-muted-foreground"
                           >
                             {bullet.text}
                           </li>

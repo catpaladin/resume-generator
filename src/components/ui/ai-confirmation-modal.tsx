@@ -139,7 +139,7 @@ export function AIConfirmationModal({
               Original:
             </label>
             <div className="rounded-lg border bg-gray-50 p-3 dark:bg-gray-700">
-              <p className="text-sm text-gray-600 italic dark:text-gray-400">
+              <p className="text-sm italic text-gray-600 dark:text-gray-400">
                 &ldquo;{originalText}&rdquo;
               </p>
             </div>
@@ -226,7 +226,7 @@ export function AIConfirmationModal({
                         setRefinementInstructions(e.target.value)
                       }
                       placeholder="e.g., 'Add more specific technologies used', 'Emphasize the business impact', 'Make it more concise'"
-                      className="h-16 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800"
+                      className="h-16 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
                       maxLength={300}
                     />
                     <div className="flex items-center justify-between">

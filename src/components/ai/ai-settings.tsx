@@ -241,14 +241,14 @@ export function AISettings() {
             Job Description (Optional)
           </label>
           <textarea
-            className="resize-vertical border-input bg-background placeholder:text-muted-foreground focus:ring-ring min-h-[120px] w-full rounded-md border p-3 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
+            className="resize-vertical min-h-[120px] w-full rounded-md border border-input bg-background p-3 text-sm placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Paste the job description here to help AI tailor your achievements to match the role requirements..."
             value={formData.jobDescription || ""}
             onChange={(e) =>
               setFormData({ ...formData, jobDescription: e.target.value })
             }
           />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             This will be used to enhance your resume bullet points with relevant
             keywords and focus areas
           </p>
@@ -260,7 +260,7 @@ export function AISettings() {
             Additional Instructions (Optional)
           </label>
           <textarea
-            className="resize-vertical border-input bg-background placeholder:text-muted-foreground focus:ring-ring min-h-[80px] w-full rounded-md border p-3 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
+            className="resize-vertical min-h-[80px] w-full rounded-md border border-input bg-background p-3 text-sm placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Add specific instructions for AI enhancement (e.g., 'Focus on leadership aspects', 'Emphasize technical skills', 'Use more quantitative language')..."
             value={formData.userInstructions || ""}
             onChange={(e) =>
@@ -268,7 +268,7 @@ export function AISettings() {
             }
             maxLength={500}
           />
-          <p className="text-muted-foreground flex items-start gap-1 text-xs">
+          <p className="flex items-start gap-1 text-xs text-muted-foreground">
             <Shield size={12} className="mt-0.5 flex-shrink-0 text-green-600" />
             <span>
               Only resume-related instructions are allowed. Content is sanitized
@@ -346,7 +346,7 @@ export function AISettings() {
                   </Select>
 
                   {formData.model && availableModels.length > 0 && (
-                    <div className="text-muted-foreground text-xs">
+                    <div className="text-xs text-muted-foreground">
                       {(() => {
                         const selectedModel = availableModels.find(
                           (m) => m.id === formData.model,
@@ -393,7 +393,7 @@ export function AISettings() {
                       setFormData({ ...formData, customModel: e.target.value })
                     }
                   />
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     Enter the exact model name (e.g., gpt-4.1, claude-opus-4.1,
                     gemini-2.5-pro)
                   </p>
@@ -422,7 +422,7 @@ export function AISettings() {
                   {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                 </Button>
               </div>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 Get your API key from{" "}
                 <a
                   href={providerInfo.apiKeyUrl}
@@ -478,7 +478,7 @@ export function AISettings() {
                   <summary className="cursor-pointer font-medium">
                     Security Details
                   </summary>
-                  <ul className="mt-1 ml-2 list-inside list-disc space-y-1">
+                  <ul className="ml-2 mt-1 list-inside list-disc space-y-1">
                     {securityInfo.limitations.map((limitation, index) => (
                       <li key={index} className="text-xs">
                         {limitation}

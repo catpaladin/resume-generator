@@ -67,17 +67,38 @@ export const PARSING_PATTERNS = {
   website: /(?:https?:\/\/)?(?:www\.)?[\w.-]+\.[\w]+/gi,
   dates: {
     monthYear:
-      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi,
-    yearRange: /\b\d{4}\s*[-–—]\s*(?:\d{4}|Present|Current)\b/gi,
+      /\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi,
+    yearRange: /\b\d{4}\s*[-–—]\s*(?:\d{4}|Present|Current|Ongoing|Now)\b/gi,
     fullDate: /\b\d{1,2}\/\d{1,2}\/\d{4}\b/g,
+    monthYearRange:
+      /\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\s*[-–—]\s*(?:(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}|Present|Current|Ongoing|Now)\b/gi,
+    quarterYear: /\bQ[1-4]\s+\d{4}\b/gi,
+    mmYyyy: /\b\d{1,2}\/\d{4}\b/g,
+    seasons: /\b(?:Spring|Summer|Fall|Autumn|Winter)\s+\d{4}\b/gi,
   },
   bulletPoints: /^[\s]*[•\-\*\+]\s+(.+)/gm,
   headers: /^[A-Z][A-Z\s]{2,}$/gm,
+  location: {
+    cityState: /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}\b/g,
+    cityCountry:
+      /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g,
+    remote:
+      /\b(?:Remote|Virtual|Home|WFH|Work\s+from\s+home|Distributed|Telecommute)\b/gi,
+    hybrid: /\b(?:Hybrid|Flexible|On-site\/Remote|Remote\/On-site)\b/gi,
+  },
+  company: {
+    suffixes:
+      /\b(?:Inc|LLC|Corp|Company|Ltd|Technologies|Solutions|Systems|Group|Enterprises|Consulting|Services|Partners|Associates|Holdings|International|Global|Worldwide)\.?\b/gi,
+    separators: /\s*[-–—|@]\s*/,
+    indicators: /\b(?:at|@|with|for)\s+/gi,
+  },
   skills: {
     programming:
-      /\b(?:JavaScript|TypeScript|Python|Java|C\+\+|C#|PHP|Ruby|Go|Rust|Swift|Kotlin|React|Vue|Angular|Node\.js|Express|Django|Flask|Spring|Laravel)\b/gi,
+      /\b(?:JavaScript|TypeScript|Python|Java|C\+\+|C#|PHP|Ruby|Go|Rust|Swift|Kotlin|React|Vue|Angular|Node\.js|Express|Django|Flask|Spring|Laravel|HTML|CSS|SQL|NoSQL|MongoDB|PostgreSQL|MySQL|Redis|GraphQL|REST|API)\b/gi,
     tools:
-      /\b(?:Git|Docker|Kubernetes|AWS|Azure|GCP|Jenkins|Jira|Confluence|Figma|Sketch|Photoshop|Excel|PowerPoint)\b/gi,
+      /\b(?:Git|Docker|Kubernetes|AWS|Azure|GCP|Jenkins|Jira|Confluence|Figma|Sketch|Photoshop|Excel|PowerPoint|Slack|Teams|Zoom|Linux|Windows|macOS|VS\s*Code|IntelliJ|Eclipse)\b/gi,
+    frameworks:
+      /\b(?:React|Vue|Angular|Svelte|Next\.js|Nuxt\.js|Gatsby|Express|Koa|Fastify|Django|Flask|Rails|Laravel|Spring|Hibernate|Tensorflow|PyTorch|Pandas|NumPy)\b/gi,
   },
 };
 

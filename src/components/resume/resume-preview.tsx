@@ -296,11 +296,11 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
   return (
     <Card className="bg-card p-6">
       <div className="mb-6 flex items-center justify-between print:hidden">
-        <h2 className="text-foreground text-xl font-bold">Resume Preview</h2>
+        <h2 className="text-xl font-bold text-foreground">Resume Preview</h2>
         <button
           onClick={handleExportPDF}
           disabled={isExporting}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 rounded-md px-4 py-2 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           <Download size={18} />
           {isExporting ? "Exporting..." : "Export PDF"}
@@ -310,16 +310,16 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
       <div
         ref={previewRef}
         id="resume-preview"
-        className="border-border mx-auto w-[816px] max-w-full space-y-6 rounded-lg border bg-white p-8 text-black shadow-sm sm:p-10 print:w-full print:space-y-4 print:rounded-none print:border-0 print:p-0 print:shadow-none"
+        className="mx-auto w-[816px] max-w-full space-y-6 rounded-lg border border-border bg-white p-8 text-black shadow-sm sm:p-10 print:w-full print:space-y-4 print:rounded-none print:border-0 print:p-0 print:shadow-none"
       >
         <div
           className="scroll-mt-24 text-center print:break-inside-avoid"
           id="section-header"
         >
-          <h1 className="text-primary mb-2 text-2xl font-bold uppercase">
+          <h1 className="mb-2 text-2xl font-bold uppercase text-primary">
             {isMounted ? data.personal?.fullName || "" : ""}
           </h1>
-          <p className="text-foreground/80 text-sm">
+          <p className="text-sm text-foreground/80">
             {isMounted
               ? [
                   // Conditionally render contact info
@@ -340,10 +340,10 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
             id="section-summary"
             className="scroll-mt-24 print:break-inside-avoid"
           >
-            <h2 className="border-border text-primary mb-2 border-b pb-1 text-base font-bold uppercase">
+            <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
               Professional Summary
             </h2>
-            <p className="text-foreground/80 text-sm">
+            <p className="text-sm text-foreground/80">
               {data.personal.summary}
             </p>
           </section>
@@ -366,7 +366,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
               id="section-experience"
               className="scroll-mt-24 print:break-inside-avoid"
             >
-              <h2 className="border-border text-primary mb-2 border-b pb-1 text-base font-bold uppercase">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Professional Experience
               </h2>
               {data.experience.map(
@@ -375,16 +375,16 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                     // Use <details> for each experience
                     <details
                       key={index}
-                      className="group border-border/50 mb-2 border-b pb-2 last:border-b-0 print:break-inside-avoid"
+                      className="group mb-2 border-b border-border/50 pb-2 last:border-b-0 print:break-inside-avoid"
                     >
                       {/* Use <summary> for the clickable header */}
-                      <summary className="hover:bg-muted/50 flex cursor-pointer list-none items-start justify-between rounded-md p-2 group-open:mb-1">
+                      <summary className="flex cursor-pointer list-none items-start justify-between rounded-md p-2 hover:bg-muted/50 group-open:mb-1">
                         <div className="mr-2 flex-grow text-left">
-                          <h3 className="text-foreground text-base font-semibold">
+                          <h3 className="text-base font-semibold text-foreground">
                             {exp.company}
                           </h3>
                           <div className="flex flex-col items-start sm:flex-row sm:items-baseline sm:gap-1">
-                            <p className="text-muted-foreground text-sm font-medium">
+                            <p className="text-sm font-medium text-muted-foreground">
                               {exp.position}
                             </p>
                             {exp.location && (
@@ -405,14 +405,14 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                         </span>
                       </summary>
                       {/* The content inside <details> but outside <summary> is collapsible */}
-                      <div className="px-2 pt-1 pb-3">
-                        <ul className="mt-1 ml-4 list-disc space-y-1">
+                      <div className="px-2 pb-3 pt-1">
+                        <ul className="ml-4 mt-1 list-disc space-y-1">
                           {exp.bulletPoints?.map(
                             (bullet, bulletIndex) =>
                               bullet.text && (
                                 <li
                                   key={bulletIndex}
-                                  className="text-foreground/80 text-sm"
+                                  className="text-sm text-foreground/80"
                                 >
                                   {bullet.text}
                                 </li>
@@ -433,7 +433,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
               id="section-education"
               className="scroll-mt-24 print:break-inside-avoid"
             >
-              <h2 className="border-border text-primary mb-2 border-b pb-1 text-base font-bold uppercase">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Education
               </h2>
               {data.education.map(
@@ -441,14 +441,14 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                   edu.school && (
                     <div key={index} className="mb-2">
                       <div className="flex items-baseline justify-between">
-                        <h3 className="text-foreground text-base font-semibold">
+                        <h3 className="text-base font-semibold text-foreground">
                           {edu.school}
                         </h3>
                         <span className="text-subtle text-sm">
                           {edu.graduationYear}
                         </span>
                       </div>
-                      <p className="text-foreground/80 text-sm">{edu.degree}</p>
+                      <p className="text-sm text-foreground/80">{edu.degree}</p>
                     </div>
                   ),
               )}
@@ -464,7 +464,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
               id="section-projects"
               className="scroll-mt-24 print:break-inside-avoid"
             >
-              <h2 className="border-border text-primary mb-2 border-b pb-1 text-base font-bold uppercase">
+              <h2 className="mb-2 border-b border-border pb-1 text-base font-bold uppercase text-primary">
                 Projects
               </h2>
               {data.projects.map(
@@ -472,7 +472,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                   project.name && (
                     <div key={index} className="mb-2">
                       <div className="flex items-baseline justify-between">
-                        <h3 className="text-foreground text-base font-semibold">
+                        <h3 className="text-base font-semibold text-foreground">
                           {project.name}
                         </h3>
                         {project.link && (
@@ -480,7 +480,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary ml-4 truncate text-sm hover:underline"
+                            className="ml-4 truncate text-sm text-primary hover:underline"
                             style={{ maxWidth: "50%" }}
                           >
                             {project.link}
@@ -488,7 +488,7 @@ export function ClientResumePreview({ data }: ClientResumePreviewProps) {
                         )}
                       </div>
                       {project.description && (
-                        <p className="text-foreground/80 mt-1 text-sm">
+                        <p className="mt-1 text-sm text-foreground/80">
                           {project.description}
                         </p>
                       )}

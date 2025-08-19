@@ -15,13 +15,13 @@ const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={id} className="text-foreground text-sm font-medium">
+          <label htmlFor={id} className="text-sm font-medium text-foreground">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
               {icon}
             </div>
           )}
@@ -29,7 +29,7 @@ const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
             id={id}
             type={type}
             className={cn(
-              "border-input bg-background/60 placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:ring-primary/20 flex h-11 w-full rounded-lg border px-4 py-3 text-sm backdrop-blur-sm transition-all focus-visible:shadow-sm focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+              "flex h-11 w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-sm backdrop-blur-sm transition-all placeholder:text-muted-foreground hover:border-ring/30 focus-visible:border-primary focus-visible:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50",
               icon && "pl-11",
               error &&
                 "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",

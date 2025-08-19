@@ -87,7 +87,7 @@ function FeedbackContainer({
   if (feedbacks.length === 0) return null;
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 max-w-md space-y-2">
+    <div className="fixed bottom-4 right-4 z-50 max-w-md space-y-2">
       {feedbacks.map((feedback) => (
         <FeedbackCard
           key={feedback.id}

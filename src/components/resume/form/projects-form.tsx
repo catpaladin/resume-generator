@@ -149,7 +149,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="border-warning/30 text-warning hover:bg-warning/5 border-dashed"
+            className="border-dashed border-warning/30 text-warning hover:bg-warning/5"
             onClick={addProject}
           >
             <Plus size={16} className="mr-2" /> Add Project

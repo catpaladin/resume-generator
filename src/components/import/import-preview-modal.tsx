@@ -169,7 +169,7 @@ export function ImportPreviewModal({
           {activeTab === "original" && (
             <div className="p-6">
               <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-700">
-                <pre className="text-xs whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300">
                   {importResult.originalContent ||
                     "Original content not available"}
                 </pre>

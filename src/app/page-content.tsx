@@ -20,7 +20,7 @@ export default function HomePageContent() {
   if (!mounted) return null;
 
   return (
-    <div className="container grid items-start gap-8 pt-6 pb-8 md:grid-cols-2">
+    <div className="container grid items-start gap-8 pb-8 pt-6 md:grid-cols-2">
       <div className="flex flex-col space-y-6">
         <ResumeBuilderContainer data={resumeData} onUpdate={setResumeData} />
       </div>
@@ -30,10 +30,10 @@ export default function HomePageContent() {
         <ResumePreviewContainer data={resumeData} />
       </div>
 
-      <div className="fixed right-6 bottom-6 md:hidden print:hidden">
+      <div className="fixed bottom-6 right-6 md:hidden print:hidden">
         <button
           onClick={() => window.print()}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-12 w-12 items-center justify-center rounded-full shadow-lg"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
           aria-label="Print Resume"
         >
           <Printer className="h-6 w-6" />

@@ -16,20 +16,20 @@ export function HeaderSection({ data }: HeaderSectionProps) {
 
   return (
     <section className="space-y-2 text-center">
-      <h1 className="text-foreground text-2xl font-bold">{fullName}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{fullName}</h1>
 
       {contactInfo.length > 0 && (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {contactInfo.join(" • ")}
         </p>
       )}
 
       {summary && (
         <div className="mt-4 text-left">
-          <h2 className="text-foreground mb-1 text-base font-semibold">
+          <h2 className="mb-1 text-base font-semibold text-foreground">
             Professional Summary
           </h2>
-          <p className="text-muted-foreground text-sm">{summary}</p>
+          <p className="text-sm text-muted-foreground">{summary}</p>
         </div>
       )}
     </section>

@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.10](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.9...resume-generator-v0.2.10) (2025-08-18)
 
-
 ### Features
 
-* add import docx that tries to parse the resume ([d11e23c](https://github.com/catpaladin/resume-generator/commit/d11e23c9b26bd10c6658964a7cdff7c1e5eef5ca))
+- add import docx that tries to parse the resume ([d11e23c](https://github.com/catpaladin/resume-generator/commit/d11e23c9b26bd10c6658964a7cdff7c1e5eef5ca))
 
 ## [0.2.9](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.8...resume-generator-v0.2.9) (2025-08-12)
 
