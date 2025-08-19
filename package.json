@@ -138,10 +138,7 @@
           ]
         }
       ],
-      "verifyUpdateCodeSignature": false,
-      "sign": false,
-      "certificateFile": null,
-      "certificatePassword": null
+      "verifyUpdateCodeSignature": false
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable.${ext}"
