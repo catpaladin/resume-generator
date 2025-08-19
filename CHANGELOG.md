@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.11](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.10...resume-generator-v0.2.11) (2025-08-19)
+
+
+### Features
+
+* enhance docx parser for better matching ([b9bb339](https://github.com/catpaladin/resume-generator/commit/b9bb3399e14270b5761f3444afcdcf5e2d66ed60))
+
+
+### Bug Fixes
+
+* address signing issues with windows electron build ([af38548](https://github.com/catpaladin/resume-generator/commit/af38548e17513b81e6dd97da9b6ed45c8811e8ce))
+
 ## [0.2.10](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.9...resume-generator-v0.2.10) (2025-08-18)
 
 ### Features
