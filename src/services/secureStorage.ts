@@ -102,18 +102,29 @@ class SecureStorage {
    * Encrypt and store sensitive data
    */
   async setSecure(key: string, value: string): Promise<void> {
+    console.log(
+      `[SecureStorage.setSecure] Starting encryption for key: ${key}`,
+    );
+
     if (!this.isSupported) {
       console.warn(
         "Secure storage not supported, falling back to localStorage",
       );
       localStorage.setItem(key, value);
+      console.log(
+        `[SecureStorage.setSecure] Stored in plain localStorage for key: ${key}`,
+      );
       return;
     }
 
     try {
+      console.log(`[SecureStorage.setSecure] Getting crypto key...`);
       const cryptoKey = await this.getOrCreateKey();
+      console.log(`[SecureStorage.setSecure] Got crypto key, generating IV...`);
+
       const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 
+      console.log(`[SecureStorage.setSecure] Encrypting data...`);
       const encryptedData = await crypto.subtle.encrypt(
         { name: ALGORITHM, iv },
         cryptoKey,
@@ -127,10 +138,16 @@ class SecureStorage {
 
       const encryptedBase64 = btoa(String.fromCharCode(...combined));
 
+      console.log(`[SecureStorage.setSecure] Getting existing store...`);
       // Store encrypted data
       const existingData = this.getEncryptedStore();
       existingData[key] = encryptedBase64;
+
+      console.log(`[SecureStorage.setSecure] Saving to localStorage...`);
       localStorage.setItem(ENCRYPTED_DATA_KEY, JSON.stringify(existingData));
+      console.log(
+        `[SecureStorage.setSecure] Successfully encrypted and stored key: ${key}`,
+      );
     } catch (error) {
       console.error("Encryption failed:", error);
       throw new Error("Failed to securely store data");
@@ -141,19 +158,40 @@ class SecureStorage {
    * Decrypt and retrieve sensitive data
    */
   async getSecure(key: string): Promise<string | null> {
+    console.log(
+      `[SecureStorage.getSecure] Starting decryption for key: ${key}`,
+    );
+
     if (!this.isSupported) {
-      return localStorage.getItem(key);
+      console.log(
+        `[SecureStorage.getSecure] Secure storage not supported, using localStorage`,
+      );
+      const value = localStorage.getItem(key);
+      console.log(
+        `[SecureStorage.getSecure] Retrieved from localStorage:`,
+        value ? "Found" : "Not found",
+      );
+      return value;
     }
 
     try {
+      console.log(`[SecureStorage.getSecure] Getting encrypted store...`);
       const encryptedStore = this.getEncryptedStore();
       const encryptedBase64 = encryptedStore[key];
 
       if (!encryptedBase64) {
+        console.log(
+          `[SecureStorage.getSecure] No encrypted data found for key: ${key}`,
+        );
         return null;
       }
 
+      console.log(
+        `[SecureStorage.getSecure] Found encrypted data, getting crypto key...`,
+      );
       const cryptoKey = await this.getOrCreateKey();
+
+      console.log(`[SecureStorage.getSecure] Decoding base64 data...`);
       const combined = new Uint8Array(
         atob(encryptedBase64)
           .split("")
@@ -163,16 +201,30 @@ class SecureStorage {
       const iv = combined.slice(0, IV_LENGTH);
       const encryptedData = combined.slice(IV_LENGTH);
 
+      console.log(`[SecureStorage.getSecure] Decrypting data...`);
       const decryptedData = await crypto.subtle.decrypt(
         { name: ALGORITHM, iv },
         cryptoKey,
         encryptedData,
       );
 
-      return new TextDecoder().decode(decryptedData);
+      const result = new TextDecoder().decode(decryptedData);
+      console.log(
+        `[SecureStorage.getSecure] Successfully decrypted key: ${key}`,
+      );
+      return result;
     } catch (error) {
       console.error("Decryption failed:", error);
-      return null;
+
+      // Try to recover by clearing corrupted data and regenerating key
+      try {
+        console.warn("Attempting to recover from decryption failure...");
+        await this.clearCorruptedData();
+        return null; // Return null so user can re-enter their API key
+      } catch (recoveryError) {
+        console.error("Recovery failed:", recoveryError);
+        return null;
+      }
     }
   }
 
@@ -199,6 +251,16 @@ class SecureStorage {
    * Clear all securely stored data
    */
   async clearAll(): Promise<void> {
+    localStorage.removeItem(ENCRYPTED_DATA_KEY);
+    localStorage.removeItem(SALT_KEY);
+    this.cryptoKey = null;
+  }
+
+  /**
+   * Clear corrupted encryption data and reset crypto key
+   */
+  private async clearCorruptedData(): Promise<void> {
+    console.warn("Clearing corrupted encryption data...");
     localStorage.removeItem(ENCRYPTED_DATA_KEY);
     localStorage.removeItem(SALT_KEY);
     this.cryptoKey = null;
@@ -260,11 +322,42 @@ class SecureStorage {
 export const secureStorage = new SecureStorage();
 
 // Helper functions for common operations
-export const storeApiKey = (provider: string, apiKey: string) =>
-  secureStorage.setSecure(`api-key-${provider}`, apiKey);
+export const storeApiKey = async (provider: string, apiKey: string) => {
+  console.log(`[SecureStorage] Storing API key for provider: ${provider}`);
+  try {
+    await secureStorage.setSecure(`api-key-${provider}`, apiKey);
+    console.log(`[SecureStorage] Successfully stored API key for ${provider}`);
+  } catch (error) {
+    console.error(
+      `[SecureStorage] Failed to store API key for ${provider}:`,
+      error,
+    );
+    throw error;
+  }
+};
 
-export const getApiKey = (provider: string) =>
-  secureStorage.getSecure(`api-key-${provider}`);
+export const getApiKey = async (provider: string) => {
+  console.log(`[SecureStorage] Retrieving API key for provider: ${provider}`);
+  try {
+    const apiKey = await secureStorage.getSecure(`api-key-${provider}`);
+    console.log(
+      `[SecureStorage] Retrieved API key for ${provider}:`,
+      apiKey ? `Found (${apiKey.length} chars)` : "Not found",
+    );
+    return apiKey;
+  } catch (error) {
+    console.error(
+      `[SecureStorage] Failed to retrieve API key for ${provider}:`,
+      error,
+    );
+    return null;
+  }
+};
 
 export const removeApiKey = (provider: string) =>
   secureStorage.removeSecure(`api-key-${provider}`);
+
+export const clearAllSecureData = () => secureStorage.clearAll();
+
+export const isSecureStorageSupported = () =>
+  secureStorage.isSecureStorageSupported();

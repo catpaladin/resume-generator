@@ -61,9 +61,23 @@ export function AISettings() {
         const storedKey = await getApiKey(formData.provider);
         setApiKey(storedKey || "");
         setFormData((prev) => ({ ...prev, hasApiKey: !!storedKey }));
+
+        // If no stored key found, show helpful message
+        if (!storedKey) {
+          console.info(
+            `No stored API key found for ${formData.provider}. Please enter your API key.`,
+          );
+        }
       } catch (error) {
         console.error("Failed to load API key:", error);
+        // Clear any corrupted data and reset
         setApiKey("");
+        setFormData((prev) => ({ ...prev, hasApiKey: false }));
+
+        // Show user-friendly error message
+        alert(
+          "There was an issue loading your stored API key. Please re-enter your API key.",
+        );
       } finally {
         setIsLoadingApiKey(false);
       }
@@ -125,14 +139,23 @@ export function AISettings() {
   };
 
   const handleSave = async () => {
+    console.log(
+      `[AISettings] Save button clicked. Provider: ${formData.provider}, API key length: ${apiKey.length}`,
+    );
+
     if (!apiKey.trim()) {
+      console.log(`[AISettings] No API key entered`);
       alert("Please enter an API key");
       return;
     }
 
     try {
+      console.log(
+        `[AISettings] About to store API key for provider: ${formData.provider}`,
+      );
       // Store API key securely
       await storeApiKey(formData.provider, apiKey);
+      console.log(`[AISettings] API key stored successfully`);
 
       // Save settings (without API key)
       const settingsToSave = {
@@ -140,6 +163,7 @@ export function AISettings() {
         hasApiKey: true,
       };
       setAISettings(settingsToSave);
+      console.log(`[AISettings] Settings saved to store`);
 
       alert("AI settings saved securely!");
     } catch (error) {

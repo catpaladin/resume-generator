@@ -4,7 +4,6 @@ import {
   Briefcase,
   GraduationCap,
   Code,
-  Bot,
 } from "lucide-react";
 import type { ResumeData } from "@/types/resume";
 import type { Tab } from "@/types/common";
@@ -20,7 +19,6 @@ export const TabConfig: Tab[] = [
   { id: "experience", icon: Briefcase, label: "Experience" },
   { id: "education", icon: GraduationCap, label: "Education" },
   { id: "projects", icon: Code, label: "Projects" },
-  { id: "ai-settings", icon: Bot, label: "AI Settings" },
 ] as const;
 
 export type TabType = (typeof TabConfig)[number]["id"];

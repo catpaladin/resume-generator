@@ -1,0 +1,101 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button/button";
+import { TabConfig } from "@/config/constants";
+import {
+  EducationForm,
+  ExperienceForm,
+  PersonalInfoForm,
+  ProjectsForm,
+  SkillsForm,
+} from "./form";
+import type { ResumeData } from "@/types/resume";
+import type { TabType } from "@/types/common";
+
+interface EnhancedResumeBuilderProps {
+  data: ResumeData;
+  updateSection: <K extends keyof ResumeData>(
+    section: K,
+    value: ResumeData[K],
+  ) => void;
+}
+
+export function EnhancedResumeBuilder({
+  data,
+  updateSection,
+}: EnhancedResumeBuilderProps) {
+  const [activeTab, setActiveTab] = useState<TabType>("personal");
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "personal":
+        return (
+          <PersonalInfoForm
+            data={data.personal}
+            onChange={(field, value) =>
+              updateSection("personal", { ...data.personal, [field]: value })
+            }
+          />
+        );
+      case "skills":
+        return (
+          <SkillsForm
+            skills={data.skills}
+            onChange={(skills) => updateSection("skills", skills)}
+          />
+        );
+      case "experience":
+        return (
+          <ExperienceForm
+            experiences={data.experience}
+            onChange={(experiences) => updateSection("experience", experiences)}
+            onNavigateToAISettings={undefined}
+          />
+        );
+      case "education":
+        return (
+          <EducationForm
+            education={data.education}
+            onChange={(education) => updateSection("education", education)}
+          />
+        );
+      case "projects":
+        return (
+          <ProjectsForm
+            projects={data.projects}
+            onChange={(projects) => updateSection("projects", projects)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      {/* Clean Tab Navigation */}
+      <div className="no-scrollbar mb-3 flex items-center gap-1 overflow-x-auto pb-1">
+        {TabConfig.map(({ id, icon: Icon, label }) => (
+          <Button
+            key={id}
+            type="button"
+            variant={activeTab === id ? "default" : "secondary"}
+            size="sm"
+            className="h-8 shrink-0 rounded-full px-3 text-xs md:text-sm"
+            aria-pressed={activeTab === id}
+            onClick={() => setActiveTab(id as TabType)}
+          >
+            <span className="inline-flex items-center gap-1">
+              <Icon size={14} />
+              <span className="truncate">{label}</span>
+            </span>
+          </Button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="min-h-0 flex-1">{renderTabContent()}</div>
+    </>
+  );
+}
