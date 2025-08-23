@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useResumeStore } from "@/store/resumeStore";
 import { useTheme } from "@/hooks/use-theme";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import type { ResumeData } from "@/types/resume";
 import type {
   AIEnhancementResult,
@@ -54,6 +55,12 @@ export function AIEnhancementModal({
     focusAreas: [],
     enableFallback: true,
   });
+
+  const modalRef = useClickOutside<HTMLDivElement>(() => {
+    if (step !== "enhancing") {
+      onClose();
+    }
+  }, isOpen);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -104,6 +111,7 @@ export function AIEnhancementModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
+        ref={modalRef}
         className={`max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg p-6 shadow-xl ${
           isDark ? "bg-gray-800" : "bg-white"
         }`}

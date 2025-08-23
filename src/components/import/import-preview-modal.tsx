@@ -12,7 +12,13 @@ import {
   Info,
   Eye,
   Download,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
+import { useClickOutside } from "@/hooks/use-click-outside";
+import { useResumeStore } from "@/store/resumeStore";
+import { parseResumeWithAI } from "@/lib/ai/ai-parsing-service";
+import { getApiKey } from "@/services/secureStorage";
 import type { ResumeData } from "@/types/resume";
 import type { ImportResult } from "@/lib/importers/import-manager";
 
@@ -31,10 +37,20 @@ export function ImportPreviewModal({
   onReject,
   onEdit,
 }: ImportPreviewModalProps) {
+  const { aiSettings } = useResumeStore();
   const [activeTab, setActiveTab] = useState<"preview" | "original" | "errors">(
     "preview",
   );
-  const editedData = importResult.data;
+  const [isAIParsing, setIsAIParsing] = useState(false);
+  const [aiParsedData, setAiParsedData] = useState<ResumeData | null>(null);
+  const [aiParsingError, setAiParsingError] = useState<string | null>(null);
+
+  const displayData = aiParsedData || importResult.data;
+  const isUsingAIData = !!aiParsedData;
+
+  const modalRef = useClickOutside<HTMLDivElement>(() => {
+    onReject();
+  }, isOpen);
 
   if (!isOpen || !importResult.success || !importResult.data) return null;
 
@@ -56,18 +72,78 @@ export function ImportPreviewModal({
   };
 
   const handleAccept = () => {
-    onAccept(editedData || importResult.data!);
+    onAccept(displayData || importResult.data!);
   };
 
   const handleEdit = () => {
-    if (onEdit && editedData) {
-      onEdit(editedData);
+    if (onEdit && displayData) {
+      onEdit(displayData);
+    }
+  };
+
+  const handleAIParseImprove = async () => {
+    if (
+      !aiSettings?.hasApiKey ||
+      !importResult.originalContent ||
+      !importResult.data
+    ) {
+      setAiParsingError(
+        "AI parsing not available - missing API key or original content",
+      );
+      return;
+    }
+
+    setIsAIParsing(true);
+    setAiParsingError(null);
+
+    try {
+      const apiKey = await getApiKeyForProvider(aiSettings.provider);
+      if (!apiKey) {
+        throw new Error(
+          `No API key found for provider: ${aiSettings.provider}`,
+        );
+      }
+
+      const result = await parseResumeWithAI(
+        importResult.originalContent,
+        importResult.data,
+        {
+          provider: aiSettings.provider,
+          model: aiSettings.model || aiSettings.customModel,
+          apiKey,
+        },
+      );
+
+      if (result.success && result.data) {
+        setAiParsedData(result.data);
+      } else {
+        setAiParsingError(result.error || "AI parsing failed");
+      }
+    } catch (error) {
+      setAiParsingError(
+        error instanceof Error ? error.message : "AI parsing failed",
+      );
+    } finally {
+      setIsAIParsing(false);
+    }
+  };
+
+  const getApiKeyForProvider = async (provider: string): Promise<string> => {
+    try {
+      const apiKey = await getApiKey(provider);
+      return apiKey || "";
+    } catch (error) {
+      console.error(`Failed to get API key for ${provider}:`, error);
+      return "";
     }
   };
 
   const modalContent = (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="relative flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-800">
+      <div
+        ref={modalRef}
+        className="relative flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-800"
+      >
         <div className="flex items-center justify-between border-b p-6">
           <div className="flex items-center gap-3">
             <FileText size={24} className="text-blue-600" />
@@ -162,7 +238,27 @@ export function ImportPreviewModal({
         <div className="flex-1 overflow-auto">
           {activeTab === "preview" && (
             <div className="p-6">
-              <ResumePreview data={importResult.data} />
+              {isUsingAIData && (
+                <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={16} className="text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      Showing AI-improved parsing results
+                    </span>
+                  </div>
+                </div>
+              )}
+              {aiParsingError && (
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-700 dark:bg-red-900/20">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600" />
+                    <span className="text-sm text-red-800 dark:text-red-200">
+                      {aiParsingError}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <ResumePreview data={displayData || importResult.data!} />
             </div>
           )}
 
@@ -269,6 +365,23 @@ export function ImportPreviewModal({
                 Edit Before Import
               </Button>
             )}
+            {importResult.aiEnhancementAvailable &&
+              aiSettings?.hasApiKey &&
+              !isUsingAIData && (
+                <Button
+                  onClick={handleAIParseImprove}
+                  disabled={isAIParsing}
+                  variant="outline"
+                  className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                >
+                  {isAIParsing ? (
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles size={16} className="mr-2" />
+                  )}
+                  {isAIParsing ? "Parsing with AI..." : "Parse with AI"}
+                </Button>
+              )}
             <Button
               onClick={handleAccept}
               className={`flex-1 ${

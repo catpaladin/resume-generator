@@ -2,32 +2,15 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  Bot,
-  Settings,
-  BarChart3,
-  History,
-  Upload,
-  X,
-  ChevronDown,
-} from "lucide-react";
+import { Bot, Settings, X, ChevronDown } from "lucide-react";
 import { EnhancedAISettings } from "@/components/import/enhanced-ai-settings";
-import { AIUsageMonitor } from "@/components/import/ai-usage-monitor";
-import { AIHistoryViewer } from "@/components/import/ai-history-viewer";
-import { AIEnhancedDropzone } from "@/components/import/ai-enhanced-dropzone";
-import type { ResumeData } from "@/types/resume";
-
 interface AINavbarControlsProps {
-  onImportComplete?: (data: ResumeData) => void;
   className?: string;
 }
 
-type ModalType = "settings" | "analytics" | "history" | "import" | null;
+type ModalType = "settings" | null;
 
-export function AINavbarControls({
-  onImportComplete,
-  className = "",
-}: AINavbarControlsProps) {
+export function AINavbarControls({ className = "" }: AINavbarControlsProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -46,24 +29,6 @@ export function AINavbarControls({
       title: "AI Settings",
       icon: Settings,
       component: <EnhancedAISettings />,
-      width: "max-w-4xl",
-    },
-    analytics: {
-      title: "AI Analytics",
-      icon: BarChart3,
-      component: <AIUsageMonitor />,
-      width: "max-w-6xl",
-    },
-    history: {
-      title: "Enhancement History",
-      icon: History,
-      component: <AIHistoryViewer />,
-      width: "max-w-6xl",
-    },
-    import: {
-      title: "AI Import",
-      icon: Upload,
-      component: <AIEnhancedDropzone onImportSuccess={onImportComplete} />,
       width: "max-w-4xl",
     },
   };
@@ -93,22 +58,6 @@ export function AINavbarControls({
           <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div className="space-y-1 p-2">
               <button
-                onClick={() => openModal("import")}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <Upload
-                  size={16}
-                  className="text-blue-600 dark:text-blue-400"
-                />
-                <div className="text-left">
-                  <div className="font-medium">AI Import</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Upload & enhance resumes
-                  </div>
-                </div>
-              </button>
-
-              <button
                 onClick={() => openModal("settings")}
                 className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
               >
@@ -120,38 +69,6 @@ export function AINavbarControls({
                   <div className="font-medium">AI Settings</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     Configure providers & options
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => openModal("analytics")}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <BarChart3
-                  size={16}
-                  className="text-purple-600 dark:text-purple-400"
-                />
-                <div className="text-left">
-                  <div className="font-medium">Analytics</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Usage & cost tracking
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => openModal("history")}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <History
-                  size={16}
-                  className="text-amber-600 dark:text-amber-400"
-                />
-                <div className="text-left">
-                  <div className="font-medium">History</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Enhancement records
                   </div>
                 </div>
               </button>

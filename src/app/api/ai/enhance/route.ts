@@ -14,11 +14,13 @@ export async function POST(request: NextRequest) {
       originalText,
       parsedData,
       apiKey,
+      isParsingMode,
     }: {
       options: AIEnhancementOptions;
       originalText: string;
       parsedData: ResumeData;
       apiKey: string;
+      isParsingMode?: boolean;
     } = body;
 
     if (!options.provider) {
@@ -47,7 +49,10 @@ export async function POST(request: NextRequest) {
       enhancementLevel: options.enhancementLevel,
     };
 
-    let result: Pick<AIEnhancementResult, "originalData" | "enhancedData" | "suggestions" | "confidence">;
+    let result: Pick<
+      AIEnhancementResult,
+      "originalData" | "enhancedData" | "suggestions" | "confidence"
+    >;
 
     // Call the appropriate AI provider API
     switch (options.provider) {
@@ -56,6 +61,7 @@ export async function POST(request: NextRequest) {
           enhancementRequest,
           apiKey,
           options.model,
+          isParsingMode,
         );
         break;
       case "anthropic":
@@ -63,6 +69,7 @@ export async function POST(request: NextRequest) {
           enhancementRequest,
           apiKey,
           options.model,
+          isParsingMode,
         );
         break;
       case "gemini":
@@ -70,6 +77,7 @@ export async function POST(request: NextRequest) {
           enhancementRequest,
           apiKey,
           options.model,
+          isParsingMode,
         );
         break;
       default:
@@ -107,7 +115,13 @@ async function enhanceWithOpenAI(
   request: AIEnhancementRequest,
   apiKey: string,
   model?: string,
-): Promise<Pick<AIEnhancementResult, "originalData" | "enhancedData" | "suggestions" | "confidence">> {
+  isParsingMode?: boolean,
+): Promise<
+  Pick<
+    AIEnhancementResult,
+    "originalData" | "enhancedData" | "suggestions" | "confidence"
+  >
+> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -119,11 +133,11 @@ async function enhanceWithOpenAI(
       messages: [
         {
           role: "system",
-          content: getSystemPrompt(request.enhancementLevel),
+          content: getSystemPrompt(request.enhancementLevel, isParsingMode),
         },
         {
           role: "user",
-          content: getUserPrompt(request),
+          content: getUserPrompt(request, isParsingMode),
         },
       ],
       temperature: 0.7,
@@ -142,14 +156,20 @@ async function enhanceWithOpenAI(
     throw new Error("No content received from OpenAI");
   }
 
-  return parseEnhancementResponse(content, request);
+  return parseEnhancementResponse(content, request, isParsingMode);
 }
 
 async function enhanceWithAnthropic(
   request: AIEnhancementRequest,
   apiKey: string,
   model?: string,
-): Promise<Pick<AIEnhancementResult, "originalData" | "enhancedData" | "suggestions" | "confidence">> {
+  isParsingMode?: boolean,
+): Promise<
+  Pick<
+    AIEnhancementResult,
+    "originalData" | "enhancedData" | "suggestions" | "confidence"
+  >
+> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -163,7 +183,7 @@ async function enhanceWithAnthropic(
       messages: [
         {
           role: "user",
-          content: `${getSystemPrompt(request.enhancementLevel)}\n\n${getUserPrompt(request)}`,
+          content: `${getSystemPrompt(request.enhancementLevel, isParsingMode)}\n\n${getUserPrompt(request, isParsingMode)}`,
         },
       ],
     }),
@@ -180,14 +200,20 @@ async function enhanceWithAnthropic(
     throw new Error("No content received from Anthropic");
   }
 
-  return parseEnhancementResponse(content, request);
+  return parseEnhancementResponse(content, request, isParsingMode);
 }
 
 async function enhanceWithGemini(
   request: AIEnhancementRequest,
   apiKey: string,
   model?: string,
-): Promise<Pick<AIEnhancementResult, "originalData" | "enhancedData" | "suggestions" | "confidence">> {
+  isParsingMode?: boolean,
+): Promise<
+  Pick<
+    AIEnhancementResult,
+    "originalData" | "enhancedData" | "suggestions" | "confidence"
+  >
+> {
   const modelName = model || "gemini-pro";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
@@ -201,7 +227,7 @@ async function enhanceWithGemini(
           {
             parts: [
               {
-                text: `${getSystemPrompt(request.enhancementLevel)}\n\n${getUserPrompt(request)}`,
+                text: `${getSystemPrompt(request.enhancementLevel, isParsingMode)}\n\n${getUserPrompt(request, isParsingMode)}`,
               },
             ],
           },
@@ -225,10 +251,36 @@ async function enhanceWithGemini(
     throw new Error("No content received from Gemini");
   }
 
-  return parseEnhancementResponse(content, request);
+  return parseEnhancementResponse(content, request, isParsingMode);
 }
 
-function getSystemPrompt(enhancementLevel: string): string {
+function getSystemPrompt(
+  enhancementLevel: string,
+  isParsingMode?: boolean,
+): string {
+  if (isParsingMode) {
+    return `You are an expert resume parser. Your job is to extract structured resume data from raw text more accurately than basic parsing algorithms.
+
+CRITICAL RULES:
+1. NEVER fabricate or invent information
+2. Only extract information that is explicitly present in the text
+3. If information is unclear or missing, leave it blank rather than guess
+4. Focus on better extraction/parsing, not enhancement or improvement
+5. Preserve the original meaning and facts exactly as written
+6. Return ONLY valid JSON that matches the exact schema specified
+7. Generate unique IDs for all array items using format: section-timestamp-index (e.g., "exp-1640995200000-0")
+
+RESPONSE FORMAT: Return ONLY a JSON object, no markdown, no explanations, no additional text.
+
+Your goal is to catch details that basic parsing might miss:
+- Better name extraction from headers
+- More accurate date parsing
+- Better separation of company names vs positions
+- More precise bullet point extraction
+- Better skill categorization from context
+- More accurate contact information extraction`;
+  }
+
   const basePrompt = `You are an expert resume enhancement AI. Your task is to improve resume content while maintaining accuracy and authenticity.
 
 Rules:
@@ -241,13 +293,83 @@ Rules:
   const levelPrompts = {
     light: "Focus on grammar, clarity, and minor wording improvements.",
     moderate: "Enhance impact, add relevant keywords, and improve structure.",
-    comprehensive: "Comprehensive optimization for ATS, impact, and professional presentation.",
+    comprehensive:
+      "Comprehensive optimization for ATS, impact, and professional presentation.",
   };
 
   return `${basePrompt}\n\nEnhancement Level: ${levelPrompts[enhancementLevel as keyof typeof levelPrompts] || levelPrompts.moderate}`;
 }
 
-function getUserPrompt(request: AIEnhancementRequest): string {
+function getUserPrompt(
+  request: AIEnhancementRequest,
+  isParsingMode?: boolean,
+): string {
+  if (isParsingMode) {
+    const timestamp = Date.now();
+    return `Here is the raw text from a resume document:
+
+"""
+${request.originalText || ""}
+"""
+
+Here is what basic parsing extracted:
+${JSON.stringify(request.parsedData, null, 2)}
+
+Please parse the raw text more accurately and return a JSON object that exactly matches this ResumeData structure:
+
+{
+  "personal": {
+    "fullName": "extracted full name",
+    "email": "extracted email",
+    "phone": "extracted phone number",
+    "location": "extracted location", 
+    "linkedin": "extracted linkedin URL",
+    "summary": "extracted professional summary"
+  },
+  "skills": [
+    {
+      "id": "skill-${timestamp}-0",
+      "name": "skill name",
+      "category": "Technical"
+    }
+  ],
+  "experience": [
+    {
+      "id": "exp-${timestamp}-0",
+      "company": "company name",
+      "position": "job title",
+      "location": "job location",
+      "startDate": "MM/YYYY",
+      "endDate": "MM/YYYY",
+      "isCurrent": false,
+      "bulletPoints": [
+        {
+          "id": "bp-${timestamp}-0",
+          "text": "achievement or responsibility"
+        }
+      ]
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-${timestamp}-0", 
+      "school": "university name",
+      "degree": "degree and field",
+      "graduationYear": "YYYY"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-${timestamp}-0",
+      "name": "project name",
+      "description": "project description",
+      "link": "project URL"
+    }
+  ]
+}
+
+IMPORTANT: Return ONLY the JSON object above, no additional text, explanations, or markdown formatting.`;
+  }
   let prompt = `Please enhance this resume data:\n\n${JSON.stringify(request.parsedData, null, 2)}`;
 
   if (request.jobDescription) {
@@ -287,16 +409,59 @@ function getUserPrompt(request: AIEnhancementRequest): string {
 function parseEnhancementResponse(
   content: string,
   request: AIEnhancementRequest,
-): Pick<AIEnhancementResult, "originalData" | "enhancedData" | "suggestions" | "confidence"> {
+  isParsingMode?: boolean,
+): Pick<
+  AIEnhancementResult,
+  "originalData" | "enhancedData" | "suggestions" | "confidence"
+> {
   try {
-    // Extract JSON from the response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    // Clean content and extract JSON
+    const cleanContent = content.trim();
+
+    // Try to find JSON in the response
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No JSON found in response");
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
 
+    if (isParsingMode) {
+      // In parsing mode, expect direct ResumeData format
+      // Validate that it has the required structure
+      if (
+        !parsed.personal &&
+        !parsed.skills &&
+        !parsed.experience &&
+        !parsed.education &&
+        !parsed.projects
+      ) {
+        throw new Error(
+          "Invalid parsing response: missing required ResumeData structure",
+        );
+      }
+
+      return {
+        originalData: request.parsedData,
+        enhancedData: parsed, // Direct ResumeData format
+        suggestions: [
+          {
+            id: "parsing-improvement",
+            field: "parsing",
+            section: "personal",
+            originalValue: "basic parsing",
+            suggestedValue: "AI-improved parsing",
+            reasoning:
+              "AI parsing extracted more accurate structured data from raw text",
+            confidence: 0.9,
+            type: "improvement" as const,
+          },
+        ],
+        confidence: 0.9,
+      };
+    }
+
+    // Enhancement mode - expect the standard format
     return {
       originalData: request.parsedData,
       enhancedData: parsed.enhancedData || request.parsedData,
@@ -305,6 +470,7 @@ function parseEnhancementResponse(
     };
   } catch (error) {
     console.error("Failed to parse AI response:", error);
+    console.error("Response content:", content);
 
     // Fallback: return original data with error note
     return {
@@ -317,7 +483,7 @@ function parseEnhancementResponse(
           section: "personalInfo" as keyof ResumeData,
           originalValue: "AI response",
           suggestedValue: "Could not parse AI response",
-          reasoning: "The AI response could not be parsed properly",
+          reasoning: `The AI response could not be parsed properly: ${error instanceof Error ? error.message : error}`,
           confidence: 0.1,
           type: "improvement" as const,
         },

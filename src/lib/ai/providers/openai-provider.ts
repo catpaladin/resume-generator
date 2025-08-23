@@ -115,15 +115,19 @@ Response format:
   }
 
   async estimateCost(request: AIEnhancementRequest): Promise<number> {
-    // Rough estimation based on OpenAI pricing
-    const inputTokens = Math.ceil(request.originalText.length / 4); // ~4 chars per token
-    const outputTokens = 1000; // Estimated output
+    const { CostEstimator } = await import("../cost-estimator");
 
-    // GPT-4o-mini pricing (as of 2024): $0.15/1M input, $0.6/1M output
-    const inputCost = (inputTokens / 1000000) * 0.15;
-    const outputCost = (outputTokens / 1000000) * 0.6;
+    const model = this.config?.model || this.defaultModel;
+    const estimate = CostEstimator.estimateEnhancementCost(
+      "openai",
+      model,
+      request.originalText,
+      request.jobDescription,
+      request.userInstructions,
+      request.enhancementLevel,
+    );
 
-    return inputCost + outputCost;
+    return estimate ? estimate.totalCost : 0;
   }
 
   async getSupportedModels(): Promise<string[]> {

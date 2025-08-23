@@ -84,15 +84,19 @@ export class ClaudeProvider extends BaseAIProvider {
   }
 
   async estimateCost(request: AIEnhancementRequest): Promise<number> {
-    // Rough estimation based on Claude pricing
-    const inputTokens = Math.ceil(request.originalText.length / 4); // ~4 chars per token
-    const outputTokens = 1000; // Estimated output
+    const { CostEstimator } = await import("../cost-estimator");
 
-    // Claude 3.5 Sonnet pricing (as of 2024): $3/1M input, $15/1M output
-    const inputCost = (inputTokens / 1000000) * 3;
-    const outputCost = (outputTokens / 1000000) * 15;
+    const model = this.config?.model || this.defaultModel;
+    const estimate = CostEstimator.estimateEnhancementCost(
+      "anthropic",
+      model,
+      request.originalText,
+      request.jobDescription,
+      request.userInstructions,
+      request.enhancementLevel,
+    );
 
-    return inputCost + outputCost;
+    return estimate ? estimate.totalCost : 0;
   }
 
   async getSupportedModels(): Promise<string[]> {

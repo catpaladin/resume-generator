@@ -84,15 +84,19 @@ export class GeminiProvider extends BaseAIProvider {
   }
 
   async estimateCost(request: AIEnhancementRequest): Promise<number> {
-    // Rough estimation based on Gemini pricing
-    const inputTokens = Math.ceil(request.originalText.length / 4); // ~4 chars per token
-    const outputTokens = 1000; // Estimated output
+    const { CostEstimator } = await import("../cost-estimator");
 
-    // Gemini 1.5 Pro pricing (as of 2024): $1.25/1M input, $5/1M output
-    const inputCost = (inputTokens / 1000000) * 1.25;
-    const outputCost = (outputTokens / 1000000) * 5;
+    const model = this.config?.model || this.defaultModel;
+    const estimate = CostEstimator.estimateEnhancementCost(
+      "gemini",
+      model,
+      request.originalText,
+      request.jobDescription,
+      request.userInstructions,
+      request.enhancementLevel,
+    );
 
-    return inputCost + outputCost;
+    return estimate ? estimate.totalCost : 0;
   }
 
   async getSupportedModels(): Promise<string[]> {

@@ -167,7 +167,7 @@ export function HeaderActions() {
     <>
       <div className="flex items-center gap-2">
         {/* AI Tools */}
-        <AINavbarControls onImportComplete={handleImportSuccess} />
+        <AINavbarControls />
 
         {/* Separator */}
         <div className="h-6 w-px bg-gray-300" />

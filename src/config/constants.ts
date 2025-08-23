@@ -1,10 +1,4 @@
-import {
-  User,
-  Lightbulb,
-  Briefcase,
-  GraduationCap,
-  Code,
-} from "lucide-react";
+import { User, Lightbulb, Briefcase, GraduationCap, Code } from "lucide-react";
 import type { ResumeData } from "@/types/resume";
 import type { Tab } from "@/types/common";
 

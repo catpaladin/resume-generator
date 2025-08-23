@@ -1,64 +1,48 @@
 import React, { useState, useCallback } from "react";
 import { useResumeStore } from "@/store/resumeStore";
 import { ImportDropzone } from "./import-dropzone";
-import { AIEnhancementModal } from "./ai-enhancement-modal";
+import { ImportPreviewModal } from "./import-preview-modal";
 import type { ResumeData } from "@/types/resume";
-import type {
-  AIEnhancementResult,
-  AIEnhancementOptions,
-} from "@/types/ai-enhancement";
 import {
-  AIEnhancedImportManager,
-  type AIImportResult,
-  type AIImportProgress,
-} from "@/lib/importers/ai-enhanced-import-manager";
-import { enhanceResumeWithAI } from "@/lib/ai/ai-service";
+  ImportManager,
+  type ImportResult,
+  type ImportProgress,
+} from "@/lib/importers/import-manager";
 
 interface AIEnhancedDropzoneProps {
-  onImportSuccess?: (data: ResumeData, result: AIImportResult) => void;
+  onImportSuccess?: (data: ResumeData, result: ImportResult) => void;
   onImportError?: (error: string) => void;
   className?: string;
-  enableAIByDefault?: boolean;
 }
 
 export function AIEnhancedDropzone({
   onImportSuccess,
   onImportError,
   className = "",
-  enableAIByDefault = true,
 }: AIEnhancedDropzoneProps) {
-  const { aiSettings, setResumeData } = useResumeStore();
+  const { setResumeData } = useResumeStore();
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState<AIImportProgress | null>(
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(
     null,
   );
-  const [showAIModal, setShowAIModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [pendingImportData, setPendingImportData] = useState<{
     parsedData: ResumeData;
     originalText: string;
-    importResult: AIImportResult;
+    importResult: ImportResult;
   } | null>(null);
 
   const handleFileImport = useCallback(
     async (file: File) => {
       if (!file) return;
 
-      // Check if AI is enabled but no API key is configured
-      if (enableAIByDefault && !aiSettings?.hasApiKey) {
-        onImportError?.(
-          "AI enhancement is enabled but no API key is configured. Please set up your AI settings first.",
-        );
-        return;
-      }
-
       setIsImporting(true);
       setImportProgress(null);
 
       try {
-        const importManager = new AIEnhancedImportManager({
-          enableAI: enableAIByDefault && !!aiSettings?.hasApiKey,
-          aiSettings: aiSettings || undefined,
-          onAIProgress: (progress) => {
+        // Stage 1: Standard DOCX import (no AI involvement)
+        const importManager = new ImportManager({
+          onProgress: (progress) => {
             setImportProgress(progress);
           },
         });
@@ -69,25 +53,14 @@ export function AIEnhancedDropzone({
           throw new Error(result.errors?.[0]?.message || "Import failed");
         }
 
-        // If AI was used automatically, use the enhanced data
-        if (result.aiUsed && result.aiEnhancement) {
-          setResumeData(result.data!);
-          onImportSuccess?.(result.data!, result);
-        }
-        // If AI enhancement is available but wasn't used, show modal
-        else if (result.aiEnhancementAvailable && aiSettings?.hasApiKey) {
-          setPendingImportData({
-            parsedData: result.data!,
-            originalText: result.originalContent!,
-            importResult: result,
-          });
-          setShowAIModal(true);
-        }
-        // Otherwise, use the data as-is
-        else {
-          setResumeData(result.data!);
-          onImportSuccess?.(result.data!, result);
-        }
+        // Stage 2: Show preview modal for all successful imports
+        // For DOCX files, this will include an "Enhance with AI" button
+        setPendingImportData({
+          parsedData: result.data!,
+          originalText: result.originalContent || "",
+          importResult: result,
+        });
+        setShowPreviewModal(true);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Import failed";
@@ -97,70 +70,26 @@ export function AIEnhancedDropzone({
         setImportProgress(null);
       }
     },
-    [
-      aiSettings,
-      enableAIByDefault,
-      setResumeData,
-      onImportSuccess,
-      onImportError,
-    ],
+    [onImportSuccess, onImportError],
   );
 
-  const handleAIEnhancement = useCallback(
-    async (options: AIEnhancementOptions): Promise<AIEnhancementResult> => {
-      if (!pendingImportData) {
-        throw new Error("No pending import data");
-      }
-
-      return enhanceResumeWithAI(
-        options,
-        pendingImportData.originalText,
-        pendingImportData.parsedData,
-      );
-    },
-    [pendingImportData],
-  );
-
-  const handleAcceptEnhanced = useCallback(
-    (enhancedData: ResumeData) => {
+  const handlePreviewAccept = useCallback(
+    (data: ResumeData) => {
       if (!pendingImportData) return;
 
-      setResumeData(enhancedData);
-      onImportSuccess?.(enhancedData, {
-        ...pendingImportData.importResult,
-        data: enhancedData,
-        aiUsed: true,
-      });
+      setResumeData(data);
+      onImportSuccess?.(data, pendingImportData.importResult);
 
       setPendingImportData(null);
-      setShowAIModal(false);
+      setShowPreviewModal(false);
     },
     [pendingImportData, setResumeData, onImportSuccess],
   );
 
-  const handleRejectEnhanced = useCallback(() => {
-    if (!pendingImportData) return;
-
-    setResumeData(pendingImportData.parsedData);
-    onImportSuccess?.(
-      pendingImportData.parsedData,
-      pendingImportData.importResult,
-    );
-
+  const handlePreviewReject = useCallback(() => {
     setPendingImportData(null);
-    setShowAIModal(false);
-  }, [pendingImportData, setResumeData, onImportSuccess]);
-
-  const getProgressMessage = () => {
-    if (!importProgress) return undefined;
-
-    switch (importProgress.stage) {
-      case "ai_enhancing":
-        return "Enhancing with AI...";
-      default:
-        return importProgress.message;
-    }
-  };
+    setShowPreviewModal(false);
+  }, []);
 
   return (
     <>
@@ -168,31 +97,17 @@ export function AIEnhancedDropzone({
         onFileSelect={() => {}} // We handle import directly
         onFileImport={handleFileImport}
         isImporting={isImporting}
-        progress={
-          importProgress
-            ? {
-                stage:
-                  importProgress.stage === "ai_enhancing"
-                    ? "validating"
-                    : importProgress.stage,
-                progress: importProgress.progress,
-                message: getProgressMessage() || importProgress.message,
-              }
-            : null
-        }
+        progress={importProgress}
         className={className}
       />
 
-      {/* AI Enhancement Modal */}
-      {showAIModal && pendingImportData && (
-        <AIEnhancementModal
-          isOpen={showAIModal}
-          onClose={() => setShowAIModal(false)}
-          parsedData={pendingImportData.parsedData}
-          originalText={pendingImportData.originalText}
-          onEnhance={handleAIEnhancement}
-          onAccept={handleAcceptEnhanced}
-          onReject={handleRejectEnhanced}
+      {/* Import Preview Modal */}
+      {showPreviewModal && pendingImportData && (
+        <ImportPreviewModal
+          isOpen={showPreviewModal}
+          importResult={pendingImportData.importResult}
+          onAccept={handlePreviewAccept}
+          onReject={handlePreviewReject}
         />
       )}
     </>
@@ -210,10 +125,9 @@ export function SimpleAIEnhancedDropzone({
       onImportSuccess={(data) => {
         // For backward compatibility, we'll need to trigger the file select
         // This is a simplified version - in practice, you'd want to handle this differently
-        console.log("Import successful with AI enhancement:", data);
+        console.log("Import successful:", data);
       }}
       className={className}
-      enableAIByDefault={false}
     />
   );
 }
