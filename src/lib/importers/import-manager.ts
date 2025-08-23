@@ -38,6 +38,7 @@ export interface ImportResult {
   originalContent?: string;
   parserUsed?: string;
   needsReview?: boolean;
+  aiEnhancementAvailable?: boolean;
 }
 
 export class ImportManager {
@@ -146,6 +147,9 @@ export class ImportManager {
         originalContent: parseResult.originalContent,
         parserUsed: parser.getName(),
         needsReview,
+        aiEnhancementAvailable:
+          parser.getName() === "Word Document Parser" &&
+          !!parseResult.originalContent,
       };
     } catch (error) {
       this.reportProgress("error", 0, "Import failed");

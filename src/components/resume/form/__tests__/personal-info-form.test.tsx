@@ -98,10 +98,18 @@ describe("PersonalInfoForm", () => {
     );
   });
 
-  it("should render null when data is undefined", () => {
-    const { container } = render(
-      <PersonalInfoForm data={undefined} onChange={mockOnChange} />,
-    );
-    expect(container).toBeEmptyDOMElement();
+  it("should handle minimal data", () => {
+    const minimalData: PersonalInfo = {
+      fullName: "",
+      email: "",
+      phone: "",
+      location: "",
+      linkedin: "",
+      summary: "",
+    };
+    render(<PersonalInfoForm data={minimalData} onChange={mockOnChange} />);
+
+    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 });

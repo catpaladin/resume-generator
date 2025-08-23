@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Edit3,
 } from "lucide-react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 interface AIConfirmationModalProps {
   isOpen: boolean;
@@ -33,6 +34,12 @@ export function AIConfirmationModal({
 }: AIConfirmationModalProps) {
   const [showRefinement, setShowRefinement] = useState(false);
   const [refinementInstructions, setRefinementInstructions] = useState("");
+
+  const modalRef = useClickOutside<HTMLDivElement>(() => {
+    if (!isLoading && !isRefining) {
+      onReject();
+    }
+  }, isOpen);
 
   if (!isOpen) return null;
 
@@ -115,7 +122,10 @@ export function AIConfirmationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative mx-4 w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+      <div
+        ref={modalRef}
+        className="relative mx-4 w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+      >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">

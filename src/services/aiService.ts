@@ -1,4 +1,10 @@
-import type { AISettings, AIEnhancementRequest } from "@/types/resume";
+import type { AISettings } from "@/types/resume";
+
+// Legacy interface for individual bullet point enhancement
+interface LegacyAIEnhancementRequest {
+  originalText: string;
+  jobDescription?: string;
+}
 import { getApiKey } from "./secureStorage";
 
 export class AIService {
@@ -8,7 +14,9 @@ export class AIService {
     this.settings = settings;
   }
 
-  async enhanceBulletPoint(request: AIEnhancementRequest): Promise<string> {
+  async enhanceBulletPoint(
+    request: LegacyAIEnhancementRequest,
+  ): Promise<string> {
     const enhancedRequest = {
       ...request,
       jobDescription: request.jobDescription || this.settings.jobDescription,
@@ -74,15 +82,12 @@ export class AIService {
     }
   }
 
-  private buildEnhancementPrompt(request: AIEnhancementRequest): string {
+  private buildEnhancementPrompt(request: LegacyAIEnhancementRequest): string {
     return `You are a professional resume writer. Enhance this achievement bullet point with the following guidelines:
 
 ORIGINAL: "${request.originalText}"
 
-CONTEXT:
-- Company: ${request.context.company}
-- Position: ${request.context.position}
-${request.jobDescription ? `- Job Description: ${request.jobDescription}` : ""}
+${request.jobDescription ? `JOB DESCRIPTION: ${request.jobDescription}` : ""}
 
 REQUIREMENTS:
 - Start with diverse, strong action verbs (avoid overusing: developed, managed, led, created)

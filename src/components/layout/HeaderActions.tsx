@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button/button";
 import { ImportDropzone } from "@/components/import/import-dropzone";
 import { ImportPreviewModal } from "@/components/import/import-preview-modal";
 import { useImportWorkflow } from "@/hooks/use-import";
+import { AINavbarControls } from "./ai-navbar-controls";
 import type { ResumeData } from "@/types/resume";
 
 interface ImportModalProps {
@@ -165,6 +166,13 @@ export function HeaderActions() {
   return (
     <>
       <div className="flex items-center gap-2">
+        {/* AI Tools */}
+        <AINavbarControls />
+
+        {/* Separator */}
+        <div className="h-6 w-px bg-gray-300" />
+
+        {/* Traditional Actions */}
         <Button
           size="sm"
           onClick={handleExport}
@@ -179,7 +187,7 @@ export function HeaderActions() {
           variant="outline"
           onClick={() => setShowImportModal(true)}
           title="Import resume from file (JSON or Word)"
-          className="border-blue-200 hover:bg-blue-50"
+          className="border-gray-200 hover:bg-gray-50"
         >
           <Upload size={14} className="mr-1" />
           Import

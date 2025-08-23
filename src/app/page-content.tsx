@@ -3,6 +3,7 @@
 import { ResumeBuilderContainer } from "@/components/resume/resume-builder-container";
 import { ResumePreviewContainer } from "@/components/resume/resume-preview-container";
 import { SectionsNav } from "@/components/resume/sections-nav";
+import { AIFeedbackPortal } from "@/components/global/ai-feedback-portal";
 import { Printer } from "lucide-react";
 import { useResumeStore } from "@/store/resumeStore";
 import { useEffect, useState } from "react";
@@ -20,25 +21,30 @@ export default function HomePageContent() {
   if (!mounted) return null;
 
   return (
-    <div className="container grid items-start gap-8 pb-8 pt-6 md:grid-cols-2">
-      <div className="flex flex-col space-y-6">
-        <ResumeBuilderContainer data={resumeData} onUpdate={setResumeData} />
+    <>
+      <div className="container grid items-start gap-8 pb-8 pt-6 md:grid-cols-2">
+        <div className="flex flex-col space-y-6">
+          <ResumeBuilderContainer data={resumeData} onUpdate={setResumeData} />
+        </div>
+
+        <div className="hidden md:block">
+          <SectionsNav />
+          <ResumePreviewContainer data={resumeData} />
+        </div>
+
+        <div className="fixed bottom-6 right-6 md:hidden print:hidden">
+          <button
+            onClick={() => window.print()}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+            aria-label="Print Resume"
+          >
+            <Printer className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
-      <div className="hidden md:block">
-        <SectionsNav />
-        <ResumePreviewContainer data={resumeData} />
-      </div>
-
-      <div className="fixed bottom-6 right-6 md:hidden print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
-          aria-label="Print Resume"
-        >
-          <Printer className="h-6 w-6" />
-        </button>
-      </div>
-    </div>
+      {/* Global AI Feedback System */}
+      <AIFeedbackPortal />
+    </>
   );
 }

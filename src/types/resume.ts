@@ -81,6 +81,9 @@ export interface ImportResult {
   success: boolean;
   data?: ResumeData;
   error?: string;
+  aiEnhancementAvailable?: boolean;
+  confidence?: number;
+  originalContent?: string;
 }
 
 export interface ExportOptions {
@@ -95,14 +98,7 @@ export interface AISettings {
   jobDescription?: string;
   hasApiKey?: boolean; // Flag to indicate if API key is stored securely
   userInstructions?: string; // Additional user instructions for AI refinement
-}
-
-export interface AIEnhancementRequest {
-  originalText: string;
-  jobDescription?: string;
-  context: {
-    company: string;
-    position: string;
-  };
-  existingBulletPoints?: string[];
+  enhancementLevel?: "light" | "moderate" | "comprehensive";
+  focusAreas?: string[];
+  enableFallback?: boolean;
 }

@@ -1,4 +1,4 @@
-import { ClientResumeBuilder } from "./resume-builder";
+import { EnhancedResumeBuilder } from "./enhanced-resume-builder";
 import type { ResumeData } from "@/types/resume";
 
 interface ResumeBuilderContainerProps {
@@ -22,7 +22,7 @@ export function ResumeBuilderContainer({
 
   return (
     <div className="flex min-h-0 flex-col">
-      <ClientResumeBuilder data={data} updateSection={handleUpdateSection} />
+      <EnhancedResumeBuilder data={data} updateSection={handleUpdateSection} />
     </div>
   );
 }
