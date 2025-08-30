@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "sirv out --port 3000 --host",
     "lint": "next lint",
     "format": "prettier --write .",
     "lint-format": "next lint --fix && prettier --write .",
