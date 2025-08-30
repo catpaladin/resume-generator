@@ -66,7 +66,7 @@
     "postcss": "^8",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
-    "serve": "^14.2.4",
+    "sirv-cli": "^3.0.1",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
@@ -86,12 +86,12 @@
     ],
     "extraResources": [
       {
-        "from": "node_modules/serve",
-        "to": "serve"
+        "from": "node_modules/sirv-cli",
+        "to": "sirv-cli"
       }
     ],
     "asarUnpack": [
-      "node_modules/serve/**/*"
+      "node_modules/sirv-cli/**/*"
     ],
     "mac": {
       "category": "public.app-category.productivity",

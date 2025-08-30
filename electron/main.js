@@ -129,38 +129,42 @@ function startLocalServer() {
     console.log("Starting server for directory:", outDir);
     console.log("Directory exists:", fs.existsSync(outDir));
 
-    // Try different paths for serve in packaged app
-    let servePath;
+    // Try different paths for sirv-cli in packaged app
+    let sirvPath;
     const possiblePaths = [
-      path.join(__dirname, "../node_modules/.bin/serve"),
-      path.join(__dirname, "../node_modules/serve/bin/serve.js"),
-      path.join(process.resourcesPath, "serve/bin/serve.js"),
+      path.join(__dirname, "../node_modules/.bin/sirv"),
+      path.join(__dirname, "../node_modules/sirv-cli/bin.js"),
+      path.join(process.resourcesPath, "sirv-cli/bin.js"),
       path.join(
         process.resourcesPath,
-        "app.asar.unpacked/node_modules/serve/bin/serve.js",
+        "app.asar.unpacked/node_modules/sirv-cli/bin.js",
       ),
-      path.join(__dirname, "../resources/serve/bin/serve.js"),
+      path.join(__dirname, "../resources/sirv-cli/bin.js"),
     ];
 
     for (const p of possiblePaths) {
       if (fs.existsSync(p)) {
-        servePath = p;
-        console.log("Found serve at:", servePath);
+        sirvPath = p;
+        console.log("Found sirv at:", sirvPath);
         break;
       }
     }
 
-    if (!servePath) {
+    if (!sirvPath) {
       console.error(
-        "Could not find serve binary, falling back to static file loading",
+        "Could not find sirv binary, falling back to static file loading",
       );
       resolve();
       return;
     }
 
-    serverProcess = spawn("node", [servePath, "-s", outDir, "-p", "3001"], {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    serverProcess = spawn(
+      "node",
+      [sirvPath, outDir, "--single", "--port", "3001", "--quiet"],
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
 
     let serverStarted = false;
 
@@ -168,8 +172,9 @@ function startLocalServer() {
       const output = data.toString();
       console.log("Server stdout:", output);
       if (
-        output.includes("Accepting connections") ||
-        output.includes("served at")
+        output.includes("Your application is ready") ||
+        output.includes("http://localhost:3001") ||
+        output.includes("sirv")
       ) {
         if (!serverStarted) {
           serverStarted = true;

@@ -7,12 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.13](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.12...resume-generator-v0.2.13) (2025-08-23)
 
-
 ### Features
 
-* ai parsing for docx imports ([f51b046](https://github.com/catpaladin/resume-generator/commit/f51b0467b00fb1b2a7362acb20a2fa5cb3adf351))
-* ai parsing for import and disable other ai features until ready ([ef8bed2](https://github.com/catpaladin/resume-generator/commit/ef8bed259c4c521e8d740c02a7f9901f3d0e9e32))
-* refactor ai settings for additional ai features ([3c9cf94](https://github.com/catpaladin/resume-generator/commit/3c9cf946992a0f72d85a1bad7471550723b2f552))
+- ai parsing for docx imports ([f51b046](https://github.com/catpaladin/resume-generator/commit/f51b0467b00fb1b2a7362acb20a2fa5cb3adf351))
+- ai parsing for import and disable other ai features until ready ([ef8bed2](https://github.com/catpaladin/resume-generator/commit/ef8bed259c4c521e8d740c02a7f9901f3d0e9e32))
+- refactor ai settings for additional ai features ([3c9cf94](https://github.com/catpaladin/resume-generator/commit/3c9cf946992a0f72d85a1bad7471550723b2f552))
 
 ## [0.2.12](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.11...resume-generator-v0.2.12) (2025-08-19)
 
