@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx ts-node --project tsconfig.server.json api-proxy.ts",
+    "start": "npx ts-node --project tsconfig.server.json api-server.ts",
     "lint": "next lint",
     "format": "prettier --write .",
     "lint-format": "next lint --fix && prettier --write .",
@@ -82,7 +82,7 @@
     "files": [
       "out/**/*",
       "electron/**/*",
-      "api-proxy.ts",
+      "api-server.ts",
       "tsconfig.server.json",
       "package.json"
     ],

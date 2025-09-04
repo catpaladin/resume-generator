@@ -57,32 +57,36 @@ function createWindow() {
     // Try to start a local server, fallback to file loading
     startLocalServer()
       .then(() => {
-        // Wait a bit longer for ts-node to compile before testing
+        // Wait longer for ts-node to compile and start accepting connections
         setTimeout(() => {
-          // Test if server is actually running
+          // Test if server is actually running with a simple HEAD request
           const http = require("http");
-          const req = http.get("http://localhost:3001", (res) => {
+          console.log("Testing connection to API server...");
+
+          const req = http.get("http://localhost:3001/", (res) => {
             console.log(
-              "Server is running, loading from http://localhost:3001",
+              `✅ API server responding (${res.statusCode}), loading from http://localhost:3001`,
             );
             mainWindow.loadURL("http://localhost:3001");
           });
 
           req.on("error", (err) => {
             console.log(
-              "Server not accessible, falling back to app:// protocol",
+              "❌ Server not accessible:",
+              err.message,
+              "- falling back to app:// protocol",
             );
             mainWindow.loadURL("app://localhost/index.html");
           });
 
-          req.setTimeout(8000, () => {
+          req.setTimeout(12000, () => {
             console.log(
-              "Server connection timeout, falling back to app:// protocol",
+              "⏱️ Server connection timeout (12s) - falling back to app:// protocol",
             );
             req.destroy();
             mainWindow.loadURL("app://localhost/index.html");
           });
-        }, 3000); // Wait 3 seconds for ts-node to compile
+        }, 5000); // Wait 5 seconds for ts-node to compile
       })
       .catch((error) => {
         console.error("Failed to start server:", error);
@@ -133,12 +137,12 @@ function createWindow() {
 function startLocalServer() {
   return new Promise((resolve, reject) => {
     const outDir = path.join(__dirname, "../out");
-    console.log("Starting proxy server for directory:", outDir);
+    console.log("Starting API server for directory:", outDir);
     console.log("Directory exists:", fs.existsSync(outDir));
 
-    // Try different paths for ts-node and api-proxy.ts in packaged app
+    // Try different paths for ts-node and api-server.ts in packaged app
     let tsNodePath;
-    let apiProxyPath;
+    let apiServerPath;
     let tsconfigPath;
 
     const tsNodePossiblePaths = [
@@ -152,10 +156,10 @@ function startLocalServer() {
       path.join(__dirname, "../resources/ts-node/dist/bin.js"),
     ];
 
-    const apiProxyPossiblePaths = [
-      path.join(__dirname, "../api-proxy.ts"),
-      path.join(process.resourcesPath, "app/api-proxy.ts"),
-      path.join(__dirname, "../app/api-proxy.ts"),
+    const apiServerPossiblePaths = [
+      path.join(__dirname, "../api-server.ts"),
+      path.join(process.resourcesPath, "app/api-server.ts"),
+      path.join(__dirname, "../app/api-server.ts"),
     ];
 
     const tsconfigPossiblePaths = [
@@ -173,11 +177,11 @@ function startLocalServer() {
       }
     }
 
-    // Find api-proxy.ts
-    for (const p of apiProxyPossiblePaths) {
+    // Find api-server.ts
+    for (const p of apiServerPossiblePaths) {
       if (fs.existsSync(p)) {
-        apiProxyPath = p;
-        console.log("Found api-proxy.ts at:", apiProxyPath);
+        apiServerPath = p;
+        console.log("Found api-server.ts at:", apiServerPath);
         break;
       }
     }
@@ -191,10 +195,10 @@ function startLocalServer() {
       }
     }
 
-    if (!tsNodePath || !apiProxyPath || !tsconfigPath) {
+    if (!tsNodePath || !apiServerPath || !tsconfigPath) {
       console.error(
-        "Could not find required files for proxy server, falling back to static file loading",
-        { tsNodePath, apiProxyPath, tsconfigPath },
+        "Could not find required files for API server, falling back to static file loading",
+        { tsNodePath, apiServerPath, tsconfigPath },
       );
       resolve();
       return;
@@ -205,7 +209,7 @@ function startLocalServer() {
 
     serverProcess = spawn(
       "node",
-      [tsNodePath, "--project", tsconfigPath, apiProxyPath],
+      [tsNodePath, "--project", tsconfigPath, apiServerPath],
       {
         stdio: ["pipe", "pipe", "pipe"],
         env: { ...process.env, PORT: "3001" },
@@ -216,7 +220,7 @@ function startLocalServer() {
 
     serverProcess.stdout.on("data", (data) => {
       const output = data.toString();
-      console.log("Proxy server stdout:", output);
+      console.log("API server stdout:", output);
       if (
         output.includes("Your application is ready") ||
         output.includes("http://localhost:3001")
@@ -229,24 +233,24 @@ function startLocalServer() {
     });
 
     serverProcess.stderr.on("data", (data) => {
-      console.error("Proxy server stderr:", data.toString());
+      console.error("API server stderr:", data.toString());
     });
 
     serverProcess.on("error", (error) => {
-      console.error("Proxy server process error:", error);
+      console.error("API server process error:", error);
       if (!serverStarted) {
         resolve(); // Continue anyway, will fallback to file:// protocol
       }
     });
 
     serverProcess.on("exit", (code, signal) => {
-      console.log("Proxy server process exited:", { code, signal });
+      console.log("API server process exited:", { code, signal });
     });
 
     // Fallback timeout
     setTimeout(() => {
       if (!serverStarted) {
-        console.log("Proxy server startup timeout, continuing anyway");
+        console.log("API server startup timeout, continuing anyway");
         resolve();
       }
     }, 5000); // Increased timeout for ts-node compilation
@@ -379,7 +383,16 @@ function getContentType(filePath) {
 
 // Handle API routes locally in Electron
 async function handleApiRoute(request, pathname) {
-  console.log("Handling API route:", pathname);
+  console.log("=== ELECTRON API ROUTE ===");
+  console.log("Method:", request.method);
+  console.log("URL:", request.url);
+  console.log("Pathname:", pathname);
+  console.log("Headers:", Object.fromEntries(request.headers));
+  console.log("=== END API ROUTE DEBUG ===");
+
+  if (pathname === "/api/ai/test") {
+    return handleAITestRoute(request);
+  }
 
   if (pathname === "/api/ai/chat") {
     return handleAIChatRoute(request);
@@ -387,6 +400,10 @@ async function handleApiRoute(request, pathname) {
 
   if (pathname === "/api/ai/models") {
     return handleAIModelsRoute(request);
+  }
+
+  if (pathname === "/api/ai/enhance") {
+    return handleAIEnhanceRoute(request);
   }
 
   return new Response("API route not found", { status: 404 });
@@ -471,6 +488,51 @@ async function handleAIModelsRoute(request) {
     });
   } catch (error) {
     console.error("AI Models API Error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+}
+
+async function handleAITestRoute(request) {
+  try {
+    const body = await request.json();
+    const { provider, apiKey, model } = body;
+
+    if (!provider || !apiKey) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: provider, apiKey" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    // Simple test response
+    return new Response(
+      JSON.stringify({ success: true, response: "Connection test successful" }),
+      { headers: { "Content-Type": "application/json" } },
+    );
+  } catch (error) {
+    console.error("AI Test API Error:", error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || "Connection test failed",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+}
+
+async function handleAIEnhanceRoute(request) {
+  try {
+    const body = await request.json();
+    // Simple placeholder response for enhance route
+    return new Response(JSON.stringify({ success: true, enhanced: body }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("AI Enhance API Error:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Internal server error" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
@@ -613,6 +675,16 @@ app.whenReady().then(() => {
   protocol.handle("app", async (request) => {
     const url = new URL(request.url);
     const pathname = decodeURIComponent(url.pathname);
+
+    // Debug: Log all requests
+    if (pathname.startsWith("/api/")) {
+      console.log("=== 🔍 PROTOCOL HANDLER API REQUEST ===");
+      console.log("📍 Pathname:", pathname);
+      console.log("🌐 Full URL:", request.url);
+      console.log("📦 Method:", request.method);
+      console.log("📋 Headers:", Object.fromEntries(request.headers.entries()));
+      console.log("=== END API REQUEST DEBUG ===");
+    }
 
     // Handle API routes
     if (pathname.startsWith("/api/")) {

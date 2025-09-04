@@ -14,6 +14,6 @@
     "noEmit": false,
     "outDir": "./dist"
   },
-  "include": ["api-proxy.ts"],
+  "include": ["api-server.ts"],
   "exclude": ["node_modules"]
 }

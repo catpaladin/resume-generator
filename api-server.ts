@@ -1,10 +1,8 @@
 import * as http from "http";
 import * as https from "https";
 import * as url from "url";
-import { spawn, ChildProcess } from "child_process";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-const SIRV_PORT = 3001;
 
 interface Message {
   role: string;
@@ -18,28 +16,11 @@ interface AIModel {
   isRecommended?: boolean;
 }
 
-// Start sirv server for static files
-const sirvProcess: ChildProcess = spawn(
-  "npx",
-  ["sirv", "out", "--port", SIRV_PORT.toString(), "--host"],
-  {
-    stdio: ["pipe", "pipe", "pipe"],
-  },
-);
-
-sirvProcess.stdout?.on("data", (data: Buffer) => {
-  const output = data.toString();
-  if (output.includes("Your application is ready")) {
-    console.log("\n  Your application is ready~! 🚀\n");
-    console.log(`  - Local:      http://localhost:${PORT}`);
-    console.log(`  - Network:    http://0.0.0.0:${PORT}\n`);
-    console.log(" LOGS");
-  }
-});
-
-sirvProcess.stderr?.on("data", (data: Buffer) => {
-  console.error("Sirv error:", data.toString());
-});
+// Static file server is now built-in, no need for external sirv process
+console.log("\n  Your application is ready~! 🚀\n");
+console.log(`  - Local:      http://localhost:${PORT}`);
+console.log(`  - Network:    http://0.0.0.0:${PORT}\n`);
+console.log(" LOGS");
 
 // Logging function
 function logRequest(method: string, path: string, statusCode: number): void {
@@ -462,34 +443,72 @@ function getFallbackModels(provider: string): AIModel[] {
   return fallbackModels[provider] || [];
 }
 
-// Proxy non-API requests to sirv
-function proxyToSirv(
+// Serve static files directly from the out directory
+function serveStaticFile(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): void {
-  const options: http.RequestOptions = {
-    hostname: "localhost",
-    port: SIRV_PORT,
-    path: req.url,
-    method: req.method,
-    headers: req.headers,
+  const fs = require("fs");
+  const path = require("path");
+
+  const url = req.url || "/";
+  let filePath: string;
+
+  if (url === "/" || url === "/index.html") {
+    filePath = path.join(__dirname, "out", "index.html");
+  } else {
+    filePath = path.join(__dirname, "out", url);
+  }
+
+  // Security: prevent directory traversal
+  const outDir = path.join(__dirname, "out");
+  const resolvedPath = path.resolve(filePath);
+  if (!resolvedPath.startsWith(outDir)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    logRequest(req.method || "GET", url, 403);
+    return;
+  }
+
+  fs.readFile(filePath, (err: NodeJS.ErrnoException | null, data: Buffer) => {
+    if (err) {
+      if (err.code === "ENOENT") {
+        res.writeHead(404);
+        res.end("Not Found");
+        logRequest(req.method || "GET", url, 404);
+      } else {
+        res.writeHead(500);
+        res.end("Internal Server Error");
+        logRequest(req.method || "GET", url, 500);
+      }
+    } else {
+      const ext = path.extname(filePath);
+      const contentType = getContentType(ext);
+      res.writeHead(200, { "Content-Type": contentType });
+      res.end(data);
+      logRequest(req.method || "GET", url, 200);
+    }
+  });
+}
+
+// Get MIME type based on file extension
+function getContentType(ext: string): string {
+  const types: Record<string, string> = {
+    ".html": "text/html",
+    ".js": "application/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".gif": "image/gif",
+    ".ico": "image/x-icon",
+    ".svg": "image/svg+xml",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".ttf": "font/ttf",
+    ".eot": "application/vnd.ms-fontobject",
   };
-
-  const proxy = http.request(options, (proxyRes: http.IncomingMessage) => {
-    const statusCode = proxyRes.statusCode || 500;
-    res.writeHead(statusCode, proxyRes.headers);
-    proxyRes.pipe(res);
-    logRequest(req.method || "GET", req.url || "/", statusCode);
-  });
-
-  proxy.on("error", (err: Error) => {
-    console.error("Proxy error:", err);
-    res.writeHead(500);
-    res.end("Proxy error");
-    logRequest(req.method || "GET", req.url || "/", 500);
-  });
-
-  req.pipe(proxy);
+  return types[ext] || "application/octet-stream";
 }
 
 // Create main server
@@ -519,8 +538,8 @@ const server = http.createServer(
     if (pathname.startsWith("/api/")) {
       handleApiRoute(req, res, pathname);
     } else {
-      // Proxy everything else to sirv
-      proxyToSirv(req, res);
+      // Serve static files directly
+      serveStaticFile(req, res);
     }
   },
 );
@@ -531,12 +550,10 @@ server.listen(PORT, "0.0.0.0", () => {
 
 // Cleanup on exit
 process.on("SIGTERM", () => {
-  sirvProcess.kill();
   server.close();
 });
 
 process.on("SIGINT", () => {
-  sirvProcess.kill();
   server.close();
   process.exit(0);
 });

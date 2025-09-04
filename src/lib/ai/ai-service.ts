@@ -281,7 +281,17 @@ export async function enhanceResumeWithAI(
     }
 
     // Use the server-side enhance endpoint to avoid CORS issues
-    const response = await fetch("/api/ai/enhance", {
+    // In Electron, we need to use absolute URLs for protocol handler to work
+    const isElectron =
+      typeof window !== "undefined" && window.location.protocol === "app:";
+    const url = isElectron
+      ? `app://localhost/api/ai/enhance`
+      : "/api/ai/enhance";
+    console.log(
+      `[enhanceResumeWithAI] Environment: ${isElectron ? "Electron" : "Web"}, URL: ${url}`,
+    );
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -315,15 +325,21 @@ export async function enhanceResumeWithAI(
 }
 
 // Helper function to test AI connectivity
-export async function testAIConnection(settings: AISettings): Promise<boolean> {
+export async function testAIConnection(
+  settings: AISettings,
+  testApiKey?: string,
+): Promise<boolean> {
   try {
     console.log(
       `[testAIConnection] Testing connection for provider: ${settings.provider}`,
     );
 
-    // Get API key from secure storage
-    const { getApiKey } = await import("@/services/secureStorage");
-    const apiKey = await getApiKey(settings.provider);
+    // Use provided API key for testing, or get from secure storage
+    let apiKey = testApiKey;
+    if (!apiKey) {
+      const { getApiKey } = await import("@/services/secureStorage");
+      apiKey = (await getApiKey(settings.provider)) || undefined;
+    }
 
     if (!apiKey) {
       console.error(
@@ -333,7 +349,26 @@ export async function testAIConnection(settings: AISettings): Promise<boolean> {
     }
 
     // Use the server-side test endpoint to avoid CORS issues
-    const response = await fetch("/api/ai/test", {
+    // In Electron, we need to use absolute URLs for protocol handler to work
+    const isElectron =
+      typeof window !== "undefined" && window.location.protocol === "app:";
+    const url = isElectron ? `app://localhost/api/ai/test` : "/api/ai/test";
+    console.log(
+      `[testAIConnection] Environment: ${isElectron ? "Electron" : "Web"}`,
+    );
+    console.log(`[testAIConnection] Making request to: ${url}`);
+    console.log(`[testAIConnection] Current location:`, window.location.href);
+    console.log(
+      `[testAIConnection] window.location.origin:`,
+      typeof window !== "undefined" ? window.location.origin : "N/A",
+    );
+    console.log(`[testAIConnection] Request payload:`, {
+      provider: settings.provider,
+      model: settings.customModel || settings.model,
+      apiKeyLength: apiKey.length,
+    });
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -345,10 +380,17 @@ export async function testAIConnection(settings: AISettings): Promise<boolean> {
       }),
     });
 
+    console.log(`[testAIConnection] Response status:`, response.status);
+    console.log(
+      `[testAIConnection] Response headers:`,
+      Object.fromEntries(response.headers),
+    );
+
     const result = await response.json();
     console.log(
       `[testAIConnection] Test result:`,
       result.success ? "Success" : "Failed",
+      result,
     );
 
     return result.success;

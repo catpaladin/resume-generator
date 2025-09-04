@@ -161,9 +161,11 @@ export function EnhancedAISettings({
 
     try {
       const testSettings = { ...formData, hasApiKey: true };
-      const success = await testAIConnection(testSettings);
+      // Pass the API key directly for testing without storing it
+      const success = await testAIConnection(testSettings, apiKey);
       setConnectionStatus(success ? "success" : "error");
     } catch (error) {
+      console.error("Test connection error:", error);
       setConnectionStatus("error");
     } finally {
       setIsTestingConnection(false);
