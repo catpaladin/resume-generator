@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.14](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.13...resume-generator-v0.2.14) (2025-08-30)
 
-
 ### Features
 
-* replace serve with sirv to address dependency vulns ([f6c90df](https://github.com/catpaladin/resume-generator/commit/f6c90df9f596d66ac872a49991ec9ee91c876bbf))
+- replace serve with sirv to address dependency vulns ([f6c90df](https://github.com/catpaladin/resume-generator/commit/f6c90df9f596d66ac872a49991ec9ee91c876bbf))
 
 ## [0.2.13](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.12...resume-generator-v0.2.13) (2025-08-23)
 

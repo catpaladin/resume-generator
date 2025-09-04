@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "sirv out --port 3000 --host",
+    "start": "npx ts-node --project tsconfig.server.json api-proxy.ts",
     "lint": "next lint",
     "format": "prettier --write .",
     "lint-format": "next lint --fix && prettier --write .",
