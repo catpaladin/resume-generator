@@ -43,11 +43,14 @@ sirvProcess.stderr?.on("data", (data: Buffer) => {
 
 // Logging function
 function logRequest(method: string, path: string, statusCode: number): void {
-  const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
-  const colorCode = statusCode >= 200 && statusCode < 300 ? '\x1b[32m' : '\x1b[31m';
-  const resetCode = '\x1b[0m';
-  
-  console.log(`${timestamp} ${colorCode}${statusCode}${resetCode} ${method} ${path}`);
+  const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
+  const colorCode =
+    statusCode >= 200 && statusCode < 300 ? "\x1b[32m" : "\x1b[31m";
+  const resetCode = "\x1b[0m";
+
+  console.log(
+    `${timestamp} ${colorCode}${statusCode}${resetCode} ${method} ${path}`,
+  );
 }
 
 // Simple API route handlers using built-in modules only
@@ -56,7 +59,7 @@ async function handleApiRoute(
   res: http.ServerResponse,
   pathname: string,
 ): Promise<void> {
-  const method = req.method || 'GET';
+  const method = req.method || "GET";
   if (pathname === "/api/ai/test") {
     return handleTestRoute(req, res, method, pathname);
   }
@@ -476,14 +479,14 @@ function proxyToSirv(
     const statusCode = proxyRes.statusCode || 500;
     res.writeHead(statusCode, proxyRes.headers);
     proxyRes.pipe(res);
-    logRequest(req.method || 'GET', req.url || '/', statusCode);
+    logRequest(req.method || "GET", req.url || "/", statusCode);
   });
 
   proxy.on("error", (err: Error) => {
     console.error("Proxy error:", err);
     res.writeHead(500);
     res.end("Proxy error");
-    logRequest(req.method || 'GET', req.url || '/', 500);
+    logRequest(req.method || "GET", req.url || "/", 500);
   });
 
   req.pipe(proxy);

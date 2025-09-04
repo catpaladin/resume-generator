@@ -82,16 +82,24 @@
     "files": [
       "out/**/*",
       "electron/**/*",
+      "api-proxy.ts",
+      "tsconfig.server.json",
       "package.json"
     ],
     "extraResources": [
       {
         "from": "node_modules/sirv-cli",
         "to": "sirv-cli"
+      },
+      {
+        "from": "node_modules/ts-node",
+        "to": "ts-node"
       }
     ],
     "asarUnpack": [
-      "node_modules/sirv-cli/**/*"
+      "node_modules/sirv-cli/**/*",
+      "node_modules/ts-node/**/*",
+      "node_modules/typescript/**/*"
     ],
     "mac": {
       "category": "public.app-category.productivity",

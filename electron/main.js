@@ -57,25 +57,32 @@ function createWindow() {
     // Try to start a local server, fallback to file loading
     startLocalServer()
       .then(() => {
-        // Test if server is actually running
-        const http = require("http");
-        const req = http.get("http://localhost:3001", (res) => {
-          console.log("Server is running, loading from http://localhost:3001");
-          mainWindow.loadURL("http://localhost:3001");
-        });
+        // Wait a bit longer for ts-node to compile before testing
+        setTimeout(() => {
+          // Test if server is actually running
+          const http = require("http");
+          const req = http.get("http://localhost:3001", (res) => {
+            console.log(
+              "Server is running, loading from http://localhost:3001",
+            );
+            mainWindow.loadURL("http://localhost:3001");
+          });
 
-        req.on("error", (err) => {
-          console.log("Server not accessible, falling back to app:// protocol");
-          mainWindow.loadURL("app://localhost/index.html");
-        });
+          req.on("error", (err) => {
+            console.log(
+              "Server not accessible, falling back to app:// protocol",
+            );
+            mainWindow.loadURL("app://localhost/index.html");
+          });
 
-        req.setTimeout(1000, () => {
-          console.log(
-            "Server connection timeout, falling back to app:// protocol",
-          );
-          req.destroy();
-          mainWindow.loadURL("app://localhost/index.html");
-        });
+          req.setTimeout(8000, () => {
+            console.log(
+              "Server connection timeout, falling back to app:// protocol",
+            );
+            req.destroy();
+            mainWindow.loadURL("app://localhost/index.html");
+          });
+        }, 3000); // Wait 3 seconds for ts-node to compile
       })
       .catch((error) => {
         console.error("Failed to start server:", error);
@@ -126,43 +133,82 @@ function createWindow() {
 function startLocalServer() {
   return new Promise((resolve, reject) => {
     const outDir = path.join(__dirname, "../out");
-    console.log("Starting server for directory:", outDir);
+    console.log("Starting proxy server for directory:", outDir);
     console.log("Directory exists:", fs.existsSync(outDir));
 
-    // Try different paths for sirv-cli in packaged app
-    let sirvPath;
-    const possiblePaths = [
-      path.join(__dirname, "../node_modules/.bin/sirv"),
-      path.join(__dirname, "../node_modules/sirv-cli/bin.js"),
-      path.join(process.resourcesPath, "sirv-cli/bin.js"),
+    // Try different paths for ts-node and api-proxy.ts in packaged app
+    let tsNodePath;
+    let apiProxyPath;
+    let tsconfigPath;
+
+    const tsNodePossiblePaths = [
+      path.join(__dirname, "../node_modules/.bin/ts-node"),
+      path.join(__dirname, "../node_modules/ts-node/dist/bin.js"),
+      path.join(process.resourcesPath, "ts-node/dist/bin.js"),
       path.join(
         process.resourcesPath,
-        "app.asar.unpacked/node_modules/sirv-cli/bin.js",
+        "app.asar.unpacked/node_modules/ts-node/dist/bin.js",
       ),
-      path.join(__dirname, "../resources/sirv-cli/bin.js"),
+      path.join(__dirname, "../resources/ts-node/dist/bin.js"),
     ];
 
-    for (const p of possiblePaths) {
+    const apiProxyPossiblePaths = [
+      path.join(__dirname, "../api-proxy.ts"),
+      path.join(process.resourcesPath, "app/api-proxy.ts"),
+      path.join(__dirname, "../app/api-proxy.ts"),
+    ];
+
+    const tsconfigPossiblePaths = [
+      path.join(__dirname, "../tsconfig.server.json"),
+      path.join(process.resourcesPath, "app/tsconfig.server.json"),
+      path.join(__dirname, "../app/tsconfig.server.json"),
+    ];
+
+    // Find ts-node
+    for (const p of tsNodePossiblePaths) {
       if (fs.existsSync(p)) {
-        sirvPath = p;
-        console.log("Found sirv at:", sirvPath);
+        tsNodePath = p;
+        console.log("Found ts-node at:", tsNodePath);
         break;
       }
     }
 
-    if (!sirvPath) {
+    // Find api-proxy.ts
+    for (const p of apiProxyPossiblePaths) {
+      if (fs.existsSync(p)) {
+        apiProxyPath = p;
+        console.log("Found api-proxy.ts at:", apiProxyPath);
+        break;
+      }
+    }
+
+    // Find tsconfig.server.json
+    for (const p of tsconfigPossiblePaths) {
+      if (fs.existsSync(p)) {
+        tsconfigPath = p;
+        console.log("Found tsconfig.server.json at:", tsconfigPath);
+        break;
+      }
+    }
+
+    if (!tsNodePath || !apiProxyPath || !tsconfigPath) {
       console.error(
-        "Could not find sirv binary, falling back to static file loading",
+        "Could not find required files for proxy server, falling back to static file loading",
+        { tsNodePath, apiProxyPath, tsconfigPath },
       );
       resolve();
       return;
     }
 
+    // Set PORT environment variable for Electron
+    process.env.PORT = "3001";
+
     serverProcess = spawn(
       "node",
-      [sirvPath, outDir, "--single", "--port", "3001", "--quiet"],
+      [tsNodePath, "--project", tsconfigPath, apiProxyPath],
       {
         stdio: ["pipe", "pipe", "pipe"],
+        env: { ...process.env, PORT: "3001" },
       },
     );
 
@@ -170,11 +216,10 @@ function startLocalServer() {
 
     serverProcess.stdout.on("data", (data) => {
       const output = data.toString();
-      console.log("Server stdout:", output);
+      console.log("Proxy server stdout:", output);
       if (
         output.includes("Your application is ready") ||
-        output.includes("http://localhost:3001") ||
-        output.includes("sirv")
+        output.includes("http://localhost:3001")
       ) {
         if (!serverStarted) {
           serverStarted = true;
@@ -184,27 +229,27 @@ function startLocalServer() {
     });
 
     serverProcess.stderr.on("data", (data) => {
-      console.error("Server stderr:", data.toString());
+      console.error("Proxy server stderr:", data.toString());
     });
 
     serverProcess.on("error", (error) => {
-      console.error("Server process error:", error);
+      console.error("Proxy server process error:", error);
       if (!serverStarted) {
         resolve(); // Continue anyway, will fallback to file:// protocol
       }
     });
 
     serverProcess.on("exit", (code, signal) => {
-      console.log("Server process exited:", { code, signal });
+      console.log("Proxy server process exited:", { code, signal });
     });
 
     // Fallback timeout
     setTimeout(() => {
       if (!serverStarted) {
-        console.log("Server startup timeout, continuing anyway");
+        console.log("Proxy server startup timeout, continuing anyway");
         resolve();
       }
-    }, 3000);
+    }, 5000); // Increased timeout for ts-node compilation
   });
 }
 
