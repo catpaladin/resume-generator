@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.15](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.14...resume-generator-v0.2.15) (2025-09-04)
+
+
+### Bug Fixes
+
+* electron app needed updates to proxy api calls with sirv ([74ea2b6](https://github.com/catpaladin/resume-generator/commit/74ea2b66130d51eb7183986a3e86bcf26b2e9564))
+* replace next serve with sirv for start script ([e43dd82](https://github.com/catpaladin/resume-generator/commit/e43dd821fa3f2b27ad14775e34bc386d8d7fc869))
+* start script was not working with standalone sirv ([663533c](https://github.com/catpaladin/resume-generator/commit/663533c5b951a269004f4be0e2c0de9e536a7d49))
+
 ## [0.2.14](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.13...resume-generator-v0.2.14) (2025-08-30)
 
 ### Features
