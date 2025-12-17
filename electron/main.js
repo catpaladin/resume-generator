@@ -50,9 +50,9 @@ function createWindow() {
     }),
   });
 
-  // Load the Next.js app
+  // Load the Astro app
   if (isDev) {
-    mainWindow.loadURL("http://localhost:3000");
+    mainWindow.loadURL("http://localhost:4321");
   } else {
     // Try to start a local server, fallback to file loading
     startLocalServer()
@@ -136,9 +136,9 @@ function createWindow() {
 
 function startLocalServer() {
   return new Promise((resolve, reject) => {
-    const outDir = path.join(__dirname, "../out");
-    console.log("Starting API server for directory:", outDir);
-    console.log("Directory exists:", fs.existsSync(outDir));
+    const distDir = path.join(__dirname, "../dist");
+    console.log("Starting API server for directory:", distDir);
+    console.log("Directory exists:", fs.existsSync(distDir));
 
     // Try different paths for ts-node and api-server.ts in packaged app
     let tsNodePath;
@@ -691,14 +691,15 @@ app.whenReady().then(() => {
       return handleApiRoute(request, pathname);
     }
 
-    // Map /_next/static paths to the actual file locations
+    // Map Astro static paths to the actual file locations
     let filePath;
-    if (pathname.startsWith("/_next/")) {
-      filePath = path.join(__dirname, "../out", pathname);
+    if (pathname.startsWith("/_astro/")) {
+      // Astro static assets
+      filePath = path.join(__dirname, "../dist", pathname);
     } else if (pathname === "/" || pathname === "/index.html") {
-      filePath = path.join(__dirname, "../out/index.html");
+      filePath = path.join(__dirname, "../dist/index.html");
     } else {
-      filePath = path.join(__dirname, "../out", pathname);
+      filePath = path.join(__dirname, "../dist", pathname);
     }
 
     console.log(

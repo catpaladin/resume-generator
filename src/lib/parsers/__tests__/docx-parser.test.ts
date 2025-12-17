@@ -1,27 +1,37 @@
+import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
+
 // Mock mammoth since it's not available in test environment
-jest.mock("mammoth", () => ({
-  extractRawText: jest.fn(),
-  convertToHtml: jest.fn(),
-}));
+vi.mock("mammoth", () => {
+  const extractRawText = vi.fn();
+  const convertToHtml = vi.fn();
 
-import { DocxParser } from "../docx-parser";
-import * as mammoth from "mammoth";
+  return {
+    // Handle default import
+    default: {
+      extractRawText,
+      convertToHtml,
+    },
+    // Handle named imports (if any, or for consistency)
+    extractRawText,
+    convertToHtml,
+  };
+});
 
-jest.mock("natural", () => ({
+// Mock natural
+vi.mock("natural", () => ({
   PorterStemmer: {
-    stem: jest.fn((word: string) => word.toLowerCase()),
+    stem: vi.fn((word: string) => word.toLowerCase()),
   },
-  WordTokenizer: jest.fn().mockImplementation(() => ({
-    tokenize: jest.fn((text: string) => text.toLowerCase().split(/\s+/)),
+  WordTokenizer: vi.fn().mockImplementation(() => ({
+    tokenize: vi.fn((text: string) => text.toLowerCase().split(/\s+/)),
   })),
 }));
 
-const mockExtractRawText = mammoth.extractRawText as jest.MockedFunction<
-  typeof mammoth.extractRawText
->;
-const mockConvertToHtml = mammoth.convertToHtml as jest.MockedFunction<
-  typeof mammoth.convertToHtml
->;
+import { DocxParser } from "../docx-parser";
+import mammoth from "mammoth";
+
+const mockExtractRawText = mammoth.extractRawText as unknown as Mock;
+const mockConvertToHtml = mammoth.convertToHtml as unknown as Mock;
 
 describe("DocxParser", () => {
   let parser: DocxParser;
@@ -42,7 +52,7 @@ describe("DocxParser", () => {
 
   beforeEach(() => {
     parser = new DocxParser();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("basic functionality", () => {
@@ -99,6 +109,14 @@ describe("DocxParser", () => {
 
       const result = await parser.parse(file);
 
+      // Debug output if failed
+      if (!result.success) {
+        console.error(
+          "Parse failed with errors:",
+          JSON.stringify(result.errors, null, 2),
+        );
+      }
+
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
       expect(result.confidence).toBeGreaterThan(0);
@@ -140,6 +158,13 @@ describe("DocxParser", () => {
       const file = createMockDocxFile("minimal.docx", 50);
 
       const result = await parser.parse(file);
+
+      if (!result.success) {
+        console.error(
+          "Minimal parse failed:",
+          JSON.stringify(result.errors, null, 2),
+        );
+      }
 
       expect(result.success).toBe(true);
       expect(result.data!.personal.fullName).toBe("John Doe");

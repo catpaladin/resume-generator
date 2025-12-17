@@ -28,22 +28,22 @@ the right, and export to PDF using your browser’s print dialog.
 
 ```bash
 # 1) Install dependencies
-npm install
+bun install
 
 # 2) Start in development (http://localhost:3000)
-npm run dev
+bun run dev
 ```
 
 ## Requirements
 
 - Node.js 22+
-- npm (or pnpm/yarn/bun)
+- Bun
 
 ## Local Development
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Hot‑reload is enabled. Your data persists in `localStorage`.
@@ -52,10 +52,10 @@ Hot‑reload is enabled. Your data persists in `localStorage`.
 
 ```bash
 # Build
-npm run build
+bun run build
 
 # Start the production server
-npm run start
+bun run start
 
 # By default: http://localhost:3000
 ```
@@ -126,9 +126,9 @@ Notes:
 The project is set up with Jest + React Testing Library.
 
 ```bash
-npm run test
-npm run test:watch
-npm run test:coverage
+bun run test
+bun run test:watch
+bun run test:coverage
 ```
 
 When adding utilities or store actions, include unit tests.

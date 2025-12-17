@@ -9,5 +9,5 @@ export type TabType =
 export interface Tab {
   id: TabType;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: any;
 }

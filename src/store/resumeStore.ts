@@ -1,3 +1,7 @@
+/**
+ * @deprecated This store is being replaced by src/store/resume.svelte.ts
+ * Please use the Svelte 5 Runes store for new development.
+ */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ResumeData, AISettings } from "@/types/resume";

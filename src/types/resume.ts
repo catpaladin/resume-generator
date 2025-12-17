@@ -102,3 +102,20 @@ export interface AISettings {
   focusAreas?: string[];
   enableFallback?: boolean;
 }
+
+export interface AIEnhancementSettings {
+  provider: "openai" | "anthropic" | "gemini";
+  model: string;
+  apiKey: string;
+  temperature: number;
+  improveWriting: boolean;
+  fixGrammar: boolean;
+  optimizeKeywords: boolean;
+  customInstructions: string;
+}
+
+export interface ValidationIssue {
+  field: string;
+  message: string;
+  type?: "error" | "warning";
+}
