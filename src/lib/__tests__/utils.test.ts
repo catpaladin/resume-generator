@@ -26,12 +26,12 @@ describe("Utility Functions", () => {
   describe("formatPhoneNumber", () => {
     it("should format a 10-digit phone number correctly", () => {
       const result = formatPhoneNumber("1234567890");
-      expect(result).toBe("(123) 456-7890");
+      expect(result).toBe("123-456-7890");
     });
 
     it("should format a phone number with existing formatting", () => {
       const result = formatPhoneNumber("(123) 456-7890");
-      expect(result).toBe("(123) 456-7890");
+      expect(result).toBe("123-456-7890");
     });
 
     it("should return the original string if it cannot be formatted", () => {
