@@ -80,31 +80,39 @@
     overflow: visible !important;
     background: white !important;
     color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* Hide UI elements */
-  body > * {
+  /* Hide common UI elements */
+  header,
+  nav,
+  footer,
+  #resume-studio-header,
+  .print\:hidden {
     display: none !important;
   }
 
-  /* Target the preview specifically */
-  body > main {
+  /* Ensure the main content area and resume parents don't truncate or add extra space */
+  main,
+  .resume-parent-container {
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* Drill down to preview container */
-  main *:not(#resume-preview-container):not(#resume-preview-container *) {
-    display: none !important;
-  }
-
+  /* Target the preview specifically */
   #resume-preview-container {
     display: block !important;
     visibility: visible !important;
     position: relative !important;
     width: 100% !important;
     max-width: none !important;
+    min-height: 0 !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0.5in !important;
@@ -129,8 +137,6 @@
   li,
   a {
     color: black !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 
   /* Ensure blue accent is printable but professional */

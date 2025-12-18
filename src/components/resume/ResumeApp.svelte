@@ -83,16 +83,16 @@
 
     {#if viewMode === 'editor'}
         <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            <div class="space-y-6">
+            <div class="space-y-6 print:hidden">
                 <ResumeBuilder />
             </div>
             
-            <div class="hidden lg:block lg:sticky lg:top-24 h-fit">
+            <div class="hidden lg:block lg:sticky lg:top-24 h-fit resume-parent-container">
                 <ResumePreview />
             </div>
         </div>
     {:else}
-        <div class="max-w-4xl mx-auto pb-20">
+        <div class="max-w-4xl mx-auto pb-20 resume-parent-container">
             <ResumePreview />
         </div>
     {/if}

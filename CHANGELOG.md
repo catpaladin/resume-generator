@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.16](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.15...resume-generator-v0.2.16) (2025-09-04)
 
-
 ### Bug Fixes
 
-* remove proxy logic and update routing for server ([4d31271](https://github.com/catpaladin/resume-generator/commit/4d312714750961d8427d50b8331138a9e8f9f830))
+- remove proxy logic and update routing for server ([4d31271](https://github.com/catpaladin/resume-generator/commit/4d312714750961d8427d50b8331138a9e8f9f830))
 
 ## [0.2.15](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.14...resume-generator-v0.2.15) (2025-09-04)
 
