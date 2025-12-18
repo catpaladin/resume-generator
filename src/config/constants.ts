@@ -17,7 +17,18 @@ export const TabConfig: Tab[] = [
 
 export type TabType = (typeof TabConfig)[number]["id"];
 
-export const initialResumeData: ResumeData = {
+// Safe UUID generation for SSR/Build environments
+export function safeUUID(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 11);
+}
+
+export const getInitialResumeData = (): ResumeData => ({
   personal: {
     fullName: "",
     location: "",
@@ -29,19 +40,19 @@ export const initialResumeData: ResumeData = {
   skills: [],
   experience: [
     {
-      id: crypto.randomUUID(),
+      id: safeUUID(),
       company: "",
       position: "",
       location: "",
       startDate: "",
       endDate: "",
-      bulletPoints: [{ id: crypto.randomUUID(), text: "" }],
+      bulletPoints: [{ id: safeUUID(), text: "" }],
       jobDescription: "",
     },
   ],
   education: [
     {
-      id: crypto.randomUUID(),
+      id: safeUUID(),
       school: "",
       degree: "",
       graduationYear: "",
@@ -49,13 +60,15 @@ export const initialResumeData: ResumeData = {
   ],
   projects: [
     {
-      id: crypto.randomUUID(),
+      id: safeUUID(),
       name: "",
-      link: "",
+      url: "",
       description: "",
     },
   ],
-};
+});
+
+export const initialResumeData = getInitialResumeData();
 
 export const MAX_ITEMS = {
   SKILLS: 10,

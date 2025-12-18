@@ -13,24 +13,26 @@
 </script>
 
 {#if hasContent}
-  <section>
-    <h2 class="mb-2 text-base font-bold text-foreground">Education</h2>
-    <div class="space-y-3">
-      {#each education as edu}
-        {#if edu.school}
-          <div class="space-y-0.5">
-            <div class="flex items-baseline justify-between">
-              <h3 class="font-semibold text-foreground">
-                {edu.school}
+  <section class="space-y-3">
+    <h2 class="text-sm font-bold tracking-widest uppercase text-primary border-l-4 border-primary pl-3 bg-primary/5 py-1">
+      EDUCATION
+    </h2>
+    <div class="space-y-4">
+      {#each education as edu (edu.id)}
+        {#if edu.school || edu.degree}
+          <div class="flex items-baseline justify-between gap-4">
+            <div>
+              <h3 class="text-[15px] font-bold text-foreground">
+                {edu.degree || 'Degree Title'}
               </h3>
-              {#if edu.graduationYear}
-                <span class="text-sm text-muted-foreground">
-                  {edu.graduationYear}
-                </span>
-              {/if}
+              <p class="text-sm font-semibold text-primary/80">
+                {edu.school || 'Institution Name'}
+              </p>
             </div>
-            {#if edu.degree}
-              <p class="text-sm text-muted-foreground">{edu.degree}</p>
+            {#if edu.graduationYear}
+              <span class="whitespace-nowrap text-xs font-bold tabular-nums text-muted-foreground uppercase tracking-wider">
+                Class of {edu.graduationYear}
+              </span>
             {/if}
           </div>
         {/if}

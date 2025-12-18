@@ -7,13 +7,8 @@ import type {
   Project,
   BulletPoint,
 } from "@/types/resume";
-import {
-  Parser,
-  ParseResult,
-  getFileExtension,
-  PARSING_PATTERNS,
-  SECTION_HEADERS,
-} from "./index";
+import type { Parser, ParseResult } from "./index";
+import { getFileExtension, PARSING_PATTERNS, SECTION_HEADERS } from "./index";
 import { generateId, normalizeResumeData } from "../validators/schemas";
 
 interface ParsedSection {
@@ -1564,7 +1559,8 @@ export class DocxParser implements Parser {
       id: generateId(),
       name: "",
       description: "",
-      link: "",
+      url: "",
+      technologies: [],
     };
 
     // First line is usually the project name
@@ -1573,7 +1569,7 @@ export class DocxParser implements Parser {
     // Look for URLs
     const urlMatch = block.match(PARSING_PATTERNS.website);
     if (urlMatch) {
-      project.link = urlMatch[0];
+      project.url = urlMatch[0];
     }
 
     // Rest is description

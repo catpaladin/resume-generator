@@ -13,40 +13,44 @@
 </script>
 
 {#if hasContent}
-  <section>
-    <h2 class="mb-2 text-base font-bold text-foreground">
-      Professional Experience
+  <section class="space-y-4">
+    <h2 class="text-sm font-bold tracking-widest uppercase text-primary border-l-4 border-primary pl-3 bg-primary/5 py-1">
+      EXPERIENCE
     </h2>
-    <div class="space-y-4">
-      {#each experiences as exp}
-        {#if exp.company}
-          <div class="space-y-1">
-            <div class="flex items-baseline justify-between">
+    <div class="space-y-6">
+      {#each experiences as exp (exp.id)}
+        {#if exp.company || exp.position}
+          <div class="space-y-2">
+            <div class="flex items-baseline justify-between gap-4">
               <div>
-                <h3 class="font-semibold text-foreground">
-                  {exp.company}
+                <h3 class="text-base font-bold text-foreground leading-tight">
+                  {exp.position || 'Position Title'}
                 </h3>
-                <div class="flex items-baseline gap-2">
-                  <p class="text-sm font-medium text-foreground">
-                    {exp.position}
-                  </p>
+                <div class="flex items-center gap-2 text-sm font-semibold text-primary/80">
+                  {exp.company || 'Company Name'}
                   {#if exp.location}
-                    <span class="text-sm text-muted-foreground">
+                    <span class="text-muted-foreground/60 font-normal text-xs uppercase tracking-wider">
                       • {exp.location}
                     </span>
                   {/if}
                 </div>
               </div>
-              <span class="whitespace-nowrap text-sm text-muted-foreground">
-                {[exp.startDate, exp.endDate].filter(Boolean).join(' - ')}
+              <span class="whitespace-nowrap text-xs font-bold tabular-nums text-muted-foreground uppercase tracking-wider">
+                {[exp.startDate, exp.endDate].filter(Boolean).join(' – ')}
               </span>
             </div>
 
+            {#if exp.jobDescription}
+              <p class="text-[13px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                {exp.jobDescription}
+              </p>
+            {/if}
+
             {#if exp.bulletPoints.length > 0}
-              <ul class="ml-4 list-disc space-y-0.5">
-                {#each exp.bulletPoints as bullet}
+              <ul class="ml-4 list-disc space-y-1">
+                {#each exp.bulletPoints as bullet (bullet.id)}
                   {#if bullet.text}
-                    <li class="overflow-visible whitespace-normal text-sm text-muted-foreground">
+                    <li class="text-[13px] leading-relaxed text-muted-foreground/90 pl-1">
                       {bullet.text}
                     </li>
                   {/if}

@@ -4,64 +4,50 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 15% 15%;
+    --background: 0 0% 98%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
-    --primary: 267 84% 65%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 91%;
-    --secondary-foreground: 220 15% 25%;
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 142 76% 52%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 88%;
-    --input: 220 13% 90%;
-    --ring: 267 84% 65%;
-    --success: 142 76% 52%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
-    --radius: 0.75rem;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 224 30% 8%;
-    --foreground: 220 20% 92%;
-    --card: 224 28% 10%;
-    --card-foreground: 220 20% 92%;
-    --popover: 224 28% 10%;
-    --popover-foreground: 220 20% 92%;
-    --primary: 267 84% 75%;
-    --primary-foreground: 224 30% 8%;
-    --secondary: 224 20% 14%;
-    --secondary-foreground: 220 20% 82%;
-    --muted: 224 20% 14%;
-    --muted-foreground: 220 10% 65%;
-    --accent: 142 76% 60%;
-    --accent-foreground: 224 30% 8%;
-    --destructive: 0 84% 70%;
-    --destructive-foreground: 224 30% 8%;
-    --border: 224 20% 18%;
-    --input: 224 20% 16%;
-    --ring: 267 84% 75%;
-    --success: 142 76% 60%;
-    --success-foreground: 224 30% 8%;
-    --warning: 38 92% 60%;
-    --warning-foreground: 224 30% 8%;
-    --info: 199 89% 58%;
-    --info-foreground: 224 30% 8%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -71,69 +57,90 @@
 }
 
 @layer utilities {
-  /* Hide scrollbars while allowing scroll */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-
-  /* Force strong light theme tokens within preview area for readability */
-  .preview-light {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 24% 95%;
-    /* Stronger contrast for muted text on white */
-    --muted-foreground: 215.4 16.3% 26%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    /* Slightly darker borders for visibility on white */
-    --border: 214.3 15% 85%;
-    --input: 214.3 15% 85%;
-    --ring: 222.2 47.4% 11.2%;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-/* Print styles for PDF export */
+/* Print Styles: isolates the resume preview exactly */
 @media print {
   @page {
-    margin: 0.5in;
-    size: auto; /* Allow auto-sizing for multiple pages */
+    margin: 0;
+    size: letter portrait;
   }
 
-  body * {
-    visibility: hidden;
+  /* Reset layout for print */
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
   }
 
-  #resume-preview,
-  #resume-preview * {
-    visibility: visible;
+  /* Hide UI elements */
+  body > * {
+    display: none !important;
+  }
+
+  /* Target the preview specifically */
+  body > main {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Drill down to preview container */
+  main *:not(#resume-preview-container):not(#resume-preview-container *) {
+    display: none !important;
+  }
+
+  #resume-preview-container {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.5in !important;
+    margin: 0 !important;
+    background: white !important;
   }
 
   #resume-preview {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
   }
 
-  /* Remove any fixed height constraints that might limit content */
-  .overflow-y-auto {
-    overflow: visible !important;
-    height: auto !important;
+  /* Force high contrast text */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  li,
+  a {
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure blue accent is printable but professional */
+  .text-primary,
+  .text-blue-600 {
+    color: #1d4ed8 !important;
+  }
+
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem !important;
   }
 }

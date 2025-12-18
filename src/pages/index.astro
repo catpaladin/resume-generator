@@ -1,22 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ResumeBuilder from '../components/resume/ResumeBuilder.svelte';
-import ResumePreview from '../components/resume/preview/ResumePreview.svelte';
+import ResumeApp from '../components/resume/ResumeApp.svelte';
 ---
 
 <Layout title="Resume Generator">
-	<div class="container mx-auto py-8">
-		<h1 class="text-3xl font-bold mb-8 text-center">Resume Builder</h1>
-		<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-			<!-- Builder Section -->
-			<div>
-				<ResumeBuilder client:load />
-			</div>
-			
-			<!-- Preview Section -->
-			<div class="print:hidden">
-				<ResumePreview client:load />
-			</div>
-		</div>
+	<div class="container mx-auto py-12 px-6">
+		<ResumeApp client:load />
 	</div>
 </Layout>

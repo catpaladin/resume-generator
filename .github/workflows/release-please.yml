@@ -66,17 +66,17 @@ jobs:
         run: bun run
         continue-on-error: true
 
-      - name: Build Next.js App
+      - name: Build Astro App
         run: |
-          echo "Building Next.js application..."
+          echo "Building Astro application..."
           bun run build
-          echo "Next.js build completed"
+          echo "Astro build completed"
         shell: bash
 
       - name: Check Build Output
         run: |
           echo "Build output:"
-          if [ -d "out" ]; then ls -la out/; else echo "No out directory found"; fi
+          if [ -d "dist" ]; then ls -la dist/; else echo "No dist directory found"; fi
         shell: bash
 
       - name: Prepare Build Environment (Linux)
@@ -241,7 +241,7 @@ jobs:
 
           ---
 
-          Built with ❤️ using Next.js, React, and Electron
+          Built with ❤️ using Astro, Svelte, and Electron
           EOF
 
             # Update release with new body and upload assets

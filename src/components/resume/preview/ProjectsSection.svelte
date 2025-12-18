@@ -22,29 +22,31 @@
 </script>
 
 {#if hasContent}
-  <section>
-    <h2 class="mb-2 text-base font-bold text-foreground">Projects</h2>
-    <div class="space-y-3">
-      {#each projects as project}
+  <section class="space-y-3">
+    <h2 class="text-sm font-bold tracking-widest uppercase text-primary border-l-4 border-primary pl-3 bg-primary/5 py-1">
+      PROJECTS
+    </h2>
+    <div class="space-y-4">
+      {#each projects as project (project.id)}
         {#if project.name}
           <div class="space-y-1">
-            <div class="mb-1 flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
-              <h3 class="font-semibold text-foreground">
+            <div class="flex items-baseline justify-between gap-4">
+              <h3 class="text-[15px] font-bold text-foreground">
                 {project.name}
               </h3>
-              {#if project.link && isValidUrl(project.link)}
+              {#if project.url && isValidUrl(project.url)}
                 <a
-                  href={project.link}
+                  href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="mt-0.5 break-all text-sm text-primary hover:underline sm:ml-4 sm:mt-0"
+                  class="text-xs font-semibold text-primary hover:underline lowercase tracking-normal"
                 >
-                  {project.link}
+                  {project.url}
                 </a>
               {/if}
             </div>
             {#if project.description}
-              <p class="text-sm text-muted-foreground">
+              <p class="text-[13px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
                 {project.description}
               </p>
             {/if}

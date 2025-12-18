@@ -1,5 +1,6 @@
 import type { ResumeData } from "@/types/resume";
-import { ParserFactory, ParseResult, validateFileSize } from "../parsers";
+import type { ParseResult } from "../parsers";
+import { ParserFactory, validateFileSize } from "../parsers";
 import { JsonParser } from "../parsers/json-parser";
 import { DocxParser } from "../parsers/docx-parser";
 import {

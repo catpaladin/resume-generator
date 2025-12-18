@@ -36,7 +36,7 @@ export interface Education {
 export interface Project {
   id: string;
   name: string;
-  link: string;
+  url: string;
   description: string;
 }
 

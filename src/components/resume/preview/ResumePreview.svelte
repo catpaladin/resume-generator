@@ -2,7 +2,7 @@
   import { resumeStore } from '@/store/resume.svelte';
   import { Card } from '@/components/ui/card';
   import Button from '@/components/ui/button/button.svelte';
-  import { Download } from 'lucide-svelte';
+  import { Download, FileText } from 'lucide-svelte';
   import HeaderSection from './HeaderSection.svelte';
   import SkillsSection from './SkillsSection.svelte';
   import ExperienceSection from './ExperienceSection.svelte';
@@ -23,7 +23,7 @@
     }
     
     // Wait for theme to apply
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 150));
     
     // Trigger print
     window.print();
@@ -32,21 +32,24 @@
     if (isDark) {
       setTimeout(() => {
         document.documentElement.classList.add('dark');
-      }, 100);
+      }, 150);
     }
   }
 </script>
 
-<Card class="bg-card p-6">
-  <div class="mb-6 flex items-center justify-between">
-    <h2 class="text-xl font-bold text-foreground">Resume Preview</h2>
-    <Button onclick={handlePrint} class="flex items-center gap-2">
-      <Download size={18} />
-      Export PDF
+<Card id="resume-preview-container" class="bg-card p-10 shadow-lg border border-border/50 min-h-[1056px] w-full max-w-[816px] mx-auto transition-all duration-300">
+  <div class="mb-10 flex items-center justify-between border-b pb-4 print:hidden">
+    <h2 class="text-xl font-bold tracking-tight text-foreground/80 flex items-center gap-2">
+        <FileText class="text-primary" size={20} />
+        Resume Preview
+    </h2>
+    <Button onclick={handlePrint} class="flex items-center gap-2 px-6 shadow-sm">
+      <Download size={16} />
+      EXPORT AS PDF
     </Button>
   </div>
 
-  <div class="space-y-6" id="resume-preview">
+  <div class="space-y-8" id="resume-preview">
     <HeaderSection data={resumeData.personal} />
     <SkillsSection skills={resumeData.skills} />
     <ExperienceSection experiences={resumeData.experience} />
@@ -54,15 +57,3 @@
     <ProjectsSection projects={resumeData.projects} />
   </div>
 </Card>
-
-<style global>
-  @media print {
-    @page {
-      margin: 0.5in;
-    }
-    body {
-      print-color-adjust: exact;
-      -webkit-print-color-adjust: exact;
-    }
-  }
-</style>

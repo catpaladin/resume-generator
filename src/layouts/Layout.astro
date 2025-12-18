@@ -19,7 +19,6 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<script is:inline>
-			// Immediate theme application to prevent flash
 			const theme = localStorage.getItem('theme');
 			if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
 				document.documentElement.classList.add('dark');
@@ -30,7 +29,7 @@ const { title } = Astro.props;
 	</head>
 	<body class="min-h-screen bg-background font-sans antialiased">
 		<Header client:load />
-		<main class="flex-1">
+		<main>
 			<slot />
 		</main>
 	</body>

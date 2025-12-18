@@ -8,7 +8,6 @@
   import Button from '../ui/button/button.svelte';
   import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
   
-  // Section definitions for navigation
   const sections = [
     { id: 'personal', label: 'Personal Info' },
     { id: 'experience', label: 'Experience' },
@@ -17,7 +16,6 @@
     { id: 'projects', label: 'Projects' }
   ] as const;
 
-  // Active section management
   let activeSection = $derived(resumeStore.uiState.activeSection);
   
   function setActiveSection(id: string) {
@@ -25,32 +23,24 @@
   }
 </script>
 
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-  <!-- Sidebar Navigation -->
-  <Card class="lg:col-span-1 h-fit">
-    <CardContent class="p-4 space-y-2">
-      {#each sections as section}
-        <Button 
-          variant={activeSection === section.id ? "default" : "ghost"} 
-          class="w-full justify-start"
-          onclick={() => setActiveSection(section.id)}
-        >
-          {section.label}
-        </Button>
-      {/each}
-    </CardContent>
-  </Card>
-
-  <!-- Main Form Area -->
-  <div class="lg:col-span-3">
-    <Card>
-      <CardHeader>
-        <CardTitle>{sections.find(s => s.id === activeSection)?.label}</CardTitle>
-        <CardDescription>
-          Fill in your information below. Changes are saved automatically.
-        </CardDescription>
+<div class="w-full">
+    <Card class="border-2 rounded-2xl shadow-sm overflow-hidden">
+      <CardHeader class="bg-slate-50/50 dark:bg-slate-900/20 border-b border-slate-100 dark:border-slate-800 pb-8">
+        <div class="flex justify-between items-start">
+            <div>
+                <CardTitle class="text-2xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">
+                    {sections.find(s => s.id === activeSection)?.label || 'Section'}
+                </CardTitle>
+                <CardDescription class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">
+                    Editing module entry details
+                </CardDescription>
+            </div>
+            <div class="bg-blue-600/10 text-blue-600 dark:text-blue-400 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter border border-blue-600/20">
+                Live Editing
+            </div>
+        </div>
       </CardHeader>
-      <CardContent class="space-y-6">
+      <CardContent class="p-8">
         {#if activeSection === 'personal'}
           <PersonalSection />
         {:else if activeSection === 'experience'}
@@ -63,23 +53,23 @@
           <ProjectsSection />
         {/if}
       </CardContent>
-      <CardFooter class="flex justify-between">
-         <!-- Simple navigation buttons -->
+      <CardFooter class="flex justify-between p-8 bg-slate-50/30 dark:bg-slate-900/10 border-t border-slate-100 dark:border-slate-800">
          {@const currentIndex = sections.findIndex(s => s.id === activeSection)}
          <Button 
            variant="outline" 
            disabled={currentIndex === 0}
            onclick={() => setActiveSection(sections[currentIndex - 1].id)}
+           class="font-black text-[10px] tracking-widest uppercase px-6 h-9"
          >
-           Previous
+           Previous Section
          </Button>
          <Button 
            disabled={currentIndex === sections.length - 1}
            onclick={() => setActiveSection(sections[currentIndex + 1].id)}
+           class="font-black text-[10px] tracking-widest uppercase px-6 h-9 shadow-md shadow-blue-600/10"
          >
-           Next
+           Next Section
          </Button>
       </CardFooter>
     </Card>
-  </div>
 </div>

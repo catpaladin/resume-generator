@@ -14,21 +14,22 @@
 </script>
 
 {#if data}
-  <section class="space-y-2 text-center">
-    <h1 class="text-2xl font-bold text-foreground">{data.fullName}</h1>
+  <section class="space-y-4 text-center border-b pb-8 border-border/30">
+    <h1 class="text-4xl font-extrabold tracking-tight text-foreground uppercase">{data.fullName || 'YOUR NAME'}</h1>
 
     {#if contactInfo.length > 0}
-      <p class="text-sm text-muted-foreground">
-        {contactInfo.join(' • ')}
-      </p>
+      <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm font-medium text-muted-foreground/80">
+        {#each contactInfo as info}
+            <span class="flex items-center gap-1.5 whitespace-nowrap">
+                {info}
+            </span>
+        {/each}
+      </div>
     {/if}
 
     {#if data.summary}
-      <div class="mt-4 text-left">
-        <h2 class="mb-1 text-base font-semibold text-foreground">
-          Professional Summary
-        </h2>
-        <p class="text-sm text-muted-foreground">{data.summary}</p>
+      <div class="mt-6 text-left max-w-2xl mx-auto">
+        <p class="text-[14px] leading-relaxed text-muted-foreground text-center">{data.summary}</p>
       </div>
     {/if}
   </section>

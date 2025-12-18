@@ -1,5 +1,6 @@
 import type { ResumeData } from "@/types/resume";
-import { Parser, ParseResult, ParseError, getFileExtension } from "./index";
+import type { Parser, ParseResult, ParseError } from "./index";
+import { getFileExtension } from "./index";
 
 export class JsonParser implements Parser {
   getName(): string {

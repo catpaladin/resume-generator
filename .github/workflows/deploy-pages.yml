@@ -387,7 +387,7 @@ jobs:
               
               <footer>
                   <div class="container">
-                      <p>Made with ❤️ using Next.js, React, and Electron</p>
+                      <p>Made with ❤️ using Astro, Svelte, and Electron</p>
                       <p><a href="https://github.com/REPO_PLACEHOLDER" style="color: var(--primary);">View on GitHub</a></p>
                   </div>
               </footer>

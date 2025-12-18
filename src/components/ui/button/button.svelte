@@ -1,6 +1,4 @@
 <script lang="ts" module>
-	import type { WithElementRefs } from "bits-ui";
-	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from "svelte/elements";
 	import { type VariantProps, cva } from "class-variance-authority";
 	import { cn } from "@/lib/utils";
 
@@ -29,16 +27,6 @@
 			},
 		}
 	);
-
-	type ButtonProps = WithElementRefs<HTMLButtonAttributes> &
-		VariantProps<typeof buttonVariants>;
-
-	type AnchorProps = WithElementRefs<HTMLAnchorAttributes> &
-		VariantProps<typeof buttonVariants> & {
-			href: string;
-		};
-
-	export type Props = ButtonProps | AnchorProps;
 </script>
 
 <script lang="ts">
@@ -48,15 +36,17 @@
 		size,
 		ref = $bindable(null),
 		children,
+		onclick,
 		...restProps
-	}: Props = $props();
+	}: any = $props();
 </script>
 
-{#if "href" in restProps}
+{#if restProps.href}
 	<a
 		bind:this={ref}
 		class={cn(buttonVariants({ variant, size, className }))}
-		{...(restProps as HTMLAnchorAttributes)}
+		{onclick}
+		{...restProps}
 	>
 		{@render children?.()}
 	</a>
@@ -64,7 +54,8 @@
 	<button
 		bind:this={ref}
 		class={cn(buttonVariants({ variant, size, className }))}
-		{...(restProps as HTMLButtonAttributes)}
+		{onclick}
+		{...restProps}
 	>
 		{@render children?.()}
 	</button>

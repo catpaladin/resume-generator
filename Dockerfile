@@ -4,14 +4,11 @@
 FROM node:22-bullseye-slim AS deps
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Install bun
+RUN npm install -g bun
 
-COPY package.json package-lock.json* ./
-
-RUN npm install --frozen-lockfile
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
 ##############################
 # Stage 2: Builder
@@ -19,27 +16,32 @@ RUN npm install --frozen-lockfile
 FROM node:22-bullseye-slim AS builder
 WORKDIR /app
 
+# Install bun
+RUN npm install -g bun
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
-RUN npm run build
+RUN bun run build
 
 ##############################
 # Stage 3: Runner
 ##############################
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+FROM node:22-bullseye-slim AS runner
 WORKDIR /app
+
 ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
 
-COPY --from=builder --chown=nonroot:nonroot /app/.next/standalone ./
-COPY --from=builder --chown=nonroot:nonroot /app/.next/static ./.next/static
-COPY --from=builder --chown=nonroot:nonroot /app/public ./public
+# Install sirv-cli to serve static files
+RUN npm install -g sirv-cli
 
-USER nonroot
+# Copy built files from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+
 EXPOSE 3000
 
-CMD ["server.js"]
+# Serve the dist folder
+CMD ["sirv", "dist", "--host", "0.0.0.0", "--port", "3000", "--single"]

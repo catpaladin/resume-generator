@@ -7,12 +7,12 @@
 
 <AccordionPrimitive.Content
 	class={cn(
-		"overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+		"text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down data-[state=open]:overflow-visible overflow-hidden",
 		className
 	)}
 	{...restProps}
 >
-	<div class="pb-4 pt-0">
+	<div class="pb-6 pt-0 px-1">
 		{@render children?.()}
 	</div>
 </AccordionPrimitive.Content>

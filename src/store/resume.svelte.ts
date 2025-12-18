@@ -3,7 +3,7 @@
  * Replaces src/store/resumeStore.ts
  */
 import { PersistedState } from "../lib/persistence.svelte";
-import { initialResumeData } from "../config/constants";
+import { getInitialResumeData } from "../config/constants";
 import type {
   ResumeData,
   AIEnhancementSettings,
@@ -27,6 +27,7 @@ interface UIState {
   isUploading: boolean;
   isGenerating: boolean;
   activeSection: string;
+  viewMode: "editor" | "preview";
   showPreview: boolean;
   sidebarOpen: boolean;
   validationErrors: ValidationIssue[];
@@ -41,7 +42,7 @@ class ResumeStore {
     resumeData: ResumeData;
     aiSettings: AIEnhancementSettings;
   }>("resume-data", {
-    resumeData: initialResumeData,
+    resumeData: getInitialResumeData(),
     aiSettings: DEFAULT_AI_SETTINGS,
   });
 
@@ -50,6 +51,7 @@ class ResumeStore {
     isUploading: false,
     isGenerating: false,
     activeSection: "personal",
+    viewMode: "editor",
     showPreview: false,
     sidebarOpen: true,
     validationErrors: [],
@@ -101,7 +103,7 @@ class ResumeStore {
     ) {
       return;
     }
-    this.#store.value.resumeData = initialResumeData;
+    this.#store.value.resumeData = getInitialResumeData();
     this.#uiState.validationErrors = [];
   }
 
