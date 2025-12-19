@@ -3,6 +3,7 @@ import type { ParseResult } from "../parsers";
 import { ParserFactory, validateFileSize } from "../parsers";
 import { JsonParser } from "../parsers/json-parser";
 import { DocxParser } from "../parsers/docx-parser";
+import { PdfParser } from "../parsers/pdf-parser";
 import {
   validateResumeData,
   type ValidationResult,
@@ -11,6 +12,7 @@ import {
 // Register all available parsers
 ParserFactory.registerParser(new JsonParser());
 ParserFactory.registerParser(new DocxParser());
+ParserFactory.registerParser(new PdfParser());
 
 export interface ImportProgress {
   stage: "reading" | "parsing" | "validating" | "complete" | "error";
@@ -81,7 +83,7 @@ export class ImportManager {
               message: `Unsupported file format. Supported formats: ${ParserFactory.getSupportedFileTypes().join(", ")}`,
               severity: "error",
               suggestion:
-                "Please convert your file to a supported format (JSON or DOCX)",
+                "Please convert your file to a supported format (JSON, DOCX, or PDF)",
             },
           ],
         };
@@ -149,7 +151,8 @@ export class ImportManager {
         parserUsed: parser.getName(),
         needsReview,
         aiEnhancementAvailable:
-          parser.getName() === "Word Document Parser" &&
+          (parser.getName() === "Word Document Parser" ||
+            parser.getName() === "PDF Parser") &&
           !!parseResult.originalContent,
       };
     } catch (error) {

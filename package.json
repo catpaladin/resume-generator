@@ -37,6 +37,7 @@
     "mammoth": "^1.11.0",
     "natural": "^8.1.0",
     "node-fetch": "^3.3.2",
+    "pdfjs-dist": "^5.4.449",
     "svelte": "^5.46.0",
     "svelte-check": "^4.3.4",
     "tailwind-merge": "^3.4.0",
