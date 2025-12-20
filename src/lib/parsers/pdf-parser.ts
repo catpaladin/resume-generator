@@ -9,26 +9,49 @@ export class PdfParser extends BaseParser implements Parser {
   private async getPdfJs() {
     if (this.pdfjs) return this.pdfjs;
 
-    // Dynamic import to avoid SSR issues with DOMMatrix
-    this.pdfjs = await import("pdfjs-dist");
-
-    // Set worker source
-    if (
-      typeof window !== "undefined" &&
-      !this.pdfjs.GlobalWorkerOptions.workerSrc
-    ) {
-      // For Vite/Astro, we can use the ?url suffix to get the worker path
-      // or use the legacy approach of setting it to the CDN.
-      // However, the CDN might fail due to version mismatch or network issues.
-      // The most reliable way in Vite is to use the worker constructor.
+    console.log("Loading PDF.js...");
+    try {
+      // Try to import the main module
+      // In Vite/Astro, sometimes the bare import fails, so we try the specific ESM build
       try {
-        // @ts-ignore
-        const Worker = await import("pdfjs-dist/build/pdf.worker.mjs?url");
-        this.pdfjs.GlobalWorkerOptions.workerSrc = Worker.default;
+        this.pdfjs = await import("pdfjs-dist");
+        console.log("Imported pdfjs-dist successfully");
       } catch (e) {
-        // Fallback to a known working CDN version if local fails
-        this.pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${this.pdfjs.version}/build/pdf.worker.min.mjs`;
+        try {
+          // @ts-ignore
+          this.pdfjs = await import("pdfjs-dist/build/pdf.mjs");
+          console.log("Imported pdfjs-dist/build/pdf.mjs successfully");
+        } catch (e2) {
+          console.warn(
+            "Failed to import modern pdfjs-dist, trying legacy build",
+            e2,
+          );
+          // @ts-ignore
+          this.pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+          console.log("Imported pdfjs-dist/legacy/build/pdf.mjs successfully");
+        }
       }
+
+      // Set worker source
+      if (
+        typeof window !== "undefined" &&
+        !this.pdfjs.GlobalWorkerOptions.workerSrc
+      ) {
+        try {
+          // Try to get the worker URL via Vite's ?url suffix
+          // @ts-ignore
+          const Worker = await import("pdfjs-dist/build/pdf.worker.mjs?url");
+          this.pdfjs.GlobalWorkerOptions.workerSrc = Worker.default || Worker;
+        } catch (e) {
+          console.warn("Failed to load local worker, falling back to CDN", e);
+          // Fallback to CDN with a specific version that matches the package
+          const version = this.pdfjs.version || "5.4.449";
+          this.pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
+        }
+      }
+    } catch (error) {
+      console.error("Critical error loading PDF.js:", error);
+      throw error;
     }
 
     return this.pdfjs;

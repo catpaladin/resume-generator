@@ -66,10 +66,7 @@ export abstract class BaseParser implements Parser {
   }
 
   protected identifySections(text: string): ParsedSection[] {
-    const lines = text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
+    const lines = text.split("\n").map((line) => line.trim());
     const sections: ParsedSection[] = [];
 
     let currentSection: ParsedSection | null = null;
@@ -77,11 +74,16 @@ export abstract class BaseParser implements Parser {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      if (line.length === 0) {
+        if (currentSection) currentContent.push("");
+        continue;
+      }
+
       const sectionType = this.detectSectionHeader(line);
 
       if (sectionType) {
         if (currentSection) {
-          currentSection.content = currentContent.join("\n");
+          currentSection.content = currentContent.join("\n").trim();
           currentSection.endIndex = i - 1;
           sections.push(currentSection);
         }
@@ -97,24 +99,24 @@ export abstract class BaseParser implements Parser {
       } else if (currentSection) {
         currentContent.push(line);
       } else {
-        if (!sections.some((s) => s.title === "personal")) {
-          if (!currentSection) {
-            currentSection = {
-              title: "personal",
-              content: "",
-              confidence: 0.8,
-              startIndex: 0,
-              endIndex: i,
-            };
-            currentContent = [];
-          }
+        // Content before any header is usually personal info
+        if (!currentSection) {
+          currentSection = {
+            title: "personal",
+            content: "",
+            confidence: 0.8,
+            startIndex: 0,
+            endIndex: i,
+          };
+          currentContent = [line];
+        } else {
           currentContent.push(line);
         }
       }
     }
 
     if (currentSection) {
-      currentSection.content = currentContent.join("\n");
+      currentSection.content = currentContent.join("\n").trim();
       currentSection.endIndex = lines.length - 1;
       sections.push(currentSection);
     }
@@ -123,15 +125,28 @@ export abstract class BaseParser implements Parser {
   }
 
   protected detectSectionHeader(line: string): string | null {
-    const cleanLine = line.toLowerCase().replace(/[^\w\s]/g, "");
+    const cleanLine = line
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "");
     const words = this.tokenize(cleanLine);
+
+    if (words.length === 0) return null;
 
     for (const [sectionType, keywords] of Object.entries(SECTION_HEADERS)) {
       for (const keyword of keywords) {
-        if (words.some((word) => this.stem(word) === this.stem(keyword))) {
+        const stemmedKeyword = this.stem(keyword);
+        const stemmedWords = words.map((w) => this.stem(w));
+
+        // Exact match or contains as a full word
+        if (stemmedWords.includes(stemmedKeyword)) {
+          const isUpperCase = line === line.toUpperCase();
+          const isShort = words.length <= 4;
+          const hasSeparator = /[:\-\–\—]/.test(line);
+
           if (
-            line.length < 50 &&
-            (line.toUpperCase() === line || words.length <= 3)
+            isShort &&
+            (isUpperCase || hasSeparator || line.trim().length < 30)
           ) {
             return sectionType;
           }
@@ -149,11 +164,15 @@ export abstract class BaseParser implements Parser {
     let confidence = 0.5;
     const keywords =
       SECTION_HEADERS[sectionType as keyof typeof SECTION_HEADERS] || [];
-    if (keywords.some((keyword) => line.toLowerCase().includes(keyword))) {
+
+    const lowerLine = line.toLowerCase();
+    if (keywords.some((keyword) => lowerLine.includes(keyword.toLowerCase()))) {
       confidence += 0.3;
     }
-    if (line.toUpperCase() === line) confidence += 0.1;
-    if (line.length < 30) confidence += 0.1;
+
+    if (line.toUpperCase() === line && line.length > 3) confidence += 0.1;
+    if (line.length < 40) confidence += 0.1;
+    if (/[:\-\–\—]/.test(line)) confidence += 0.05;
 
     return Math.min(confidence, 1.0);
   }
@@ -227,44 +246,72 @@ export abstract class BaseParser implements Parser {
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
+
     if (lines.length > 0) {
-      const nameCandidate = lines.find(
-        (line) =>
-          !line.match(PARSING_PATTERNS.email) &&
-          !line.match(PARSING_PATTERNS.phone) &&
-          !line.match(PARSING_PATTERNS.linkedin) &&
+      // Name is usually the first non-empty line that isn't a header or contact info
+      for (let i = 0; i < Math.min(lines.length, 10); i++) {
+        const line = lines[i];
+        const isHeader = this.detectSectionHeader(line) !== null;
+
+        // Reset lastIndex for global regexes before test() or use match()
+        const hasEmail = line.match(PARSING_PATTERNS.email);
+        const hasPhone = line.match(PARSING_PATTERNS.phone);
+        const hasUrl = line.match(PARSING_PATTERNS.website);
+
+        if (
+          !isHeader &&
+          !hasEmail &&
+          !hasPhone &&
+          !hasUrl &&
           line.length > 2 &&
-          line.length < 50 &&
-          !this.detectSectionHeader(line),
-      );
-      if (nameCandidate) personal.fullName = nameCandidate;
+          line.length < 60
+        ) {
+          // Additional check: Does it look like a name? (At least 1 word, capitalized)
+          const words = line.split(/\s+/);
+          const isCapitalized = words.every((w) => /^[A-Z]/.test(w));
+          if (words.length >= 1 && (isCapitalized || i === 0)) {
+            personal.fullName = line;
+            break;
+          }
+        }
+      }
     }
 
     const locationPatterns = [
+      PARSING_PATTERNS.location.cityState,
+      PARSING_PATTERNS.location.cityCountry,
       /(?:^|\n)\s*([A-Z][a-z]+(?:,\s*[A-Z]{2})?(?:,\s*\d{5})?)\s*(?:\n|$)/m,
-      /(?:Location|Address):\s*([^\n]+)/i,
+      /(?:Location|Address|Resident of):\s*([^\n|]+)/i,
     ];
     for (const pattern of locationPatterns) {
       const match = content.match(pattern);
       if (match) {
-        personal.location = match[1].trim();
+        personal.location = (match[1] || match[0]).trim();
         break;
       }
     }
 
+    const summaryHeaders = [
+      "Summary",
+      "Objective",
+      "Profile",
+      "Personal Statement",
+      "About Me",
+    ];
     const summaryPatterns = [
-      /(?:Summary|Objective|Profile|About):\s*([^]*?)(?:\n\n|\n[A-Z])/i,
+      new RegExp(
+        `(?:${summaryHeaders.join("|")}):?\\s*([^]*?)(?:\n\n|\n[A-Z][^a-z]{2,}|$)`,
+        "i",
+      ),
       /(?:^|\n)([A-Z][^]*?)(?:\n\n|\n[A-Z]{2,})/m,
     ];
     for (const pattern of summaryPatterns) {
       const match = content.match(pattern);
-      if (match && match[1].length > 50 && match[1].length < 500) {
+      if (match && match[1].trim().length > 30) {
         personal.summary = match[1].trim();
         break;
       }
     }
-
-    if (!personal.summary) personal.summary = "";
 
     return personal;
   }
@@ -298,37 +345,42 @@ export abstract class BaseParser implements Parser {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const isJobTitleLine = this.looksLikeJobTitle(line);
-      const hasCompanyIndicators = PARSING_PATTERNS.company.suffixes.test(line);
+      const hasCompanyIndicators = line.match(
+        PARSING_PATTERNS.company.suffixes,
+      );
+      const hasDate = this.lineContainsDate(line);
       const isLikelyJobLine = isJobTitleLine || hasCompanyIndicators;
 
-      const isNewExperienceStart =
-        isLikelyJobLine &&
-        ((i + 1 < lines.length && this.lineContainsDate(lines[i + 1])) ||
-          (i + 1 < lines.length &&
-            lines[i + 1].match(
-              /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}$/,
-            )) ||
-          line.includes(" at ") ||
-          line.match(/^(.+?)\s*[-–—|]\s*(.+)$/));
+      const nextLineHasDate =
+        i + 1 < lines.length && this.lineContainsDate(lines[i + 1]);
+      const nextLineIsLocation =
+        i + 1 < lines.length &&
+        (lines[i + 1].match(PARSING_PATTERNS.location.cityState) ||
+          lines[i + 1].match(PARSING_PATTERNS.location.remote));
 
-      if (isNewExperienceStart && currentBlock.length > 0) {
+      const isNewExperienceStart =
+        (isLikelyJobLine &&
+          (nextLineHasDate || nextLineIsLocation || hasDate)) ||
+        (hasDate && isLikelyJobLine) ||
+        (line.includes(" at ") && isLikelyJobLine);
+
+      // Don't split if the current block is very short and looks like it's just part of a header
+      const shouldSplit =
+        isNewExperienceStart &&
+        (currentBlock.length > 2 ||
+          this.blockLooksLikeExperience(currentBlock.join("\n")));
+
+      if (shouldSplit && currentBlock.length > 0) {
         const blockText = currentBlock.join("\n");
-        if (this.blockLooksLikeExperience(blockText)) {
-          blocks.push(blockText);
-          currentBlock = [line];
-        } else {
-          currentBlock.push(line);
-        }
+        blocks.push(blockText);
+        currentBlock = [line];
       } else {
         currentBlock.push(line);
       }
     }
 
     if (currentBlock.length > 0) {
-      const blockText = currentBlock.join("\n");
-      if (this.blockLooksLikeExperience(blockText)) {
-        blocks.push(blockText);
-      }
+      blocks.push(currentBlock.join("\n"));
     }
 
     return blocks;
@@ -354,6 +406,142 @@ export abstract class BaseParser implements Parser {
     parsedBlock.confidence = this.calculateBlockConfidence(parsedBlock);
 
     return parsedBlock;
+  }
+
+  protected extractCompanyPositionEnhanced(
+    lines: string[],
+  ): ParsedExperienceBlock["companyPosition"] {
+    const nonDateLines = lines.filter((line) => {
+      if (
+        this.lineContainsDate(line) ||
+        this.isHeaderLine(line) ||
+        this.looksLikeBulletPoint(line)
+      ) {
+        return false;
+      }
+      // Only filter out if it's a location AND doesn't look like a job/company
+      const isLocation =
+        line.match(PARSING_PATTERNS.location.cityState) ||
+        line.match(PARSING_PATTERNS.location.remote);
+      const isJobOrCompany =
+        this.looksLikeJobTitle(line) ||
+        line.match(PARSING_PATTERNS.company.suffixes);
+
+      if (isLocation && !isJobOrCompany) {
+        return false;
+      }
+      return true;
+    });
+
+    if (nonDateLines.length === 0) return undefined;
+
+    for (const line of nonDateLines) {
+      const atMatch = line.match(/^(.+?)\s+(?:at|@)\s+(.+)$/i);
+      if (atMatch) {
+        return {
+          position: atMatch[1].trim(),
+          company: atMatch[2].trim(),
+          format: "position-at-company",
+          confidence: 0.9,
+        };
+      }
+
+      // Look for explicit separators
+      const separators = PARSING_PATTERNS.company.separators;
+      if (line.match(separators)) {
+        const parts = line
+          .split(separators)
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0);
+        if (parts.length >= 2) {
+          const firstHasSuffix = parts[0].match(
+            PARSING_PATTERNS.company.suffixes,
+          );
+          const secondHasSuffix = parts[1].match(
+            PARSING_PATTERNS.company.suffixes,
+          );
+          const firstIsTitle = this.looksMoreLikePosition(parts[0]);
+          const secondIsTitle = this.looksMoreLikePosition(parts[1]);
+
+          if (firstHasSuffix && !secondHasSuffix) {
+            return {
+              company: parts[0],
+              position: parts[1],
+              format: "sep",
+              confidence: 0.9,
+            };
+          }
+          if (secondHasSuffix && !firstHasSuffix) {
+            return {
+              company: parts[1],
+              position: parts[0],
+              format: "sep",
+              confidence: 0.9,
+            };
+          }
+          if (firstIsTitle && !secondIsTitle) {
+            return {
+              position: parts[0],
+              company: parts[1],
+              format: "sep",
+              confidence: 0.85,
+            };
+          }
+          if (secondIsTitle && !firstIsTitle) {
+            return {
+              position: parts[1],
+              company: parts[0],
+              format: "sep",
+              confidence: 0.85,
+            };
+          }
+          return {
+            position: parts[0],
+            company: parts[1],
+            format: "sep",
+            confidence: 0.7,
+          };
+        }
+      }
+    }
+
+    if (nonDateLines.length >= 2) {
+      const first = nonDateLines[0];
+      const second = nonDateLines[1];
+
+      const firstHasSuffix = first.match(PARSING_PATTERNS.company.suffixes);
+      const secondIsTitle = this.looksMoreLikePosition(second);
+
+      if (firstHasSuffix && secondIsTitle) {
+        return {
+          company: first,
+          position: second,
+          format: "multi",
+          confidence: 0.85,
+        };
+      }
+      if (this.looksMoreLikePosition(first)) {
+        return {
+          position: first,
+          company: second,
+          format: "multi",
+          confidence: 0.8,
+        };
+      }
+      return {
+        company: first,
+        position: second,
+        format: "multi",
+        confidence: 0.7,
+      };
+    }
+
+    const line = nonDateLines[0];
+    const hasSuffix = line.match(PARSING_PATTERNS.company.suffixes);
+    if (hasSuffix) {
+      return { company: line, position: "", format: "single", confidence: 0.6 };
+    }
+    return { position: line, company: "", format: "single", confidence: 0.5 };
   }
 
   protected extractBulletPointsEnhanced(block: string): BulletPoint[] {
@@ -392,8 +580,8 @@ export abstract class BaseParser implements Parser {
 
   protected looksLikeJobTitle(line: string): boolean {
     const jobTitleIndicators = [
-      /\b(?:at|@|with|for)\b/i,
-      /\b(?:-|–|—|\||\u2022)\b/,
+      /\b(?:at|@|with|for|in)\b/i,
+      /\b(?:-|–|—|\||\u2022|•)\b/,
       /^\w+(?:\s+\w+){0,4}$/,
       /\b(?:engineer|developer|manager|analyst|specialist|coordinator|director|lead|senior|junior|intern|consultant|architect|designer|administrator|supervisor|executive|officer|representative|associate|assistant)\b/i,
       /\b(?:software|web|frontend|backend|full.?stack|data|product|project|marketing|sales|business|operations|technical|IT)\s+(?:engineer|developer|manager|lead|director)/i,
@@ -407,7 +595,7 @@ export abstract class BaseParser implements Parser {
     ];
 
     const companyIndicators = PARSING_PATTERNS.company.suffixes;
-    const hasCompanyMarkers = companyIndicators.test(line);
+    const hasCompanyMarkers = line.match(companyIndicators);
 
     if (
       hasCompanyMarkers &&
@@ -439,7 +627,7 @@ export abstract class BaseParser implements Parser {
   }
 
   protected looksMoreLikePosition(line: string): boolean {
-    const hasCompanySuffixes = PARSING_PATTERNS.company.suffixes.test(line);
+    const hasCompanySuffixes = line.match(PARSING_PATTERNS.company.suffixes);
     if (hasCompanySuffixes) return false;
 
     if (
@@ -473,14 +661,14 @@ export abstract class BaseParser implements Parser {
   }
 
   protected lineContainsDate(line: string): boolean {
-    return (
-      PARSING_PATTERNS.dates.monthYear.test(line) ||
-      PARSING_PATTERNS.dates.yearRange.test(line) ||
-      PARSING_PATTERNS.dates.monthYearRange.test(line) ||
-      PARSING_PATTERNS.dates.quarterYear.test(line) ||
-      PARSING_PATTERNS.dates.mmYyyy.test(line) ||
-      PARSING_PATTERNS.dates.seasons.test(line) ||
-      PARSING_PATTERNS.dates.fullDate.test(line)
+    return !!(
+      line.match(PARSING_PATTERNS.dates.monthYear) ||
+      line.match(PARSING_PATTERNS.dates.yearRange) ||
+      line.match(PARSING_PATTERNS.dates.monthYearRange) ||
+      line.match(PARSING_PATTERNS.dates.quarterYear) ||
+      line.match(PARSING_PATTERNS.dates.mmYyyy) ||
+      line.match(PARSING_PATTERNS.dates.seasons) ||
+      line.match(PARSING_PATTERNS.dates.fullDate)
     );
   }
 
@@ -613,169 +801,6 @@ export abstract class BaseParser implements Parser {
     return undefined;
   }
 
-  protected extractCompanyPositionEnhanced(
-    lines: string[],
-  ): ParsedExperienceBlock["companyPosition"] {
-    const nonDateLines = lines.filter(
-      (line) =>
-        !this.lineContainsDate(line) &&
-        !this.isHeaderLine(line) &&
-        !this.looksLikeBulletPoint(line),
-    );
-
-    for (const line of nonDateLines) {
-      const atMatch = line.match(/^(.+?)\s+(?:at|@)\s+(.+)$/i);
-      if (atMatch) {
-        return {
-          position: atMatch[1].trim(),
-          company: atMatch[2].trim(),
-          format: "position-at-company",
-          confidence: 0.9,
-        };
-      }
-    }
-
-    for (const line of nonDateLines) {
-      const separatorMatch = line.match(/^(.+?)\s*[-–—|]\s*(.+)$/);
-      if (separatorMatch) {
-        const [, first, second] = separatorMatch;
-        const firstHasCompanyIndicators =
-          PARSING_PATTERNS.company.suffixes.test(first);
-        const secondHasCompanyIndicators =
-          PARSING_PATTERNS.company.suffixes.test(second);
-        const firstIsPosition = this.looksMoreLikePosition(first);
-        const secondIsPosition = this.looksMoreLikePosition(second);
-
-        if (firstHasCompanyIndicators && !secondHasCompanyIndicators) {
-          return {
-            company: first.trim(),
-            position: second.trim(),
-            format: "company-separator-position",
-            confidence: 0.8,
-          };
-        } else if (secondHasCompanyIndicators && !firstHasCompanyIndicators) {
-          return {
-            position: first.trim(),
-            company: second.trim(),
-            format: "position-separator-company",
-            confidence: 0.8,
-          };
-        } else if (firstIsPosition && !secondIsPosition) {
-          return {
-            position: first.trim(),
-            company: second.trim(),
-            format: "position-separator-company",
-            confidence: 0.7,
-          };
-        } else {
-          return {
-            company: first.trim(),
-            position: second.trim(),
-            format: "company-separator-position",
-            confidence: 0.6,
-          };
-        }
-      }
-    }
-
-    const candidateLines = nonDateLines.slice(0, 3);
-
-    if (candidateLines.length >= 2) {
-      const [first, second] = candidateLines;
-
-      if (
-        first.includes("Tech Solutions Inc") &&
-        second.includes("Senior Full Stack Developer")
-      ) {
-        return {
-          company: first.trim(),
-          position: second.trim(),
-          format: "multiline-test-case",
-          confidence: 1.0,
-        };
-      }
-
-      const firstHasCompanySuffixes =
-        /\b(?:Inc|LLC|Corp|Company|Ltd|Solutions|Technologies|Systems|Group)\b/i.test(
-          first,
-        );
-      const secondIsObviousPosition =
-        /\b(?:Senior|Junior|Lead|Principal|Staff)\s+(?:Software|Full Stack|Backend|Frontend|Web|Data|Product)\s+(?:Engineer|Developer|Manager|Architect|Designer)\b/i.test(
-          second,
-        );
-
-      if (firstHasCompanySuffixes && secondIsObviousPosition) {
-        return {
-          company: first.trim(),
-          position: second.trim(),
-          format: "company-then-position",
-          confidence: 0.9,
-        };
-      }
-
-      for (const line of candidateLines) {
-        const atMatch = line.match(/^(.+?)\s+(?:at|@)\s+(.+)$/i);
-        if (atMatch) {
-          return {
-            position: atMatch[1].trim(),
-            company: atMatch[2].trim(),
-            format: "position-at-company",
-            confidence: 0.95,
-          };
-        }
-      }
-
-      const firstIsPosition = this.looksMoreLikePosition(first);
-      const secondIsPosition = this.looksMoreLikePosition(second);
-
-      if (!firstIsPosition && secondIsPosition) {
-        return {
-          company: first.trim(),
-          position: second.trim(),
-          format: "company-then-position",
-          confidence: 0.8,
-        };
-      }
-
-      if (firstIsPosition && !secondIsPosition) {
-        return {
-          position: first.trim(),
-          company: second.trim(),
-          format: "position-then-company",
-          confidence: 0.8,
-        };
-      }
-
-      return {
-        company: first.trim(),
-        position: second.trim(),
-        format: "default-multiline",
-        confidence: 0.6,
-      };
-    }
-
-    if (candidateLines.length === 1) {
-      const line = candidateLines[0];
-      if (this.looksMoreLikePosition(line)) {
-        return {
-          position: line.trim(),
-          company: "",
-          format: "position-only",
-          confidence: 0.5,
-        };
-      } else {
-        return {
-          company: line.trim(),
-          position: "",
-          format: "company-only",
-          confidence: 0.5,
-        };
-      }
-    }
-
-    return undefined;
-  }
-
   protected extractLocationEnhanced(
     block: string,
   ): ParsedExperienceBlock["location"] {
@@ -797,7 +822,7 @@ export abstract class BaseParser implements Parser {
       }
 
       if (
-        PARSING_PATTERNS.company.suffixes.test(line) &&
+        line.match(PARSING_PATTERNS.company.suffixes) &&
         !line.match(/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}$/)
       ) {
         continue;
@@ -867,25 +892,21 @@ export abstract class BaseParser implements Parser {
   }
 
   protected isHeaderLine(line: string): boolean {
+    if (this.looksLikeBulletPoint(line)) return false;
+    const cleanLine = line.trim();
+    if (cleanLine.length === 0) return false;
+
     return (
-      line.length < 50 &&
-      (line.toUpperCase() === line || this.detectSectionHeader(line) !== null)
+      cleanLine.length < 50 &&
+      !this.lineContainsDate(cleanLine) &&
+      (cleanLine.toUpperCase() === cleanLine ||
+        this.detectSectionHeader(cleanLine) !== null)
     );
   }
 
   protected extractBulletText(line: string): string | null {
     const bulletPatterns = [
-      /^[\s]*•\s+(.+)$/,
-      /^[\s]*▪\s+(.+)$/,
-      /^[\s]*-\s+(.+)$/,
-      /^[\s]*→\s+(.+)$/,
-      /^[\s]*○\s+(.+)$/,
-      /^[\s]*\*\s+(.+)$/,
-      /^[\s]*\+\s+(.+)$/,
-      /^[\s]*·\s+(.+)$/,
-      /^[\s]*▫\s+(.+)$/,
-      /^[\s]*◦\s+(.+)$/,
-      /^[\s]*[‣⁃▸▹▶▷◆◇■□▲△►▻⟩〉]\s+(.+)$/,
+      /^[\s]*[•▪\-→○\*\+·▫◦‣⁃▸▹▶▷◆◇■□▲△►▻⟩〉]\s*(.+)$/,
       /^[\s]*\d+[.\)]\s+(.+)$/,
       /^[\s]*[a-zA-Z][.\)]\s+(.+)$/,
     ];
@@ -1022,8 +1043,8 @@ export abstract class BaseParser implements Parser {
       /\b(?:achieved|accomplished|improved|increased|decreased|reduced|developed|created|built|designed|implemented|managed|led|coordinated|optimized|streamlined)\b/i,
       /\b(?:responsible for|worked on|collaborated|contributed|delivered|executed|maintained|supported)\b/i,
       /\b\d+%\b/,
-      /\$[\d,]+/,
-      /\b\d+[kKmM]?\+?\b/,
+      /\$[1-9]\d{0,2}(?:,\d{3})*(?:\.\d{2})?/,
+      /\b[1-9]\d{0,2}[kKmM]\+?\b/,
     ];
 
     return (
@@ -1045,16 +1066,24 @@ export abstract class BaseParser implements Parser {
     for (const line of lines) {
       const degreePatterns = [
         /\b(?:Bachelor|Master|PhD|B\.?A\.?|B\.?S\.?|M\.?A\.?|M\.?S\.?|MBA|PhD)\b/i,
-        /\b(?:Associate|Certificate|Diploma)\b/i,
+        /\b(?:Associate|Certificate|Diploma|Graduate|Doctorate)\b/i,
+        /\b(?:BEng|MEng|BSc|MSc|LLB|LLM)\b/i,
       ];
 
       const hasDegreeLike = degreePatterns.some((pattern) =>
         pattern.test(line),
       );
+      const hasUniversity =
+        /\b(?:University|College|Institute|School|Academy|Polytechnic)\b/i.test(
+          line,
+        );
       const hasYear = /\b\d{4}\b/.test(line);
 
-      if (hasDegreeLike || hasYear) {
-        if (currentEntry) educationEntries.push(currentEntry);
+      // New entry if line has degree or university and we don't have one or current one already has both
+      if (hasDegreeLike || hasUniversity || (hasYear && !currentEntry)) {
+        if (currentEntry && (currentEntry.school || currentEntry.degree)) {
+          educationEntries.push(currentEntry);
+        }
 
         currentEntry = {
           id: generateId(),
@@ -1066,34 +1095,39 @@ export abstract class BaseParser implements Parser {
         const yearMatch = line.match(/\b(\d{4})\b/);
         if (yearMatch) currentEntry.graduationYear = yearMatch[1];
 
-        if (hasDegreeLike) {
-          const patterns = [
-            /^(.+?)\s+(?:from|at)\s+(.+)$/i,
-            /^(.+?),\s+(.+)$/,
-            /^(.+)$/,
-          ];
-
-          for (const pattern of patterns) {
-            const match = line.match(pattern);
-            if (match) {
-              if (match[2]) {
-                currentEntry.degree = match[1].trim();
-                currentEntry.school = match[2].trim();
-              } else {
-                currentEntry.degree = match[1].trim();
-              }
-              break;
+        // Try to split degree and school within the same line
+        const separators = /[,||\-\–\—\t]/;
+        if (line.match(separators)) {
+          const parts = line
+            .split(separators)
+            .map((p) => p.trim())
+            .filter((p) => p.length > 0);
+          for (const part of parts) {
+            const partHasDegree = degreePatterns.some((p) => p.test(part));
+            if (partHasDegree) {
+              currentEntry.degree = part;
+            } else if (
+              /\b(?:University|College|Institute|School)\b/i.test(part) ||
+              part.length > 5
+            ) {
+              if (!currentEntry.school) currentEntry.school = part;
             }
           }
         } else {
-          currentEntry.school = line.replace(/\b\d{4}\b/, "").trim();
+          if (hasDegreeLike)
+            currentEntry.degree = line.replace(/\b\d{4}\b/, "").trim();
+          else if (hasUniversity)
+            currentEntry.school = line.replace(/\b\d{4}\b/, "").trim();
         }
-      } else if (currentEntry && !currentEntry.school) {
-        currentEntry.school = line;
+      } else if (currentEntry) {
+        if (!currentEntry.school) currentEntry.school = line;
+        else if (!currentEntry.degree) currentEntry.degree = line;
       }
     }
 
-    if (currentEntry) educationEntries.push(currentEntry);
+    if (currentEntry && (currentEntry.school || currentEntry.degree)) {
+      educationEntries.push(currentEntry);
+    }
 
     return educationEntries.filter(
       (entry) => entry.degree || entry.school,
@@ -1137,14 +1171,14 @@ export abstract class BaseParser implements Parser {
     ];
 
     return (
-      skillPatterns.some((pattern) => pattern.test(text)) ||
+      skillPatterns.some((pattern) => !!text.match(pattern)) ||
       (text.length >= 2 && text.length <= 30 && !/\s{2,}/.test(text))
     );
   }
 
   protected categorizeSkill(skill: string): string {
-    if (PARSING_PATTERNS.skills.programming.test(skill)) return "Programming";
-    if (PARSING_PATTERNS.skills.tools.test(skill)) return "Tools";
+    if (skill.match(PARSING_PATTERNS.skills.programming)) return "Programming";
+    if (skill.match(PARSING_PATTERNS.skills.tools)) return "Tools";
     if (/\b(?:HTML|CSS|SQL|XML|JSON|REST|API)\b/i.test(skill))
       return "Technical";
     return "General";
@@ -1185,7 +1219,7 @@ export abstract class BaseParser implements Parser {
 
     const descriptionLines = lines
       .slice(1)
-      .filter((line) => !PARSING_PATTERNS.website.test(line));
+      .filter((line) => !line.match(PARSING_PATTERNS.website));
     project.description = descriptionLines.join(" ");
 
     return project;

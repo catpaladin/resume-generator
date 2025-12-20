@@ -50,6 +50,12 @@ async function handleApiRoute(
   if (pathname === "/api/ai/models") {
     return handleModelsRoute(req, res, method, pathname);
   }
+  if (pathname === "/api/ai/models-dev") {
+    return handleModelsDevRoute(req, res, method, pathname);
+  }
+  if (pathname.startsWith("/api/ai/logos/")) {
+    return handleLogoProxyRoute(req, res, method, pathname);
+  }
   if (pathname === "/api/ai/enhance") {
     return handleEnhanceRoute(req, res, method, pathname);
   }
@@ -223,6 +229,111 @@ async function handleModelsRoute(
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: errorMessage }));
     logRequest(method, pathname, 500);
+  }
+}
+
+async function handleModelsDevRoute(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  method: string,
+  pathname: string,
+): Promise<void> {
+  try {
+    const options: https.RequestOptions = {
+      hostname: "models.dev",
+      port: 443,
+      path: "/api.json",
+      method: "GET",
+      headers: {
+        "User-Agent": "Resume-Generator-App",
+      },
+    };
+
+    const proxyReq = https.request(options, (proxyRes) => {
+      let body = "";
+      proxyRes.on("data", (chunk) => (body += chunk));
+      proxyRes.on("end", () => {
+        if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
+          res.writeHead(proxyRes.statusCode, {
+            "Content-Type": "application/json",
+          });
+          res.end(
+            JSON.stringify({
+              error: `Models.dev API error (${proxyRes.statusCode})`,
+            }),
+          );
+          logRequest(method, pathname, proxyRes.statusCode);
+        } else {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(body);
+          logRequest(method, pathname, 200);
+        }
+      });
+    });
+
+    proxyReq.on("error", (error) => {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: error.message }));
+      logRequest(method, pathname, 500);
+    });
+
+    proxyReq.end();
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: errorMessage }));
+    logRequest(method, pathname, 500);
+  }
+}
+
+async function handleLogoProxyRoute(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  method: string,
+  pathname: string,
+): Promise<void> {
+  try {
+    const provider = pathname.split("/").pop();
+    if (!provider) {
+      res.writeHead(400);
+      res.end("Provider missing");
+      return;
+    }
+
+    const options: https.RequestOptions = {
+      hostname: "models.dev",
+      port: 443,
+      path: `/logos/${provider}`,
+      method: "GET",
+    };
+
+    const proxyReq = https.request(options, (proxyRes) => {
+      if (proxyRes.statusCode === 404) {
+        // Fallback to default logo
+        https.get("https://models.dev/logos/default.svg", (fallbackRes) => {
+          res.writeHead(200, { "Content-Type": "image/svg+xml" });
+          fallbackRes.pipe(res);
+        });
+        return;
+      }
+
+      res.writeHead(proxyRes.statusCode || 200, {
+        "Content-Type": proxyRes.headers["content-type"] || "image/svg+xml",
+        "Cache-Control": "public, max-age=86400",
+      });
+      proxyRes.pipe(res);
+    });
+
+    proxyReq.on("error", (error) => {
+      res.writeHead(500);
+      res.end("Error fetching logo");
+    });
+
+    proxyReq.end();
+  } catch (error) {
+    res.writeHead(500);
+    res.end("Internal server error");
   }
 }
 

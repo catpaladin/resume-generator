@@ -4,25 +4,69 @@
   import Input from '../ui/input/input.svelte';
   import Label from '../ui/label/label.svelte';
   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-  import { X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-svelte';
+  import { X, CheckCircle2, AlertCircle, Loader2, RefreshCw } from 'lucide-svelte';
   import { fade, scale } from 'svelte/transition';
+  import { modelsDevService } from '@/services/modelsDevService.svelte.ts';
 
   let { show = $bindable(false) } = $props();
 
   let isTesting = $state(false);
+  let isRefreshing = $state(false);
   let testResult = $state<{ success: boolean; message: string } | null>(null);
+  let lastRefresh = $state(modelsDevService.getLastFetchDate());
 
   const providers = [
     { id: 'openai', name: 'OpenAI' },
     { id: 'anthropic', name: 'Anthropic' },
-    { id: 'gemini', name: 'Google Gemini' }
+    { id: 'gemini', name: 'Google Gemini' },
+    { id: 'deepseek', name: 'DeepSeek' },
+    { id: 'mistral', name: 'Mistral AI' },
+    { id: 'groq', name: 'Groq' },
+    { id: 'perplexity', name: 'Perplexity' },
+    { id: 'xai', name: 'xAI (Grok)' }
   ];
 
-  const modelsByProvider: Record<string, string[]> = {
-    openai: ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini'],
-    anthropic: ['claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
-    gemini: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-flash']
-  };
+  let availableModels = $derived(
+    modelsDevService.getModelsForProvider(resumeStore.aiSettings.provider)
+  );
+
+  async function refreshModels() {
+    isRefreshing = true;
+    try {
+      await modelsDevService.refresh();
+      lastRefresh = modelsDevService.getLastFetchDate();
+    } finally {
+      isRefreshing = false;
+    }
+  }
+
+  $effect(() => {
+    if (show && !modelsDevService.isDataLoaded()) {
+      modelsDevService.fetchModels().then(() => {
+        lastRefresh = modelsDevService.getLastFetchDate();
+      });
+    }
+  });
+
+  // Reset model if it's not in the available models for the new provider
+  $effect(() => {
+    const provider = resumeStore.aiSettings.provider;
+    const currentModel = resumeStore.aiSettings.model;
+    
+    if (modelsDevService.isDataLoaded()) {
+      const models = modelsDevService.getModelsForProvider(provider);
+      if (models.length > 0 && !models.some(m => m.id === currentModel)) {
+        resumeStore.updateAISettings({ model: models[0].id });
+      }
+    }
+  });
+
+  // Pre-fetch all models for all providers on mount
+  $effect(() => {
+    if (!modelsDevService.isDataLoaded()) {
+      modelsDevService.fetchModels();
+    }
+  });
 
   async function testConnection() {
     isTesting = true;
@@ -81,14 +125,29 @@
         <CardContent class="space-y-6">
           <div class="space-y-2">
             <Label>AI Provider</Label>
-            <select 
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              bind:value={resumeStore.aiSettings.provider}
-            >
-              {#each providers as provider}
-                <option value={provider.id}>{provider.name}</option>
-              {/each}
-            </select>
+            <div class="flex gap-2">
+              <select 
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                bind:value={resumeStore.aiSettings.provider}
+              >
+                {#each providers as provider}
+                  <option value={provider.id}>{provider.name}</option>
+                {/each}
+              </select>
+              <div class="flex items-center justify-center w-10 h-10 rounded-md border border-input bg-muted/30 overflow-hidden">
+                <img 
+                  src={modelsDevService.getLogoUrl(resumeStore.aiSettings.provider)} 
+                  alt={resumeStore.aiSettings.provider}
+                  class="w-6 h-6 object-contain"
+                  onerror={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    if (img.src !== 'https://models.dev/logos/default.svg') {
+                      img.src = 'https://models.dev/logos/default.svg';
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           <div class="space-y-2">
@@ -104,15 +163,34 @@
           </div>
 
           <div class="space-y-2">
-            <Label>Model</Label>
+            <div class="flex items-center justify-between">
+              <Label>Model</Label>
+              <button 
+                class="text-xs text-primary hover:underline flex items-center gap-1"
+                onclick={refreshModels}
+                disabled={isRefreshing}
+              >
+                <RefreshCw class="h-3 w-3 {isRefreshing ? 'animate-spin' : ''}" />
+                Refresh
+              </button>
+            </div>
             <select 
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               bind:value={resumeStore.aiSettings.model}
             >
-              {#each modelsByProvider[resumeStore.aiSettings.provider] || [] as model}
-                <option value={model}>{model}</option>
-              {/each}
+              {#if availableModels.length > 0}
+                {#each availableModels as model}
+                  <option value={model.id}>{model.name}</option>
+                {/each}
+              {:else}
+                <option value="">No models available</option>
+              {/if}
             </select>
+            {#if lastRefresh}
+              <p class="text-[10px] text-muted-foreground text-right">
+                Last updated: {lastRefresh.toLocaleString()}
+              </p>
+            {/if}
           </div>
 
           <div class="space-y-4 pt-2">

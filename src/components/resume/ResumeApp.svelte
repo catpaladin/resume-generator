@@ -6,6 +6,11 @@
 
   let activeSection = $derived(resumeStore.uiState.activeSection);
   let viewMode = $derived(resumeStore.uiState.viewMode);
+  let mounted = $state(false);
+  
+  $effect(() => {
+    mounted = true;
+  });
   
   const sections = [
     { id: 'personal', label: 'Personal' },
@@ -33,12 +38,15 @@
                         Resume Studio
                     </h2>
                     <div class="flex items-center gap-2 mt-1">
-                        {#if resumeStore.aiSettings.apiKey}
+                        {#if mounted && resumeStore.aiSettings.apiKey}
                             <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
                             <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">AI Engine: Ready</span>
-                        {:else}
+                        {:else if mounted}
                             <div class="h-2 w-2 bg-slate-400 dark:bg-slate-600 rounded-full"></div>
                             <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">AI Engine: Not Configured</span>
+                        {:else}
+                            <div class="h-2 w-2 bg-slate-400/20 dark:bg-slate-600/20 rounded-full"></div>
+                            <span class="text-[10px] text-slate-500/20 dark:text-slate-400/20 font-bold uppercase tracking-widest">AI Engine: Initializing...</span>
                         {/if}
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { ResumeData } from "@/types/resume";
+import { docxExporter } from "@/lib/exporters/docx-exporter";
 
 /**
  * Combines class names using clsx and tailwind-merge
@@ -72,6 +73,26 @@ export function exportResumeData(data: ResumeData): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Export resume as DOCX file
+ */
+export async function exportResumeToDocx(
+  data: ResumeData,
+  options: {
+    fileName?: string;
+    includeProjects?: boolean;
+    includeSummary?: boolean;
+  } = {},
+): Promise<void> {
+  await docxExporter.exportToFile(data, {
+    fileName:
+      options.fileName ||
+      `resume-${new Date().toISOString().split("T")[0]}.docx`,
+    includeProjects: options.includeProjects ?? true,
+    includeSummary: options.includeSummary ?? true,
+  });
 }
 
 /**

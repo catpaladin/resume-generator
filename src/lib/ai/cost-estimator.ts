@@ -1,3 +1,5 @@
+import { modelsDevService } from "../../services/modelsDevService.svelte.ts";
+
 interface ModelPricing {
   inputCostPer1M: number; // USD per 1M input tokens
   outputCostPer1M: number; // USD per 1M output tokens
@@ -124,7 +126,7 @@ export class CostEstimator {
     userInstructions?: string,
     enhancementLevel: "light" | "moderate" | "comprehensive" = "moderate",
   ): CostEstimate | null {
-    const pricing = PRICING_DATA[provider]?.[model];
+    const pricing = this.getModelPricing(provider, model);
     if (!pricing) {
       return null;
     }
@@ -195,10 +197,21 @@ export class CostEstimator {
     pricing: ModelPricing;
     costEfficiency: number; // Lower is more cost-effective
   }> {
-    const providerPricing = PRICING_DATA[provider];
-    if (!providerPricing) return [];
+    const staticPricing = PRICING_DATA[provider] || {};
+    const dynamicModels = modelsDevService.getModelsForProvider(provider);
 
-    return Object.entries(providerPricing)
+    const allModels: Record<string, ModelPricing> = { ...staticPricing };
+
+    for (const model of dynamicModels) {
+      const pricing = modelsDevService.getPricing(provider, model.id);
+      if (pricing) {
+        allModels[model.id] = pricing;
+      }
+    }
+
+    if (Object.keys(allModels).length === 0) return [];
+
+    return Object.entries(allModels)
       .map(([model, pricing]) => {
         // Calculate cost efficiency score (average cost per 1M tokens)
         const avgCost = (pricing.inputCostPer1M + pricing.outputCostPer1M) / 2;
@@ -283,6 +296,10 @@ export class CostEstimator {
    * Get pricing information for a specific model
    */
   static getModelPricing(provider: string, model: string): ModelPricing | null {
+    const dynamicPricing = modelsDevService.getPricing(provider, model);
+    if (dynamicPricing) {
+      return dynamicPricing;
+    }
     return PRICING_DATA[provider]?.[model] || null;
   }
 
@@ -290,13 +307,16 @@ export class CostEstimator {
    * Check if a model exists for a provider
    */
   static isModelSupported(provider: string, model: string): boolean {
-    return Boolean(PRICING_DATA[provider]?.[model]);
+    return Boolean(this.getModelPricing(provider, model));
   }
 
   /**
    * Get all supported providers
    */
   static getSupportedProviders(): string[] {
-    return Object.keys(PRICING_DATA);
+    const staticProviders = Object.keys(PRICING_DATA);
+    // In a real app, we might want to merge with dynamic providers
+    // but for now we'll stick to the ones we have UI for
+    return staticProviders;
   }
 }

@@ -9,4 +9,15 @@ export default defineConfig({
   build: {
     outDir: "dist",
   },
+  vite: {
+    optimizeDeps: {
+      exclude: ["pdfjs-dist"],
+    },
+    ssr: {
+      external: ["pdfjs-dist"],
+    },
+    build: {
+      target: "esnext",
+    },
+  },
 });

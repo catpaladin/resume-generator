@@ -40,19 +40,19 @@ export const getInitialResumeData = (): ResumeData => ({
   skills: [],
   experience: [
     {
-      id: safeUUID(),
+      id: "default-experience-1",
       company: "",
       position: "",
       location: "",
       startDate: "",
       endDate: "",
-      bulletPoints: [{ id: safeUUID(), text: "" }],
+      bulletPoints: [{ id: "default-bullet-1", text: "" }],
       jobDescription: "",
     },
   ],
   education: [
     {
-      id: safeUUID(),
+      id: "default-education-1",
       school: "",
       degree: "",
       graduationYear: "",
@@ -60,7 +60,7 @@ export const getInitialResumeData = (): ResumeData => ({
   ],
   projects: [
     {
-      id: safeUUID(),
+      id: "default-project-1",
       name: "",
       url: "",
       description: "",

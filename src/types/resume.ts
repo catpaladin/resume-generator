@@ -1,5 +1,3 @@
-import { type ReactNode } from "react";
-
 export interface PersonalInfo {
   fullName: string;
   location: string;
@@ -54,19 +52,6 @@ export interface ResumeData {
   projects: Project[];
 }
 
-export interface ResumeSectionProps {
-  data?: unknown;
-  onChange?: (data: unknown) => void;
-  className?: string;
-  children?: ReactNode;
-}
-
-export interface ResumeSection {
-  id: string;
-  title: string;
-  component: React.ComponentType<ResumeSectionProps>;
-}
-
 export type ResumeDataKey = keyof ResumeData;
 
 export interface ValidationResult {
@@ -87,7 +72,7 @@ export interface ImportResult {
 }
 
 export interface ExportOptions {
-  format: "json" | "pdf";
+  format: "json" | "pdf" | "docx";
   fileName?: string;
 }
 

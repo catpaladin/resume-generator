@@ -6,6 +6,7 @@
  */
 
 import { getApiKey } from "./secureStorage";
+import { modelsDevService } from "./modelsDevService.svelte.ts";
 
 export interface Model {
   id: string;
@@ -174,6 +175,22 @@ class ModelService {
    * Get models for a provider with caching
    */
   async getModels(provider: string): Promise<Model[]> {
+    // Try to get models from models.dev first
+    try {
+      if (!modelsDevService.isDataLoaded()) {
+        await modelsDevService.fetchModels();
+      }
+      const dynamicModels = modelsDevService.getModelsForProvider(provider);
+      if (dynamicModels.length > 0) {
+        return dynamicModels;
+      }
+    } catch (error) {
+      console.warn(
+        `Failed to fetch dynamic models from models.dev for ${provider}:`,
+        error,
+      );
+    }
+
     const cached = this.cache.get(provider);
 
     // Return cached data if it's fresh

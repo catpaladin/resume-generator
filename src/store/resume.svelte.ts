@@ -70,6 +70,9 @@ class ResumeStore {
   get uiState() {
     return this.#uiState;
   }
+  get hydrated() {
+    return this.#store.initialized;
+  }
 
   // Actions
   setResumeData(data: ResumeData) {

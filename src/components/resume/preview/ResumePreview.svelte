@@ -1,8 +1,7 @@
 <script lang="ts">
   import { resumeStore } from '@/store/resume.svelte';
   import { Card } from '@/components/ui/card';
-  import Button from '@/components/ui/button/button.svelte';
-  import { Download, FileText } from 'lucide-svelte';
+  import { FileText } from 'lucide-svelte';
   import HeaderSection from './HeaderSection.svelte';
   import SkillsSection from './SkillsSection.svelte';
   import ExperienceSection from './ExperienceSection.svelte';
@@ -11,30 +10,6 @@
 
   // Reactive data from store
   const resumeData = $derived(resumeStore.resumeData);
-
-  // Print/PDF export functionality
-  async function handlePrint() {
-    // Get current theme
-    const isDark = document.documentElement.classList.contains('dark');
-    
-    // Temporarily switch to light mode for printing
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    // Wait for theme to apply
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    
-    // Trigger print
-    window.print();
-    
-    // Restore dark mode after print
-    if (isDark) {
-      setTimeout(() => {
-        document.documentElement.classList.add('dark');
-      }, 150);
-    }
-  }
 </script>
 
 <Card id="resume-preview-container" class="bg-card p-10 shadow-lg border border-border/50 min-h-[1056px] w-full max-w-[816px] mx-auto transition-all duration-300">
@@ -43,10 +18,6 @@
         <FileText class="text-primary" size={20} />
         Resume Preview
     </h2>
-    <Button onclick={handlePrint} class="flex items-center gap-2 px-6 shadow-sm">
-      <Download size={16} />
-      EXPORT AS PDF
-    </Button>
   </div>
 
   <div class="space-y-8" id="resume-preview">

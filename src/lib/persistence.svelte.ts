@@ -4,6 +4,7 @@ import { untrack } from "svelte";
 export class PersistedState<T> {
   key: string;
   #value: T = $state() as T;
+  #initialized = $state(false);
 
   constructor(key: string, initialValue: T) {
     this.key = key;
@@ -34,16 +35,21 @@ export class PersistedState<T> {
               );
             }
           }
+          this.#initialized = true;
         });
 
         // 2. Auto-save effect: Use $state.snapshot to track deep changes
         $effect(() => {
+          if (!this.#initialized) return; // Don't save until loaded
           const val = $state.snapshot(this.#value);
           untrack(() => {
             localStorage.setItem(this.key, JSON.stringify(val));
           });
         });
       });
+    } else {
+      // On server, we are "initialized" with the initial value
+      this.#initialized = true;
     }
   }
 
@@ -53,5 +59,9 @@ export class PersistedState<T> {
 
   set value(newValue: T) {
     this.#value = newValue;
+  }
+
+  get initialized() {
+    return this.#initialized;
   }
 }

@@ -80,29 +80,60 @@
     overflow: visible !important;
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide common UI elements */
+  /* Hide common UI elements and any possible spacers */
   header,
   nav,
   footer,
+  aside,
   #resume-studio-header,
   .print\:hidden {
     display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Ensure the container and its parents are visible but hide non-resume siblings */
+  .container {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Specifically force the resume to be visible and at the top */
+  main {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 
   /* Ensure the main content area and resume parents don't truncate or add extra space */
-  main,
   .resume-parent-container {
     display: block !important;
+    visibility: visible !important;
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     max-width: none !important;
     border: none !important;
     box-shadow: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9999 !important;
   }
 
   /* Target the preview specifically */
@@ -115,9 +146,10 @@
     min-height: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 0.5in !important;
+    padding: 0.5in 0.6in !important; /* Standard ATS margins */
     margin: 0 !important;
     background: white !important;
+    overflow: visible !important;
   }
 
   #resume-preview {
@@ -125,7 +157,7 @@
     visibility: visible !important;
   }
 
-  /* Force high contrast text */
+  /* Force high contrast text for ATS readability */
   h1,
   h2,
   h3,
@@ -135,18 +167,45 @@
   p,
   span,
   li,
-  a {
-    color: black !important;
+  a,
+  div {
+    color: #000000 !important;
+    text-shadow: none !important;
   }
 
-  /* Ensure blue accent is printable but professional */
+  /* Simplify borders for ATS */
+  .border-l-4,
+  .border-primary,
+  .border-border {
+    border-color: #000000 !important;
+  }
+
+  /* Ensure links are readable but not distracting */
+  a {
+    text-decoration: none !important;
+    color: #000000 !important;
+  }
+
+  /* Remove background accents for ATS compatibility */
+  .bg-primary\/5,
+  .bg-secondary,
+  .bg-muted,
+  .bg-card,
+  .bg-slate-100,
+  .bg-slate-800,
+  .bg-slate-50 {
+    background-color: transparent !important;
+    background: none !important;
+  }
+
+  /* Ensure blue accent is printable but professional if kept */
   .text-primary,
   .text-blue-600 {
-    color: #1d4ed8 !important;
+    color: #000000 !important; /* Force black for ATS */
   }
 
   section {
     page-break-inside: avoid;
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1.2rem !important;
   }
 }

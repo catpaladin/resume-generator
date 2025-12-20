@@ -5,10 +5,27 @@
   import ImportDropzone from './ImportDropzone.svelte';
   import { fade, scale } from 'svelte/transition';
 
-  let { show = $bindable(false) } = $props();
+  interface Props {
+    show: boolean;
+    onImportComplete?: () => void;
+  }
+
+  let { show = $bindable(false), onImportComplete }: Props = $props();
 
   function handleClose() {
     show = false;
+  }
+
+  function handleImportComplete() {
+    // Close modal after successful import
+    setTimeout(() => {
+      handleClose();
+    }, 1500); // Give time for success message to show
+    
+    // Call external callback if provided
+    if (onImportComplete) {
+      onImportComplete();
+    }
   }
 </script>
 
@@ -36,7 +53,7 @@
           </Button>
         </CardHeader>
         <CardContent>
-          <ImportDropzone />
+          <ImportDropzone onImportComplete={handleImportComplete} />
         </CardContent>
       </Card>
     </div>

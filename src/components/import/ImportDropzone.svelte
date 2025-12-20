@@ -6,6 +6,12 @@
   import { Upload, FileText, Loader2, CheckCircle2, AlertCircle } from 'lucide-svelte';
   import { fade } from 'svelte/transition';
 
+  interface Props {
+    onImportComplete?: () => void;
+  }
+
+  let { onImportComplete }: Props = $props();
+  
   let isDragging = $state(false);
   let isImporting = $state(false);
   let progress = $state<AIImportProgress | null>(null);
@@ -53,7 +59,12 @@
       if (result.success && result.data) {
         resumeStore.setResumeData(result.data);
         success = true;
+        
+        // Wait for success message to show, then call callback
         setTimeout(() => {
+          if (onImportComplete) {
+            onImportComplete();
+          }
           success = false;
           isImporting = false;
         }, 2000);

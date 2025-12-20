@@ -7,6 +7,11 @@
   import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/accordion';
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
 
+  let mounted = $state(false);
+  $effect(() => {
+    mounted = true;
+  });
+
   function addEducation() {
     resumeStore.addArrayItem('education', {
       id: safeUUID(),
@@ -41,66 +46,79 @@
       No education added yet. Click "Add Education" to start.
     </div>
   {:else}
-    <Accordion type="single" class="w-full space-y-3" value="item-0">
-      {#each resumeStore.resumeData.education as edu, index (edu.id)}
-        <div class="flex items-start gap-3 group">
-            <div class="flex flex-col gap-1 pt-4 opacity-40 group-hover:opacity-100 transition-opacity">
-                <button 
-                    type="button"
-                    class="text-slate-400 hover:text-blue-600 disabled:opacity-20 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" 
-                    onclick={() => moveEducation(index, 'up')}
-                    disabled={index === 0}
-                >
-                    <ChevronUp class="h-4 w-4" />
-                </button>
-                <button 
-                    type="button"
-                    class="text-slate-400 hover:text-blue-600 disabled:opacity-20 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" 
-                    onclick={() => moveEducation(index, 'down')}
-                    disabled={index === resumeStore.resumeData.education.length - 1}
-                >
-                    <ChevronDown class="h-4 w-4" />
-                </button>
-            </div>
-            <AccordionItem value={`item-${index}`} class="flex-1 border-2 rounded-xl px-8 bg-card shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 overflow-visible">
-                <AccordionTrigger class="hover:no-underline py-5">
-                    <div class="flex flex-col items-start gap-1">
-                        <span class="text-left font-bold text-slate-900 dark:text-slate-100">
-                            {edu.degree || '(No Degree)'}
-                        </span>
-                        <span class="text-xs text-slate-500 font-medium">
-                            {edu.school || 'Institution Name'}
-                        </span>
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                    <div class="grid gap-8 pt-6 border-t pb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <Label>School</Label>
-                            <Input bind:value={resumeStore.resumeData.education[index].school} placeholder="University Name" />
+    {#if mounted}
+        <Accordion type="single" class="w-full space-y-3" value="item-0">
+        {#each resumeStore.resumeData.education as edu, index (edu.id)}
+            <div class="flex items-start gap-3 group">
+                <div class="flex flex-col gap-1 pt-4 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <button 
+                        type="button"
+                        class="text-slate-400 hover:text-blue-600 disabled:opacity-20 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" 
+                        onclick={() => moveEducation(index, 'up')}
+                        disabled={index === 0}
+                    >
+                        <ChevronUp class="h-4 w-4" />
+                    </button>
+                    <button 
+                        type="button"
+                        class="text-slate-400 hover:text-blue-600 disabled:opacity-20 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" 
+                        onclick={() => moveEducation(index, 'down')}
+                        disabled={index === resumeStore.resumeData.education.length - 1}
+                    >
+                        <ChevronDown class="h-4 w-4" />
+                    </button>
+                </div>
+                <AccordionItem value={`item-${index}`} class="flex-1 border-2 rounded-xl px-8 bg-card shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 overflow-visible">
+                    <AccordionTrigger class="hover:no-underline py-5">
+                        <div class="flex flex-col items-start gap-1">
+                            <span class="text-left font-bold text-slate-900 dark:text-slate-100">
+                                {edu.degree || '(No Degree)'}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                {edu.school || 'Institution Name'}
+                            </span>
                         </div>
-                        <div class="space-y-2">
-                            <Label>Degree</Label>
-                            <Input bind:value={resumeStore.resumeData.education[index].degree} placeholder="Bachelor's, Master's, etc." />
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div class="grid gap-8 pt-6 border-t pb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <Label>School</Label>
+                                <Input bind:value={resumeStore.resumeData.education[index].school} placeholder="University Name" />
+                            </div>
+                            <div class="space-y-2">
+                                <Label>Degree</Label>
+                                <Input bind:value={resumeStore.resumeData.education[index].degree} placeholder="Bachelor's, Master's, etc." />
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <Label>Graduation Year</Label>
-                        <Input bind:value={resumeStore.resumeData.education[index].graduationYear} placeholder="2024" />
-                    </div>
+                        
+                        <div class="space-y-2">
+                            <Label>Graduation Year</Label>
+                            <Input bind:value={resumeStore.resumeData.education[index].graduationYear} placeholder="2024" />
+                        </div>
 
-                    <div class="flex justify-end pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
-                        <Button variant="destructive" size="sm" class="h-8 text-xs font-semibold" onclick={() => removeEducation(index)}>
-                        <Trash2 class="mr-2 h-3.5 w-3.5" /> Remove Education
-                        </Button>
+                        <div class="flex justify-end pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                            <Button variant="destructive" size="sm" class="h-8 text-xs font-semibold" onclick={() => removeEducation(index)}>
+                            <Trash2 class="mr-2 h-3.5 w-3.5" /> Remove Education
+                            </Button>
+                        </div>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </div>
+        {/each}
+        </Accordion>
+    {:else}
+        <div class="space-y-3">
+            {#each resumeStore.resumeData.education as edu (edu.id)}
+                <div class="border-2 rounded-xl px-8 py-5 bg-card opacity-50">
+                    <div class="flex flex-col items-start gap-1">
+                        <span class="font-bold text-slate-900 dark:text-slate-100">{edu.degree || '(No Degree)'}</span>
+                        <span class="text-xs text-slate-500">{edu.school || 'Institution Name'}</span>
                     </div>
-                    </div>
-                </AccordionContent>
-            </AccordionItem>
+                </div>
+            {/each}
         </div>
-      {/each}
-    </Accordion>
+    {/if}
   {/if}
 </div>
