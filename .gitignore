@@ -42,6 +42,7 @@ next-env.d.ts
 
 # electron
 /dist
+/release
 
 .astro
 .tmp

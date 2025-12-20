@@ -141,14 +141,14 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           echo "=== Windows Build Artifacts ==="
-          if (Test-Path "dist") { Get-ChildItem -Path "dist" -Recurse } else { echo "No dist directory found" }
+          if (Test-Path "release") { Get-ChildItem -Path "release" -Recurse } else { echo "No release directory found" }
         shell: powershell
 
       - name: Check Build Artifacts (Unix)
         if: matrix.os != 'windows-latest'
         run: |
           echo "=== Build Artifacts ==="
-          if [ -d "dist" ]; then find dist -type f; else echo "No dist directory found"; fi
+          if [ -d "release" ]; then find release -type f; else echo "No release directory found"; fi
         shell: bash
 
       - name: Upload Artifacts (macOS)
@@ -157,8 +157,8 @@ jobs:
         with:
           name: macos-build
           path: |
-            dist/*.dmg
-            dist/*.zip
+            release/*.dmg
+            release/*.zip
         continue-on-error: true
 
       - name: Upload Artifacts (Windows)
@@ -167,8 +167,8 @@ jobs:
         with:
           name: windows-build
           path: |
-            dist/*.exe
-            dist/*.zip
+            release/*.exe
+            release/*.zip
         continue-on-error: true
 
       - name: Upload Artifacts (Linux)
@@ -176,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-build
-          path: dist/*.AppImage
+          path: release/*.AppImage
         continue-on-error: true
 
   upload-release-assets:
