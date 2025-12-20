@@ -1,11 +1,4 @@
-const {
-  app,
-  BrowserWindow,
-  Menu,
-  shell,
-  dialog,
-  protocol,
-} = require("electron");
+const { app, BrowserWindow, Menu, shell, protocol } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
@@ -135,86 +128,33 @@ function createWindow() {
 }
 
 function startLocalServer() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const distDir = path.join(__dirname, "../dist");
     console.log("Starting API server for directory:", distDir);
-    console.log("Directory exists:", fs.existsSync(distDir));
 
-    // Try different paths for ts-node and api-server.ts in packaged app
-    let tsNodePath;
-    let apiServerPath;
-    let tsconfigPath;
+    // Path to the compiled server
+    let serverPath = path.join(__dirname, "../dist/api-server.js");
 
-    const tsNodePossiblePaths = [
-      path.join(__dirname, "../node_modules/.bin/ts-node"),
-      path.join(__dirname, "../node_modules/ts-node/dist/bin.js"),
-      path.join(process.resourcesPath, "ts-node/dist/bin.js"),
-      path.join(
-        process.resourcesPath,
-        "app.asar.unpacked/node_modules/ts-node/dist/bin.js",
-      ),
-      path.join(__dirname, "../resources/ts-node/dist/bin.js"),
-    ];
-
-    const apiServerPossiblePaths = [
-      path.join(__dirname, "../api-server.ts"),
-      path.join(process.resourcesPath, "app/api-server.ts"),
-      path.join(__dirname, "../app/api-server.ts"),
-    ];
-
-    const tsconfigPossiblePaths = [
-      path.join(__dirname, "../tsconfig.server.json"),
-      path.join(process.resourcesPath, "app/tsconfig.server.json"),
-      path.join(__dirname, "../app/tsconfig.server.json"),
-    ];
-
-    // Find ts-node
-    for (const p of tsNodePossiblePaths) {
-      if (fs.existsSync(p)) {
-        tsNodePath = p;
-        console.log("Found ts-node at:", tsNodePath);
-        break;
-      }
+    if (!fs.existsSync(serverPath)) {
+      // Try production path
+      serverPath = path.join(process.resourcesPath, "app/dist/api-server.js");
     }
 
-    // Find api-server.ts
-    for (const p of apiServerPossiblePaths) {
-      if (fs.existsSync(p)) {
-        apiServerPath = p;
-        console.log("Found api-server.ts at:", apiServerPath);
-        break;
-      }
-    }
-
-    // Find tsconfig.server.json
-    for (const p of tsconfigPossiblePaths) {
-      if (fs.existsSync(p)) {
-        tsconfigPath = p;
-        console.log("Found tsconfig.server.json at:", tsconfigPath);
-        break;
-      }
-    }
-
-    if (!tsNodePath || !apiServerPath || !tsconfigPath) {
-      console.error(
-        "Could not find required files for API server, falling back to static file loading",
-        { tsNodePath, apiServerPath, tsconfigPath },
-      );
+    if (!fs.existsSync(serverPath)) {
+      console.error("Could not find API server at:", serverPath);
       resolve();
       return;
     }
 
+    console.log("Launching API server from:", serverPath);
+
     // Set PORT environment variable for Electron
     process.env.PORT = "3001";
 
-    serverProcess = spawn(
-      "node",
-      [tsNodePath, "--project", tsconfigPath, apiServerPath],
-      {
-        stdio: ["pipe", "pipe", "pipe"],
-        env: { ...process.env, PORT: "3001" },
-      },
-    );
+    serverProcess = spawn("node", [serverPath], {
+      stdio: ["pipe", "pipe", "pipe"],
+      env: { ...process.env, PORT: "3001", NODE_ENV: "production" },
+    });
 
     let serverStarted = false;
 
@@ -498,7 +438,7 @@ async function handleAIModelsRoute(request) {
 async function handleAITestRoute(request) {
   try {
     const body = await request.json();
-    const { provider, apiKey, model } = body;
+    const { provider, apiKey } = body;
 
     if (!provider || !apiKey) {
       return new Response(
@@ -750,7 +690,7 @@ app.on("window-all-closed", () => {
 });
 
 // Security: Prevent new window creation
-app.on("web-contents-created", (event, contents) => {
+app.on("web-contents-created", (_event, contents) => {
   contents.on("new-window", (event, navigationUrl) => {
     event.preventDefault();
     shell.openExternal(navigationUrl);

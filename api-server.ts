@@ -89,10 +89,9 @@ async function handleTestRoute(
 ): Promise<void> {
   try {
     const body = await parseBody(req);
-    const { provider, apiKey, model } = body as {
+    const { provider, apiKey } = body as {
       provider?: string;
       apiKey?: string;
-      model?: string;
     };
 
     if (!provider || !apiKey) {
@@ -233,7 +232,7 @@ async function handleModelsRoute(
 }
 
 async function handleModelsDevRoute(
-  req: http.IncomingMessage,
+  _req: http.IncomingMessage,
   res: http.ServerResponse,
   method: string,
   pathname: string,
@@ -288,7 +287,7 @@ async function handleModelsDevRoute(
 }
 
 async function handleLogoProxyRoute(
-  req: http.IncomingMessage,
+  _req: http.IncomingMessage,
   res: http.ServerResponse,
   method: string,
   pathname: string,
@@ -325,13 +324,13 @@ async function handleLogoProxyRoute(
       proxyRes.pipe(res);
     });
 
-    proxyReq.on("error", (error) => {
+    proxyReq.on("error", (_error) => {
       res.writeHead(500);
       res.end("Error fetching logo");
     });
 
     proxyReq.end();
-  } catch (error) {
+  } catch (_error) {
     res.writeHead(500);
     res.end("Internal server error");
   }
@@ -566,13 +565,13 @@ function serveStaticFile(
   let filePath: string;
 
   if (url === "/" || url === "/index.html") {
-    filePath = path.join(__dirname, "out", "index.html");
+    filePath = path.join(__dirname, "dist", "index.html");
   } else {
-    filePath = path.join(__dirname, "out", url);
+    filePath = path.join(__dirname, "dist", url);
   }
 
   // Security: prevent directory traversal
-  const outDir = path.join(__dirname, "out");
+  const outDir = path.join(__dirname, "dist");
   const resolvedPath = path.resolve(filePath);
   if (!resolvedPath.startsWith(outDir)) {
     res.writeHead(403);
