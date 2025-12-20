@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.17](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.16...resume-generator-v0.2.17) (2025-10-09)
+
+
+### Bug Fixes
+
+* update config to address issue with container builds ([1779dd0](https://github.com/catpaladin/resume-generator/commit/1779dd04f12438360be56a009dcd5209c03d9b05))
+
 ## [0.2.16](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.15...resume-generator-v0.2.16) (2025-09-04)
 
 ### Bug Fixes

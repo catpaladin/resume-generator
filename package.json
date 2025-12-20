@@ -1,7 +1,7 @@
 {
   "name": "resume-generator",
-  "version": "0.2.16",
-  "description": "A modern, portable resume generator built with Astro + Svelte",
+  "version": "0.2.17",
+  "description": "A modern, portable resume generator built with Next.js, React, and Electron",
   "author": "catpaladin",
   "private": true,
   "scripts": {
