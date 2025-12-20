@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.18](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.17...resume-generator-v0.2.18) (2025-12-20)
+
+
+### Features
+
+* add pdf parser to import functionality ([57f5e31](https://github.com/catpaladin/resume-generator/commit/57f5e31512b2fef22405378839a0e7be0b8ecd6f))
+* enhance import and export capability; update ai provider data to pull from models-dev ([899b9d8](https://github.com/catpaladin/resume-generator/commit/899b9d8453bafd732c84e701a10bd2cd66a3b6c4))
+* enhance packaging and address issues with broken packages ([f2d4b16](https://github.com/catpaladin/resume-generator/commit/f2d4b161c3a5cfbf71de3244193138b5cc0fbdce))
+
+
+### Bug Fixes
+
+* forgot to update tests for change to phone number format ([575d207](https://github.com/catpaladin/resume-generator/commit/575d207981532dfd3fc45b7c8017e4fbb3f747ea))
+
+
+### Styles
+
+* dark and light mode set. Preparing for provider connectivity ([3929078](https://github.com/catpaladin/resume-generator/commit/3929078e60d2f04e8ef7fae7de5a8d2b49aab898))
+
+
+### Code Refactoring
+
+* migrate from nextjs + react app to astro + svelte ([2b95116](https://github.com/catpaladin/resume-generator/commit/2b95116a9f5a17f5ca0a9b9c47e598ccd3e5cfd6))
+* migrate from nextjs + react to svelte 5 + astro ([098c867](https://github.com/catpaladin/resume-generator/commit/098c867f148142de243eb8f89c8ef77daeb58ade))
+* port over previous functionality that can work ([14eb413](https://github.com/catpaladin/resume-generator/commit/14eb4139c25799ebc798dad5b31d97aa27a3b3bf))
+
 ## [0.2.17](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.16...resume-generator-v0.2.17) (2025-10-09)
 
 
