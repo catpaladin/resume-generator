@@ -1,134 +1,92 @@
 # Resume Generator
 
-An opinionated, modern resume builder built with Next.js 15, Tailwind CSS,
-and Zustand. Edit your resume on the left, see a live, print‑ready preview on
+An opinionated, modern resume builder built with Astro 5, Svelte 5, Tailwind CSS 4,
+and Svelte Runes. Edit your resume on the left, see a live, print-ready preview on
 the right, and export to PDF using your browser’s print dialog.
 
 ## Features
 
+- **AI-Enhanced Import** — Upload PDF or DOCX resumes; our AI automatically parses
+  and structures the content for you.
+- **Standalone API Server** — Integrated Bun-powered server for AI proxying and static hosting.
 - **Skills by Category** — Each skill can have a category; the preview groups
   them automatically. Unassigned skills show under "General Skills".
-- **Accessible Skill Pills** — Light: black pill with white text/border.
-  Dark: white pill with black text/border.
-- **Modern Preview Sheet** — Bordered, print‑safe, ATS‑friendly.
+- **Modern Preview Sheet** — Bordered, print-safe, ATS-friendly.
 - **Quick Section Navigation** — Simple sidebar for fast jumping.
-- **Theme Support** — Light/dark via `next-themes`.
-- **Local Persistence** — Auto‑save to `localStorage` via Zustand.
-- **Drag & Drop Ordering** — Powered by `@dnd-kit`.
+- **Theme Support** — Full light/dark mode support.
+- **Local Persistence** — Auto-save to `localStorage` via Svelte Runes.
 
 ## Tech Stack
 
-- Next.js (App Router)
-- React 19
-- Tailwind CSS
-- Zustand
-- `@dnd-kit`
+- **Astro 5** — Static Site Generation & API Routes
+- **Svelte 5** — UI Layer using Runes for reactive state
+- **Tailwind CSS 4** — Zero-runtime CSS with the new engine
+- **Bun** — Fast runtime, package manager, and bundler
+- **Lucide Svelte** — Icon system
+- **bits-ui** — Accessible UI primitives
 
 ## Quick Start (Development)
 
 ```bash
 # 1) Install dependencies
-npm install
+bun install
 
-# 2) Start in development (http://localhost:3000)
-npm run dev
+# 2) Start in development (http://localhost:4321)
+bun run dev
 ```
-
-## Requirements
-
-- Node.js 22+
-- npm (or pnpm/yarn/bun)
-
-## Local Development
-
-```bash
-npm install
-npm run dev
-```
-
-Hot‑reload is enabled. Your data persists in `localStorage`.
 
 ## Production Build
 
+The production build generates both the Astro static site and a standalone, optimized API server bundle.
+
 ```bash
-# Build
-npm run build
+# Build both frontend and API server
+bun run build
 
 # Start the production server
-npm run start
+bun run start
 
 # By default: http://localhost:3000
 ```
 
 ## Docker
 
-This repo includes a multi‑stage Dockerfile that produces a small, non‑root
-runtime image.
+This repository produces a highly secure, minimal container image using **Bun Distroless**.
 
-Build the image:
+- **Small Footprint**: ~40MB compressed.
+- **Secure**: No shell, no package manager, no root user.
+- **Performance**: Powered by Bun's high-performance runtime.
 
-```bash
-docker build -t resume-generator:latest .
-```
-
-Run the container:
+### Build and Run
 
 ```bash
+# Build the image
+docker buildx build -t resume-generator:latest .
+
+# Run the container
 docker run --rm -p 3000:3000 resume-generator:latest
-# App is available at http://localhost:3000
 ```
 
-Notes:
+## Desktop App (Electron)
 
-- Image runs as a non‑root user and exposes port `3000`.
-- `NEXT_TELEMETRY_DISABLED` and `NODE_ENV=production` are set in the image.
-
-## Scripts
-
-### Web Development
-
-- `dev` — Start the dev server
-- `build` — Build for production
-- `start` — Run the production build
-- `lint` — Run ESLint
-- `lint-format` — ESLint fix + Prettier (run before committing)
-- `test` — Run unit tests
-- `test:watch` — Watch mode
-- `test:coverage` — Coverage report
-
-### Desktop App (Electron)
+The app is fully compatible with Electron for a native desktop experience. We've optimized the build to remove `ts-node` in production, resulting in a much leaner installer.
 
 - `electron:dev` — Build and run in Electron
 - `electron:pack` — Create unpacked Electron build
-- `dist:win` — Build Windows portable executable
-- `dist:mac` — Build macOS DMG (unsigned)
-- `dist:linux` — Build Linux AppImage
+- `dist:win` / `dist:mac` / `dist:linux` — Build platform-specific installers
 
 ## Project Structure
 
-- `src/components/resume/form/` — Form components for editing
-- `src/components/resume/preview/` — Live preview components
-- `src/components/ui/` — Reusable UI (shadcn/ui)
-- `src/types/` — TypeScript interfaces
-- `src/store/` — Zustand stores (e.g., `resumeStore.ts`)
-- `src/lib/` — Utility functions
-- `src/hooks/` — Custom hooks
-- `src/app/page.tsx` — Main page composing builder + preview
-
-## Theming and PDF Export
-
-- Preview defaults to light theme for print clarity.
-- Use your browser’s Print dialog to export to PDF.
-- Enable background graphics for best results.
+- `src/components/` — Svelte components grouped by domain (form, preview, ui)
+- `src/lib/ai/` — AI service abstraction and provider implementations
+- `src/store/` — Reactive state management using Svelte Runes
+- `api-server.ts` — Standalone server implementation for production/Docker
+- `electron/` — Main process logic and protocol handlers
 
 ## Testing
 
-The project is set up with Jest + React Testing Library.
-
 ```bash
-npm run test
-npm run test:watch
-npm run test:coverage
+bun run test
 ```
 
-When adding utilities or store actions, include unit tests.
+The project uses Vitest with `@testing-library/svelte` for unit and component testing.

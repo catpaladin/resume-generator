@@ -22,7 +22,6 @@
         { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
         { "type": "revert", "section": "Reverts", "hidden": false }
       ],
-      "extra-files": ["package-lock.json"],
       "include-v-in-tag": true,
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true

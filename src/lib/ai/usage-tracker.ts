@@ -357,6 +357,8 @@ class AIUsageTracker {
     currentSpending: number,
     threshold: number,
   ): void {
+    if (typeof window === "undefined") return;
+
     console.warn(`AI Usage Cost Alert: ${type}`, {
       currentSpending,
       threshold,

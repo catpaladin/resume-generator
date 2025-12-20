@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { ResumeData } from "@/types/resume";
+import { docxExporter } from "@/lib/exporters/docx-exporter";
 
 /**
  * Combines class names using clsx and tailwind-merge
@@ -10,15 +11,39 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Format a phone number to (XXX) XXX-XXXX format
+ * Format a phone number with dashes and support international numbers
  */
 export function formatPhoneNumber(phone: string): string {
+  // Remove all non-numeric characters
   const cleaned = phone.replace(/\D/g, "");
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-  if (match) {
-    return `(${match[1]}) ${match[2]}-${match[3]}`;
+
+  // If empty, return empty
+  if (!cleaned) return "";
+
+  // Handle standard US 10-digit number
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
   }
-  return phone;
+
+  // Handle international or longer numbers
+  if (cleaned.length > 10) {
+    // Format as +X-XXX-XXX-XXXX or similar based on length
+    // For simplicity, we'll just add dashes every few digits
+    if (cleaned.length === 11) {
+      return `${cleaned.slice(0, 1)}-${cleaned.slice(1, 4)}-${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    }
+    // Generic grouping for very long numbers
+    return cleaned.replace(/(\d{3})(?=\d)/g, "$1-");
+  }
+
+  // Short numbers (e.g. while typing)
+  if (cleaned.length > 6) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  } else if (cleaned.length > 3) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+  }
+
+  return cleaned;
 }
 
 /**
@@ -48,6 +73,26 @@ export function exportResumeData(data: ResumeData): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Export resume as DOCX file
+ */
+export async function exportResumeToDocx(
+  data: ResumeData,
+  options: {
+    fileName?: string;
+    includeProjects?: boolean;
+    includeSummary?: boolean;
+  } = {},
+): Promise<void> {
+  await docxExporter.exportToFile(data, {
+    fileName:
+      options.fileName ||
+      `resume-${new Date().toISOString().split("T")[0]}.docx`,
+    includeProjects: options.includeProjects ?? true,
+    includeSummary: options.includeSummary ?? true,
+  });
 }
 
 /**

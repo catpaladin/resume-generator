@@ -43,42 +43,40 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: "20"
-          cache: "npm"
+          bun-version: latest
 
       - name: Install Dependencies
         run: |
           echo "Installing dependencies..."
-          npm ci --verbose
+          bun install
           echo "Dependencies installed successfully"
         shell: bash
 
       - name: Verify Dependencies
         run: |
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "Electron version: $(npx electron --version)"
+          echo "Bun version: $(bun --version)"
+          echo "Electron version: $(bun x electron --version)"
           echo "Available scripts:"
         shell: bash
 
       - name: List Available Scripts
-        run: npm run
+        run: bun run
         continue-on-error: true
 
-      - name: Build Next.js App
+      - name: Build Astro App
         run: |
-          echo "Building Next.js application..."
-          npm run build
-          echo "Next.js build completed"
+          echo "Building Astro application..."
+          bun run build
+          echo "Astro build completed"
         shell: bash
 
       - name: Check Build Output
         run: |
           echo "Build output:"
-          if [ -d "out" ]; then ls -la out/; else echo "No out directory found"; fi
+          if [ -d "dist" ]; then ls -la dist/; else echo "No dist directory found"; fi
         shell: bash
 
       - name: Prepare Build Environment (Linux)
@@ -104,7 +102,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           echo "Building Electron app for macOS..."
-          npm run dist:mac -- --publish=never
+          bun run dist:mac -- --publish=never
           echo "macOS build completed"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,7 +116,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           echo "Building Electron app for Windows..."
-          npm run dist:win -- --publish=never
+          bun run dist:win -- --publish=never
           echo "Windows build completed"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -133,7 +131,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           echo "Building Electron app for Linux..."
-          npm run dist:linux -- --publish=never
+          bun run dist:linux -- --publish=never
           echo "Linux build completed"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -243,7 +241,7 @@ jobs:
 
           ---
 
-          Built with ❤️ using Next.js, React, and Electron
+          Built with ❤️ using Astro, Svelte, and Electron
           EOF
 
             # Update release with new body and upload assets

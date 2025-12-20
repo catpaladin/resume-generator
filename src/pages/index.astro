@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ResumeApp from '../components/resume/ResumeApp.svelte';
+---
+
+<Layout title="Resume Generator">
+	<div class="container mx-auto py-12 px-6">
+		<ResumeApp client:load />
+	</div>
+</Layout>

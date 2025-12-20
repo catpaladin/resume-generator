@@ -1,5 +1,3 @@
-import { type ReactNode } from "react";
-
 export interface PersonalInfo {
   fullName: string;
   location: string;
@@ -36,7 +34,7 @@ export interface Education {
 export interface Project {
   id: string;
   name: string;
-  link: string;
+  url: string;
   description: string;
 }
 
@@ -52,19 +50,6 @@ export interface ResumeData {
   experience: Experience[];
   education: Education[];
   projects: Project[];
-}
-
-export interface ResumeSectionProps {
-  data?: unknown;
-  onChange?: (data: unknown) => void;
-  className?: string;
-  children?: ReactNode;
-}
-
-export interface ResumeSection {
-  id: string;
-  title: string;
-  component: React.ComponentType<ResumeSectionProps>;
 }
 
 export type ResumeDataKey = keyof ResumeData;
@@ -87,7 +72,7 @@ export interface ImportResult {
 }
 
 export interface ExportOptions {
-  format: "json" | "pdf";
+  format: "json" | "pdf" | "docx";
   fileName?: string;
 }
 
@@ -101,4 +86,21 @@ export interface AISettings {
   enhancementLevel?: "light" | "moderate" | "comprehensive";
   focusAreas?: string[];
   enableFallback?: boolean;
+}
+
+export interface AIEnhancementSettings {
+  provider: "openai" | "anthropic" | "gemini";
+  model: string;
+  apiKey: string;
+  temperature: number;
+  improveWriting: boolean;
+  fixGrammar: boolean;
+  optimizeKeywords: boolean;
+  customInstructions: string;
+}
+
+export interface ValidationIssue {
+  field: string;
+  message: string;
+  type?: "error" | "warning";
 }

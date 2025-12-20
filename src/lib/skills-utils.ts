@@ -1,4 +1,4 @@
-import { Skill } from "@/types/resume";
+import type { Skill } from "@/types/resume";
 
 /**
  * Groups skills by category for display in the resume preview.

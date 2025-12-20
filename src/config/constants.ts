@@ -1,4 +1,4 @@
-import { User, Lightbulb, Briefcase, GraduationCap, Code } from "lucide-react";
+import { User, Lightbulb, Briefcase, GraduationCap, Code } from "lucide-svelte";
 import type { ResumeData } from "@/types/resume";
 import type { Tab } from "@/types/common";
 
@@ -17,7 +17,18 @@ export const TabConfig: Tab[] = [
 
 export type TabType = (typeof TabConfig)[number]["id"];
 
-export const initialResumeData: ResumeData = {
+// Safe UUID generation for SSR/Build environments
+export function safeUUID(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 11);
+}
+
+export const getInitialResumeData = (): ResumeData => ({
   personal: {
     fullName: "",
     location: "",
@@ -29,19 +40,19 @@ export const initialResumeData: ResumeData = {
   skills: [],
   experience: [
     {
-      id: crypto.randomUUID(),
+      id: "default-experience-1",
       company: "",
       position: "",
       location: "",
       startDate: "",
       endDate: "",
-      bulletPoints: [{ id: crypto.randomUUID(), text: "" }],
+      bulletPoints: [{ id: "default-bullet-1", text: "" }],
       jobDescription: "",
     },
   ],
   education: [
     {
-      id: crypto.randomUUID(),
+      id: "default-education-1",
       school: "",
       degree: "",
       graduationYear: "",
@@ -49,13 +60,15 @@ export const initialResumeData: ResumeData = {
   ],
   projects: [
     {
-      id: crypto.randomUUID(),
+      id: "default-project-1",
       name: "",
-      link: "",
+      url: "",
       description: "",
     },
   ],
-};
+});
+
+export const initialResumeData = getInitialResumeData();
 
 export const MAX_ITEMS = {
   SKILLS: 10,

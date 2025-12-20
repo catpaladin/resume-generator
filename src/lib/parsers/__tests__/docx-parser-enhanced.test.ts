@@ -1,18 +1,27 @@
+import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
+
 // Enhanced DOCX Parser Tests
-jest.mock("mammoth", () => ({
-  extractRawText: jest.fn(),
-  convertToHtml: jest.fn(),
-}));
+vi.mock("mammoth", () => {
+  const extractRawText = vi.fn();
+  const convertToHtml = vi.fn();
+
+  return {
+    // Handle default import
+    default: {
+      extractRawText,
+      convertToHtml,
+    },
+    // Handle named imports (if any, or for consistency)
+    extractRawText,
+    convertToHtml,
+  };
+});
 
 import { DocxParser } from "../docx-parser";
-import * as mammoth from "mammoth";
+import mammoth from "mammoth";
 
-const mockExtractRawText = mammoth.extractRawText as jest.MockedFunction<
-  typeof mammoth.extractRawText
->;
-const mockConvertToHtml = mammoth.convertToHtml as jest.MockedFunction<
-  typeof mammoth.convertToHtml
->;
+const mockExtractRawText = mammoth.extractRawText as unknown as Mock;
+const mockConvertToHtml = mammoth.convertToHtml as unknown as Mock;
 
 describe("Enhanced DocxParser", () => {
   let parser: DocxParser;
@@ -30,7 +39,7 @@ describe("Enhanced DocxParser", () => {
 
   beforeEach(() => {
     parser = new DocxParser();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Enhanced Experience Parsing", () => {

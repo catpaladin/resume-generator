@@ -44,7 +44,7 @@ export const EducationSchema = z.object({
 export const ProjectSchema = z.object({
   id: IdSchema,
   name: z.string().min(1, "Project name is required"),
-  link: z.string().default(""),
+  url: z.string().default(""),
   description: z.string().min(1, "Project description is required"),
 });
 
@@ -201,7 +201,7 @@ export function normalizeResumeData(
     projects: (partialData.projects || []).map((proj) => ({
       id: proj.id || generateId(),
       name: proj.name || "",
-      link: proj.link || "",
+      url: proj.url || "",
       description: proj.description || "",
     })),
   };

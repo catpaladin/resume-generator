@@ -3,11 +3,8 @@ import type {
   AIEnhancementResult,
   AIEnhancementOptions,
 } from "@/types/ai-enhancement";
-import {
-  ImportManager,
-  type ImportResult,
-  type ImportOptions,
-} from "./import-manager";
+import type { ImportResult, ImportOptions } from "./import-manager";
+import { ImportManager } from "./import-manager";
 import { enhanceResumeWithAI } from "../ai/ai-service";
 
 export interface AIImportProgress {
