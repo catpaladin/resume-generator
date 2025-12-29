@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.20](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.19...resume-generator-v0.2.20) (2025-12-29)
+
+
+### Bug Fixes
+
+* resolve Electron app blank screen from static serving path issue ([54bec5b](https://github.com/catpaladin/resume-generator/commit/54bec5bb518ba7e4dabb63d0571d3730e579a465))
+
 ## [0.2.19](https://github.com/catpaladin/resume-generator/compare/resume-generator-v0.2.18...resume-generator-v0.2.19) (2025-12-20)
 
 
