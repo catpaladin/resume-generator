@@ -8,7 +8,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build && bun run build:server",
-    "build:server": "bun build ./api-server.ts --target node --outfile ./dist/api-server.js",
+    "build:server": "bun build ./api-server.ts --target node --format cjs --outfile ./dist/api-server.js",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write .",

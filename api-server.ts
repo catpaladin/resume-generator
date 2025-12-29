@@ -1,8 +1,28 @@
 import * as http from "http";
 import * as https from "https";
 import * as url from "url";
+import * as path from "path";
+import * as fs from "fs";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Path to static files - must be provided via environment variable
+// This avoids build-time __dirname issues when bundling
+const STATIC_DIR = process.env.STATIC_DIR;
+
+if (!STATIC_DIR) {
+  console.error(
+    "ERROR: STATIC_DIR environment variable is required. " +
+      "Please provide the path to static files (e.g., dist/).",
+  );
+  process.exit(1);
+}
+
+// Validate that the static directory exists
+if (!fs.existsSync(STATIC_DIR)) {
+  console.error(`ERROR: Static directory does not exist: ${STATIC_DIR}`);
+  process.exit(1);
+}
 
 interface Message {
   role: string;
@@ -16,10 +36,10 @@ interface AIModel {
   isRecommended?: boolean;
 }
 
-// Static file server is now built-in, no need for external sirv process
 console.log("\n  Your application is ready~! 🚀\n");
-console.log(`  - Local:      http://localhost:${PORT}`);
-console.log(`  - Network:    http://0.0.0.0:${PORT}\n`);
+console.log(`  - Local:       http://localhost:${PORT}`);
+console.log(`  - Network:     http://0.0.0.0:${PORT}`);
+console.log(`  - Static Root: ${STATIC_DIR}\n`);
 console.log(" LOGS");
 
 // Logging function
@@ -41,6 +61,12 @@ async function handleApiRoute(
   pathname: string,
 ): Promise<void> {
   const method = req.method || "GET";
+  if (pathname === "/api/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+    logRequest(method, pathname, 200);
+    return;
+  }
   if (pathname === "/api/ai/test") {
     return handleTestRoute(req, res, method, pathname);
   }
@@ -557,46 +583,54 @@ function getFallbackModels(provider: string): AIModel[] {
 function serveStaticFile(
   req: http.IncomingMessage,
   res: http.ServerResponse,
+  pathname: string,
 ): void {
-  const fs = require("fs");
-  const path = require("path");
-
-  const url = req.url || "/";
   let filePath: string;
 
-  if (url === "/" || url === "/index.html") {
-    filePath = path.join(__dirname, "dist", "index.html");
+  if (pathname === "/" || pathname === "/index.html") {
+    filePath = path.join(STATIC_DIR!, "index.html");
   } else {
-    filePath = path.join(__dirname, "dist", url);
+    // Standard path for URLs (handled by path.join)
+    // Remove leading slash to make it relative to STATIC_DIR
+    const relativePath = pathname.startsWith("/")
+      ? pathname.slice(1)
+      : pathname;
+    filePath = path.join(STATIC_DIR!, relativePath);
   }
 
   // Security: prevent directory traversal
-  const outDir = path.join(__dirname, "dist");
+  const outDir = path.resolve(STATIC_DIR!);
   const resolvedPath = path.resolve(filePath);
   if (!resolvedPath.startsWith(outDir)) {
     res.writeHead(403);
     res.end("Forbidden");
-    logRequest(req.method || "GET", url, 403);
+    logRequest(req.method || "GET", pathname, 403);
     return;
   }
 
   fs.readFile(filePath, (err: NodeJS.ErrnoException | null, data: Buffer) => {
     if (err) {
       if (err.code === "ENOENT") {
+        console.log(
+          `  - \x1b[31m404\x1b[0m ${req.method} ${pathname} (Tried: ${filePath})`,
+        );
         res.writeHead(404);
         res.end("Not Found");
-        logRequest(req.method || "GET", url, 404);
+        logRequest(req.method || "GET", pathname, 404);
       } else {
         res.writeHead(500);
         res.end("Internal Server Error");
-        logRequest(req.method || "GET", url, 500);
+        logRequest(req.method || "GET", pathname, 500);
       }
     } else {
-      const ext = path.extname(filePath);
+      const ext = path.extname(filePath).toLowerCase();
       const contentType = getContentType(ext);
+      console.log(
+        `  - \x1b[32mServing\x1b[0m ${req.method} ${pathname} (${contentType})`,
+      );
       res.writeHead(200, { "Content-Type": contentType });
       res.end(data);
-      logRequest(req.method || "GET", url, 200);
+      logRequest(req.method || "GET", pathname, 200);
     }
   });
 }
@@ -606,6 +640,7 @@ function getContentType(ext: string): string {
   const types: Record<string, string> = {
     ".html": "text/html",
     ".js": "application/javascript",
+    ".mjs": "application/javascript",
     ".css": "text/css",
     ".json": "application/json",
     ".png": "image/png",
@@ -613,6 +648,7 @@ function getContentType(ext: string): string {
     ".gif": "image/gif",
     ".ico": "image/x-icon",
     ".svg": "image/svg+xml",
+    ".webp": "image/webp",
     ".woff": "font/woff",
     ".woff2": "font/woff2",
     ".ttf": "font/ttf",
@@ -649,13 +685,13 @@ const server = http.createServer(
       handleApiRoute(req, res, pathname);
     } else {
       // Serve static files directly
-      serveStaticFile(req, res);
+      serveStaticFile(req, res, pathname);
     }
   },
 );
 
 server.listen(PORT, "0.0.0.0", () => {
-  // Server startup message will be shown when sirv is ready
+  // Server startup message
 });
 
 // Cleanup on exit

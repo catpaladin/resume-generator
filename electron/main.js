@@ -34,9 +34,8 @@ function createWindow() {
       webSecurity: !isDev,
     },
     icon: path.join(__dirname, "../public/favicon.ico"),
-    titleBarStyle: process.platform === "darwin" ? "default" : "default",
-    show: false, // Don't show until ready-to-show
-    // macOS specific improvements
+    titleBarStyle: "default",
+    show: false,
     ...(process.platform === "darwin" && {
       vibrancy: "under-window",
       visualEffectState: "active",
@@ -47,16 +46,13 @@ function createWindow() {
   if (isDev) {
     mainWindow.loadURL("http://localhost:4321");
   } else {
-    // Try to start a local server, fallback to file loading
     startLocalServer()
       .then(() => {
-        // Wait longer for ts-node to compile and start accepting connections
         setTimeout(() => {
-          // Test if server is actually running with a simple HEAD request
           const http = require("http");
           console.log("Testing connection to API server...");
 
-          const req = http.get("http://localhost:3001/", (res) => {
+          const req = http.get("http://localhost:3001/api/health", (res) => {
             console.log(
               `✅ API server responding (${res.statusCode}), loading from http://localhost:3001`,
             );
@@ -79,28 +75,22 @@ function createWindow() {
             req.destroy();
             mainWindow.loadURL("app://localhost/index.html");
           });
-        }, 5000); // Wait 5 seconds for ts-node to compile
+        }, 5000);
       })
       .catch((error) => {
         console.error("Failed to start server:", error);
-        console.log("Loading via app:// protocol");
         mainWindow.loadURL("app://localhost/index.html");
       });
   }
 
-  // Show window when ready to prevent visual flash
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-
-    // Open DevTools in development
     if (isDev) {
       mainWindow.webContents.openDevTools();
     }
   });
 
-  // Handle window closed
   mainWindow.on("closed", () => {
-    // Only clean up server if this is the last window on non-macOS
     if (
       process.platform !== "darwin" ||
       BrowserWindow.getAllWindows().length === 1
@@ -110,20 +100,16 @@ function createWindow() {
         serverProcess = null;
       }
     }
-
-    // Only set mainWindow to null if it's this specific window
     if (mainWindow && mainWindow.isDestroyed()) {
       mainWindow = null;
     }
   });
 
-  // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
   });
 
-  // Create application menu
   createMenu();
 }
 
@@ -132,11 +118,9 @@ function startLocalServer() {
     const distDir = path.join(__dirname, "../dist");
     console.log("Starting API server for directory:", distDir);
 
-    // Path to the compiled server
     let serverPath = path.join(__dirname, "../dist/api-server.js");
 
     if (!fs.existsSync(serverPath)) {
-      // Try production path
       serverPath = path.join(process.resourcesPath, "app/dist/api-server.js");
     }
 
@@ -148,12 +132,14 @@ function startLocalServer() {
 
     console.log("Launching API server from:", serverPath);
 
-    // Set PORT environment variable for Electron
-    process.env.PORT = "3001";
-
     serverProcess = spawn("node", [serverPath], {
       stdio: ["pipe", "pipe", "pipe"],
-      env: { ...process.env, PORT: "3001", NODE_ENV: "production" },
+      env: {
+        ...process.env,
+        STATIC_DIR: distDir,
+        PORT: "3001",
+        NODE_ENV: "production",
+      },
     });
 
     let serverStarted = false;
@@ -179,7 +165,7 @@ function startLocalServer() {
     serverProcess.on("error", (error) => {
       console.error("API server process error:", error);
       if (!serverStarted) {
-        resolve(); // Continue anyway, will fallback to file:// protocol
+        resolve();
       }
     });
 
@@ -187,13 +173,12 @@ function startLocalServer() {
       console.log("API server process exited:", { code, signal });
     });
 
-    // Fallback timeout
     setTimeout(() => {
       if (!serverStarted) {
         console.log("API server startup timeout, continuing anyway");
         resolve();
       }
-    }, 5000); // Increased timeout for ts-node compilation
+    }, 5000);
   });
 }
 
@@ -206,34 +191,26 @@ function createMenu() {
           label: "New Resume",
           accelerator: "CmdOrCtrl+N",
           click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send("menu-new-resume");
-            }
+            if (mainWindow) mainWindow.webContents.send("menu-new-resume");
           },
         },
         {
           label: "New Window",
           accelerator: "CmdOrCtrl+Shift+N",
-          click: () => {
-            createWindow();
-          },
+          click: () => createWindow(),
         },
         {
           label: "Export PDF",
           accelerator: "CmdOrCtrl+E",
           click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send("menu-export-pdf");
-            }
+            if (mainWindow) mainWindow.webContents.send("menu-export-pdf");
           },
         },
         { type: "separator" },
         {
           label: "Quit",
           accelerator: process.platform === "darwin" ? "Cmd+Q" : "Ctrl+Q",
-          click: () => {
-            app.quit();
-          },
+          click: () => app.quit(),
         },
       ],
     },
@@ -269,7 +246,6 @@ function createMenu() {
     },
   ];
 
-  // macOS specific menu adjustments
   if (process.platform === "darwin") {
     template.unshift({
       label: app.getName(),
@@ -285,15 +261,6 @@ function createMenu() {
         { role: "quit" },
       ],
     });
-
-    // Window menu
-    template[4].submenu = [
-      { role: "close" },
-      { role: "minimize" },
-      { role: "zoom" },
-      { type: "separator" },
-      { role: "front" },
-    ];
   }
 
   const menu = Menu.buildFromTemplate(template);
@@ -305,6 +272,7 @@ function getContentType(filePath) {
   const contentTypes = {
     ".html": "text/html",
     ".js": "application/javascript",
+    ".mjs": "application/javascript",
     ".css": "text/css",
     ".json": "application/json",
     ".png": "image/png",
@@ -312,6 +280,7 @@ function getContentType(filePath) {
     ".jpeg": "image/jpeg",
     ".gif": "image/gif",
     ".svg": "image/svg+xml",
+    ".webp": "image/webp",
     ".ico": "image/x-icon",
     ".woff": "font/woff",
     ".woff2": "font/woff2",
@@ -321,30 +290,19 @@ function getContentType(filePath) {
   return contentTypes[ext] || "text/plain";
 }
 
-// Handle API routes locally in Electron
 async function handleApiRoute(request, pathname) {
   console.log("=== ELECTRON API ROUTE ===");
   console.log("Method:", request.method);
-  console.log("URL:", request.url);
   console.log("Pathname:", pathname);
-  console.log("Headers:", Object.fromEntries(request.headers));
   console.log("=== END API ROUTE DEBUG ===");
 
-  if (pathname === "/api/ai/test") {
-    return handleAITestRoute(request);
-  }
-
-  if (pathname === "/api/ai/chat") {
-    return handleAIChatRoute(request);
-  }
-
-  if (pathname === "/api/ai/models") {
-    return handleAIModelsRoute(request);
-  }
-
-  if (pathname === "/api/ai/enhance") {
-    return handleAIEnhanceRoute(request);
-  }
+  if (pathname === "/api/ai/test") return handleAITestRoute(request);
+  if (pathname === "/api/ai/chat") return handleAIChatRoute(request);
+  if (pathname === "/api/ai/models") return handleAIModelsRoute(request);
+  if (pathname === "/api/ai/models-dev") return handleAIModelsDevRoute(request);
+  if (pathname.startsWith("/api/ai/logos/"))
+    return handleAILogoProxyRoute(request, pathname);
+  if (pathname === "/api/ai/enhance") return handleAIEnhanceRoute(request);
 
   return new Response("API route not found", { status: 404 });
 }
@@ -355,134 +313,126 @@ async function handleAIChatRoute(request) {
     const { provider, apiKey, model, messages, maxTokens = 500 } = body;
 
     if (!provider || !apiKey || !messages) {
-      return new Response(
-        JSON.stringify({
-          error: "Missing required fields: provider, apiKey, messages",
-        }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+      return new Response(JSON.stringify({ error: "Missing fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    let responseContent;
+    if (provider === "openai")
+      responseContent = await callOpenAI(
+        apiKey,
+        model || "gpt-4.1",
+        messages,
+        maxTokens,
       );
-    }
+    else if (provider === "anthropic")
+      responseContent = await callAnthropic(
+        apiKey,
+        model || "claude-3-5-sonnet-latest",
+        messages,
+        maxTokens,
+      );
+    else if (provider === "gemini")
+      responseContent = await callGemini(
+        apiKey,
+        model || "gemini-2.5-pro",
+        messages,
+        maxTokens,
+      );
+    else
+      return new Response(JSON.stringify({ error: "Unsupported provider" }), {
+        status: 400,
+      });
 
-    let response;
-    switch (provider) {
-      case "openai":
-        response = await callOpenAI(
-          apiKey,
-          model || "gpt-4",
-          messages,
-          maxTokens,
-        );
-        break;
-      case "anthropic":
-        response = await callAnthropic(
-          apiKey,
-          model || "claude-3-5-sonnet-20240620",
-          messages,
-          maxTokens,
-        );
-        break;
-      case "gemini":
-        response = await callGemini(
-          apiKey,
-          model || "gemini-pro",
-          messages,
-          maxTokens,
-        );
-        break;
-      default:
-        return new Response(
-          JSON.stringify({ error: `Unsupported provider: ${provider}` }),
-          { status: 400, headers: { "Content-Type": "application/json" } },
-        );
-    }
-
-    return new Response(JSON.stringify({ content: response }), {
+    return new Response(JSON.stringify({ content: responseContent }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("AI API Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
   }
 }
 
 async function handleAIModelsRoute(request) {
   try {
     const body = await request.json();
-    const { provider, apiKey } = body;
-
-    if (!provider || !apiKey) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: provider, apiKey" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // Return fallback models for now - can be enhanced later
+    const { provider } = body;
     const fallbackModels = getFallbackModels(provider);
-
     return new Response(JSON.stringify({ models: fallbackModels }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("AI Models API Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
+  }
+}
+
+async function handleAIModelsDevRoute() {
+  try {
+    const response = await fetch("https://models.dev/api.json", {
+      headers: { "User-Agent": "Resume-Generator-App" },
+    });
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
+  }
+}
+
+async function handleAILogoProxyRoute(request, pathname) {
+  try {
+    const provider = pathname.split("/").pop().replace(".svg", "");
+    let response = await fetch(`https://models.dev/logos/${provider}.svg`);
+    if (response.status === 404)
+      response = await fetch("https://models.dev/logos/default.svg");
+    const blob = await response.blob();
+    return new Response(blob, {
+      headers: {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=86400",
+      },
+    });
+  } catch (error) {
+    return new Response("Error", { status: 500 });
   }
 }
 
 async function handleAITestRoute(request) {
   try {
-    const body = await request.json();
-    const { provider, apiKey } = body;
-
-    if (!provider || !apiKey) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: provider, apiKey" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // Simple test response
     return new Response(
       JSON.stringify({ success: true, response: "Connection test successful" }),
       { headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
-    console.error("AI Test API Error:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || "Connection test failed",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ success: false }), { status: 500 });
   }
 }
 
 async function handleAIEnhanceRoute(request) {
   try {
     const body = await request.json();
-    // Simple placeholder response for enhance route
     return new Response(JSON.stringify({ success: true, enhanced: body }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("AI Enhance API Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
   }
 }
 
-// AI Provider API functions
 async function callOpenAI(apiKey, model, messages, maxTokens) {
-  const fetch = require("node-fetch");
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -496,24 +446,16 @@ async function callOpenAI(apiKey, model, messages, maxTokens) {
       temperature: 0.7,
     }),
   });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`OpenAI API error (${response.status}): ${errorData}`);
-  }
-
   const data = await response.json();
   return data.choices[0]?.message?.content || "";
 }
 
 async function callAnthropic(apiKey, model, messages, maxTokens) {
-  const fetch = require("node-fetch");
   const prompt = messages
     .map(
       (msg) => `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`,
     )
     .join("\n\n");
-
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -527,42 +469,23 @@ async function callAnthropic(apiKey, model, messages, maxTokens) {
       messages: [{ role: "user", content: prompt }],
     }),
   });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`Anthropic API error (${response.status}): ${errorData}`);
-  }
-
   const data = await response.json();
   return data.content[0]?.text || "";
 }
 
 async function callGemini(apiKey, model, messages, maxTokens) {
-  const fetch = require("node-fetch");
   const prompt = messages.map((msg) => msg.content).join("\n\n");
-
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: maxTokens,
-          temperature: 0.7,
-        },
+        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
       }),
     },
   );
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorData}`);
-  }
-
   const data = await response.json();
   return data.candidates[0]?.content?.parts[0]?.text || "";
 }
@@ -571,128 +494,73 @@ function getFallbackModels(provider) {
   const fallbackModels = {
     openai: [
       {
-        id: "gpt-4",
-        name: "GPT-4",
-        description: "Most capable model",
+        id: "gpt-4.1",
+        name: "GPT-4.1",
+        description: "Most capable model (2025)",
         isRecommended: true,
       },
-      { id: "gpt-4o", name: "GPT-4o", description: "Multimodal model" },
       {
-        id: "gpt-4o-mini",
-        name: "GPT-4o Mini",
-        description: "Faster and cost-effective",
+        id: "gpt-4.1-mini",
+        name: "GPT-4.1 Mini",
+        description: "Faster, cost-effective",
       },
     ],
     anthropic: [
       {
-        id: "claude-3-5-sonnet-20240620",
-        name: "Claude 3.5 Sonnet",
-        description: "Balanced performance",
+        id: "claude-opus-4.1",
+        name: "Claude Opus 4.1",
+        description: "Flagship model (2025)",
         isRecommended: true,
       },
       {
-        id: "claude-3-5-haiku-latest",
-        name: "Claude 3.5 Haiku",
-        description: "Fast and cost-effective",
+        id: "claude-sonnet-4",
+        name: "Claude Sonnet 4",
+        description: "High-performance",
       },
     ],
     gemini: [
       {
-        id: "gemini-pro",
-        name: "Gemini Pro",
-        description: "Google's flagship model",
+        id: "gemini-2.5-pro",
+        name: "Gemini 2.5 Pro",
+        description: "Most advanced (2025)",
         isRecommended: true,
+      },
+      {
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
+        description: "Price-performance",
       },
     ],
   };
-
   return fallbackModels[provider] || [];
 }
 
-// App event listeners
 app.whenReady().then(() => {
-  // Register custom protocol for serving static files and handling API routes
   protocol.handle("app", async (request) => {
     const url = new URL(request.url);
     const pathname = decodeURIComponent(url.pathname);
+    if (pathname.startsWith("/api/")) return handleApiRoute(request, pathname);
 
-    // Debug: Log all requests
-    if (pathname.startsWith("/api/")) {
-      console.log("=== 🔍 PROTOCOL HANDLER API REQUEST ===");
-      console.log("📍 Pathname:", pathname);
-      console.log("🌐 Full URL:", request.url);
-      console.log("📦 Method:", request.method);
-      console.log("📋 Headers:", Object.fromEntries(request.headers.entries()));
-      console.log("=== END API REQUEST DEBUG ===");
-    }
+    const distRoot = path.join(__dirname, "../dist");
+    let filePath =
+      pathname === "/" || pathname === "/index.html"
+        ? path.join(distRoot, "index.html")
+        : path.join(
+            distRoot,
+            pathname.startsWith("/") ? pathname.slice(1) : pathname,
+          );
 
-    // Handle API routes
-    if (pathname.startsWith("/api/")) {
-      return handleApiRoute(request, pathname);
-    }
-
-    // Map Astro static paths to the actual file locations
-    let filePath;
-    if (pathname.startsWith("/_astro/")) {
-      // Astro static assets
-      filePath = path.join(__dirname, "../dist", pathname);
-    } else if (pathname === "/" || pathname === "/index.html") {
-      filePath = path.join(__dirname, "../dist/index.html");
-    } else {
-      filePath = path.join(__dirname, "../dist", pathname);
-    }
-
-    console.log(
-      "Protocol handler - requested:",
-      pathname,
-      "-> mapped to:",
-      filePath,
-    );
-
-    if (fs.existsSync(filePath)) {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       return new Response(fs.readFileSync(filePath), {
-        headers: {
-          "content-type": getContentType(filePath),
-        },
+        headers: { "content-type": getContentType(filePath) },
       });
-    } else {
-      console.log("File not found:", filePath);
-      return new Response("File not found", { status: 404 });
     }
+    return new Response("Not Found", { status: 404 });
   });
-
   createWindow();
-
-  app.on("activate", () => {
-    // On macOS, re-create window when dock icon is clicked
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    } else {
-      // If windows exist, focus the main one
-      const windows = BrowserWindow.getAllWindows();
-      if (windows.length > 0) {
-        windows[0].focus();
-      }
-    }
-  });
 });
 
 app.on("window-all-closed", () => {
-  // Clean up server process
-  if (serverProcess) {
-    serverProcess.kill();
-  }
-
-  // On macOS, keep app running even when all windows are closed
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-// Security: Prevent new window creation
-app.on("web-contents-created", (_event, contents) => {
-  contents.on("new-window", (event, navigationUrl) => {
-    event.preventDefault();
-    shell.openExternal(navigationUrl);
-  });
+  if (serverProcess) serverProcess.kill();
+  if (process.platform !== "darwin") app.quit();
 });
